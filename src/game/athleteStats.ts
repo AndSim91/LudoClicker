@@ -196,6 +196,8 @@ export function getAthleteTournamentStats(
   courseXUnlocked = false,
   /** The athlete's collaborator record, if any: only collaborators hold teaching titles. */
   titles?: TeachingTitles,
+  /** Formazione (Reputation): +20% per point on what every course adds (14/10). */
+  formBonusMultiplier = 1,
 ): AthleteTournamentStats {
   const base = getContactBaseStats(contact);
   const numericForms = getNumericFormCount(forms);
@@ -211,8 +213,8 @@ export function getAthleteTournamentStats(
     teachingBonus,
     weapon: getAthleteWeapon(forms, contact.formBranchPreferences),
     experienceMultiplier,
-    arena: getPreparation(base.arena, formBonus.arena + teachingBonus.arena, tournamentExperience),
-    style: getPreparation(base.style, formBonus.style + teachingBonus.style, tournamentExperience),
+    arena: getPreparation(base.arena, (formBonus.arena + teachingBonus.arena) * formBonusMultiplier, tournamentExperience),
+    style: getPreparation(base.style, (formBonus.style + teachingBonus.style) * formBonusMultiplier, tournamentExperience),
   };
 }
 
@@ -222,6 +224,8 @@ export function rollAthleteBaseStats(
   specialProfileId?: SpecialCollaboratorId,
   /** Genetica (Reputation): scales the rolled base values, legendaries keep theirs. */
   geneticsMultiplier = 1,
+  /** Points added to the roll before Genetica: 0,1 per Reputation point earned (test, 14/10). */
+  baseBonus = 0,
 ): { arena: number; style: number; nextSeed: number } {
   if (rarity === "legendary") {
     const [arena, style] = FIXED_LEGENDARY_STATS[specialProfileId ?? "andrea-simonazzi"] ??
@@ -232,8 +236,8 @@ export function rollAthleteBaseStats(
   const [arenaRoll, afterArena] = nextRandom(seed);
   const [styleRoll, nextSeed] = nextRandom(afterArena);
   return {
-    arena: Math.round((minimum + Math.floor(arenaRoll * (maximum + 1 - minimum))) * geneticsMultiplier),
-    style: Math.round((minimum + Math.floor(styleRoll * (maximum + 1 - minimum))) * geneticsMultiplier),
+    arena: Math.round((minimum + Math.floor(arenaRoll * (maximum + 1 - minimum)) + baseBonus) * geneticsMultiplier),
+    style: Math.round((minimum + Math.floor(styleRoll * (maximum + 1 - minimum)) + baseBonus) * geneticsMultiplier),
     nextSeed,
   };
 }
@@ -274,8 +278,9 @@ export function getContactPreparation(
   forms: readonly FormId[] = contact.forms,
   courseXUnlocked = false,
   titles?: TeachingTitles,
+  formBonusMultiplier = 1,
 ) {
-  const stats = getAthleteTournamentStats(contact, forms, courseXUnlocked, titles);
+  const stats = getAthleteTournamentStats(contact, forms, courseXUnlocked, titles, formBonusMultiplier);
   return {
     arena: stats.arena,
     style: stats.style,

@@ -1,3 +1,4 @@
+import { getFormBonusMultiplier } from "../../game/reputation";
 import { getOfficialStatsVisibilityTier, isCourseXUnlocked } from "../../content/upgrades";
 import { useMemo, useState } from "react";
 import { Icon } from "../../components/common/Icon";
@@ -89,7 +90,7 @@ export function TournamentOverview({ state: stateOverride, onOpenResult }: Tourn
     state.contacts.map((contact) => {
       const collaborator = collaboratorsByContactId.get(contact.id);
       const forms = collaborator?.forms ?? contact.forms;
-      const preparation = getContactPreparation(contact, forms, courseXUnlocked, collaborator);
+      const preparation = getContactPreparation(contact, forms, courseXUnlocked, collaborator, getFormBonusMultiplier(state));
       const visible = hasUnlockedOfficialStats(forms, statsTier);
       return [contact.id, { contact, preparation, visible }] as const;
     }),

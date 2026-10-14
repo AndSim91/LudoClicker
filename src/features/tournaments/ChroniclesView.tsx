@@ -1,3 +1,4 @@
+import { getFormBonusMultiplier } from "../../game/reputation";
 import { getOfficialStatsVisibilityTier, isCourseXUnlocked } from "../../content/upgrades";
 import { useMemo, useState } from "react";
 import { OfficialStatValue } from "../../components/common/OfficialStatValue";
@@ -181,7 +182,7 @@ export function ChroniclesView({
           return [
             contact.id,
             {
-              values: getContactPreparation(contact, forms, isCourseXUnlocked(state.upgrades), collaborator),
+              values: getContactPreparation(contact, forms, isCourseXUnlocked(state.upgrades), collaborator, getFormBonusMultiplier(state)),
               visible: hasUnlockedOfficialStats(forms, getOfficialStatsVisibilityTier(state.upgrades)),
             },
           ] as const;

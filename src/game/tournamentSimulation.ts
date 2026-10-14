@@ -1,3 +1,4 @@
+import { getFormBonusMultiplier } from "./reputation";
 import { PROSPECT_FIRST_NAMES, PROSPECT_LAST_NAMES } from "../content/prospectDirectory";
 import { getLegendaryEncounterMultiplier } from "./contacts";
 import {
@@ -158,7 +159,7 @@ function createOwnedParticipants(
   return contacts.map((contact) => {
     const collaborator = collaboratorsByContactId.get(contact.id);
     const forms = collaborator?.forms ?? contact.forms;
-    const stats = getAthleteTournamentStats(contact, forms, isCourseXUnlocked(state.upgrades), collaborator);
+    const stats = getAthleteTournamentStats(contact, forms, isCourseXUnlocked(state.upgrades), collaborator, getFormBonusMultiplier(state));
     return {
       id: `owned-${contact.id}`,
       ownedContactId: contact.id,

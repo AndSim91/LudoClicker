@@ -1,4 +1,4 @@
-import { getAthleteGeneticsMultiplier } from "./reputation";
+import { getAthleteBaseBonus, getAthleteGeneticsMultiplier } from "./reputation";
 import { createRandomProspect } from "../content/prospectDirectory";
 import { getAthleteImmunityStatus, getYearlyRiskReduction, isAthleteImmuneFromDeparture } from "./athleteImmunity";
 import { advanceRandomSeed, RARITY_BASE_RANGE, rollAthleteBaseStats } from "./athleteStats";
@@ -120,8 +120,12 @@ function mergeGroups(groups: Iterable<MemberGroup>, currentMonth: number): Membe
 const GROUPING_RARITY_ORDER: Record<MemberGroup["rarity"], number> = { common: 0, rare: 1, "ultra-rare": 2 };
 
 /** A natural talent: natural Arena + Stile near the best roll of the rarity. */
-function isNaturalTalent(contact: Contact & { rarity: MemberGroup["rarity"] }, geneticsMultiplier: number): boolean {
-  const best = RARITY_BASE_RANGE[contact.rarity][1] * 2 * geneticsMultiplier;
+function isNaturalTalent(
+  contact: Contact & { rarity: MemberGroup["rarity"] },
+  geneticsMultiplier: number,
+  baseBonus: number,
+): boolean {
+  const best = (RARITY_BASE_RANGE[contact.rarity][1] + baseBonus) * 2 * geneticsMultiplier;
   return (contact.arenaBase ?? 0) + (contact.styleBase ?? 0) >= best * GAME_CONFIG.materialTalentShare;
 }
 
@@ -129,6 +133,7 @@ function isGroupable(
   contact: Contact,
   keep: ReadonlySet<string>,
   geneticsMultiplier: number,
+  baseBonus: number,
 ): contact is Contact & { rarity: MemberGroup["rarity"] } {
   return contact.status === "enrolled" &&
     contact.rarity !== "legendary" &&
@@ -138,7 +143,7 @@ function isGroupable(
     !contact.training &&
     !contact.tournamentExperience &&
     !keep.has(contact.id) &&
-    !isNaturalTalent(contact as Contact & { rarity: MemberGroup["rarity"] }, geneticsMultiplier);
+    !isNaturalTalent(contact as Contact & { rarity: MemberGroup["rarity"] }, geneticsMultiplier, baseBonus);
 }
 
 /**
@@ -182,8 +187,9 @@ export function groupExcessMembers(state: GameState): GameState {
   if (excess <= 0) return state;
   const keep = getContactsToKeep(state);
   const geneticsMultiplier = getAthleteGeneticsMultiplier(state);
+  const baseBonus = getAthleteBaseBonus(state);
   const candidates = state.contacts
-    .filter((contact) => isGroupable(contact, keep, geneticsMultiplier))
+    .filter((contact) => isGroupable(contact, keep, geneticsMultiplier, baseBonus))
     .sort((left, right) =>
       GROUPING_RARITY_ORDER[left.rarity] - GROUPING_RARITY_ORDER[right.rarity] ||
       getGroupingStrength(left) - getGroupingStrength(right))
@@ -225,7 +231,7 @@ export function materializeGroupedMembers(
       const group = groups[index];
       const profile = getGroupMemberProfile(group, state.school.currentMonth);
       const { firstName, lastName, email } = createRandomProspect(seed);
-      const stats = rollAthleteBaseStats(advanceRandomSeed(seed, 3), group.rarity, undefined, geneticsMultiplier);
+      const stats = rollAthleteBaseStats(advanceRandomSeed(seed, 3), group.rarity, undefined, geneticsMultiplier, getAthleteBaseBonus(state));
       seed = stats.nextSeed;
       let suffix = state.contacts.length + created.length;
       while (ids.has(makeGameId("member", now, suffix))) suffix += 1;

@@ -1,3 +1,4 @@
+import { getFormBonusMultiplier } from "../../game/reputation";
 import { hasAnyTraining } from "../../game/trainingSlots";
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { Icon } from "../../components/common/Icon";
@@ -237,7 +238,7 @@ function SectorCollaboratorRow({
     mastery[collaborator.assignment ?? "instructor"],
   );
   const officialStats = contact && hasUnlockedOfficialStats(collaborator.forms, getOfficialStatsVisibilityTier(state.upgrades))
-    ? getContactPreparation(contact, collaborator.forms, isCourseXUnlocked(state.upgrades), collaborator)
+    ? getContactPreparation(contact, collaborator.forms, isCourseXUnlocked(state.upgrades), collaborator, getFormBonusMultiplier(state))
     : undefined;
   const isInstructor = collaborator.assignment === "instructor";
 

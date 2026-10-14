@@ -1,3 +1,4 @@
+import { getFormBonusMultiplier } from "../../game/reputation";
 import { useMemo, useState } from "react";
 import { Icon } from "../../components/common/Icon";
 import { OfficialStatValue } from "../../components/common/OfficialStatValue";
@@ -167,7 +168,7 @@ export function CollaboratorList({
               : undefined;
             const hasVisibleStats = hasUnlockedOfficialStats(collaborator.forms, statsTier);
             const officialStats = contact && hasVisibleStats
-              ? getContactPreparation(contact, collaborator.forms, false, collaborator)
+              ? getContactPreparation(contact, collaborator.forms, false, collaborator, getFormBonusMultiplier(state))
               : undefined;
             const selected = collaborator.id === selectedCollaboratorId;
             const nextMasteryLevel = masteryProgress

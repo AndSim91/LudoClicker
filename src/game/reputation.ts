@@ -1,4 +1,5 @@
 import { getUpgradeEffectTotal } from "../content/upgrades";
+import { getCareer } from "./career";
 import { GAME_CONFIG } from "./config";
 import type { FoundedSchool, GameState } from "./types";
 
@@ -68,6 +69,19 @@ export function getReputationMultiplier(
 export function getAthleteGeneticsMultiplier(state: Pick<GameState, "network" | "upgrades">): number {
   return getReputationMultiplier(state, "genetics") *
     (1 + getUpgradeEffectTotal(state.upgrades, "athleteBaseStatsBonus"));
+}
+
+/**
+ * Points added to the Arena and Stile rolls of new athletes, before Genetica:
+ * 0,1 for every Reputation point the network has earned (Andrea, 14/10, test).
+ */
+export function getAthleteBaseBonus(state: Pick<GameState, "statistics">): number {
+  return getCareer(state).reputationEarned * GAME_CONFIG.athleteBaseStatsPerReputation;
+}
+
+/** Formazione: what Forms and teaching titles add to Arena and Stile, +20% per point. */
+export function getFormBonusMultiplier(state: Pick<GameState, "network">): number {
+  return getReputationMultiplier(state, "training");
 }
 
 function getReptileWin(state: GameState): "reptile" | "superba" | undefined {

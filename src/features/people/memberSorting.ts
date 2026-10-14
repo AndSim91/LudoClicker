@@ -44,6 +44,8 @@ export interface MemberSortContext {
   courseXUnlocked: boolean;
   /** Occhio del Maestro level: when Arena and Style are visible. */
   statsTier: number;
+  /** Formazione (Reputation) on what the courses add. */
+  formBonusMultiplier?: number;
   collaboratorsByContactId: ReadonlyMap<string, Collaborator>;
 }
 
@@ -62,7 +64,7 @@ export function getMemberVisibleScore(
 ): number | null {
   const forms = getMemberStudent(contact, context).forms;
   if (!hasUnlockedOfficialStats(forms, context.statsTier)) return null;
-  return getContactPreparation(contact, forms, false, context.collaboratorsByContactId.get(contact.id))[key];
+  return getContactPreparation(contact, forms, false, context.collaboratorsByContactId.get(contact.id), context.formBonusMultiplier)[key];
 }
 
 export function getMemberNextFormLabel(

@@ -26,6 +26,7 @@ import { getCollaboratorFallbackProductivity } from "./collaboratorFallback";
 import { getInstructorPendingReleaseIds } from "./collaboratorManagement";
 import {
   improveRandomAthletes,
+  isAthleticPreparationTarget,
   resolveSocialContentCycles,
 } from "./collaboratorAutomationOutcomes";
 import { GAME_CONFIG } from "./config";
@@ -595,7 +596,7 @@ export function processInstructorAthleticPreparation(
 ): GameState {
   const safeElapsedMs = Math.min(1_000, Math.max(0, elapsedMs));
   const hasEligibleAthletes = state.contacts.some(
-    (contact) => contact.status === "enrolled",
+    (contact) => isAthleticPreparationTarget(contact, state.school.currentMonth),
   );
   if (!hasEligibleAthletes) {
     return state.automation.lessonBuffer === 0

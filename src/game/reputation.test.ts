@@ -10,9 +10,11 @@ import {
   addSchoolToMap,
   getMonthlyNetworkRent,
   getPrestigeReputationPreview,
+  getAthleteBaseBonus,
+  getFormBonusMultiplier,
   getReputationMultiplier,
 } from "./reputation";
-import { rollAthleteBaseStats } from "./athleteStats";
+import { getAthleteTournamentStats, rollAthleteBaseStats } from "./athleteStats";
 import { getEventContactMultiplier } from "./eventRewards";
 import { getEmailBookingChance, getEnrollmentChance, getWritingPower } from "./formulas";
 import { completeShortGoal, foundSchool } from "./schoolProgressionFlow";
@@ -307,4 +309,21 @@ it("restarts the Missioni delle Onde from series 1 at every new school", () => {
   }, 3_000, 1);
   expect(completed.shortGoal.completedCount).toBe(1);
   expect(completed.messages.some((message) => message.subject === "Si esce dalla palestra")).toBe(false);
+});
+
+it("adds 0,1 per Reputation point earned before Genetica, and Formazione raises what courses add", () => {
+  const initial = createInitialState(1_000);
+  const state = {
+    ...initial,
+    statistics: { ...initial.statistics, career: { ...initial.statistics.career!, reputationEarned: 10 } },
+    network: { ...initial.network, reputationUpgrades: { training: 1 } },
+  };
+  expect(getAthleteBaseBonus(state)).toBe(1);
+  const plain = rollAthleteBaseStats(7, "common");
+  const boosted = rollAthleteBaseStats(7, "common", undefined, 1.4, getAthleteBaseBonus(state));
+  expect(boosted.arena).toBe(Math.round((plain.arena + 1) * 1.4));
+
+  const athlete = { ...initial.contacts[0], arenaBase: 100, styleBase: 100, forms: ["form-1" as const] };
+  expect(getAthleteTournamentStats(athlete, athlete.forms, false, undefined, getFormBonusMultiplier(state)).arena)
+    .toBeCloseTo(112);
 });

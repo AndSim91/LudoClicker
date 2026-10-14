@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { getFormTrainingYear } from "./calendar";
 import { createInitialCollaboratorMastery } from "../content/mastery";
 import {
   getInstructorAthleticPreparationProductivity,
@@ -32,7 +33,13 @@ function preparationState(upgradeLevel: number): GameState {
     ...initial,
     contacts: initial.contacts.map((contact, index) =>
       index === 0
-        ? { ...contact, status: "enrolled", arenaBase: 10, styleBase: 10 }
+        ? {
+            ...contact,
+            status: "enrolled",
+            arenaBase: 10,
+            styleBase: 10,
+            lastAgonistCourseYear: getFormTrainingYear(initial.school.currentMonth),
+          }
         : contact
     ),
     school: {
@@ -164,5 +171,18 @@ describe("instructor athletic preparation", () => {
       (result.state.contacts[0].arenaBase ?? 0) +
       (result.state.contacts[0].styleBase ?? 0),
     ).toBe(23);
+  });
+
+  it("grows only who took Arena Tecnica this school year, also in July and August", () => {
+    const initial = preparationState(5);
+    const year = getFormTrainingYear(initial.school.currentMonth);
+    const trained = { ...initial.contacts[0], id: "trained" };
+    const idle = { ...trained, id: "idle", lastAgonistCourseYear: year - 1 };
+    const result = improveRandomAthletes({ ...initial, contacts: [idle, trained] }, 5);
+    expect(result.state.contacts.map((contact) => contact.arenaBase! + contact.styleBase!)).toEqual([20, 25]);
+
+    const summer = { ...initial, school: { ...initial.school, currentMonth: 19 } };
+    const lastYear = { ...trained, lastAgonistCourseYear: getFormTrainingYear(19) - 1 };
+    expect(improveRandomAthletes({ ...summer, contacts: [lastYear] }, 1).improvements).toBe(1);
   });
 });

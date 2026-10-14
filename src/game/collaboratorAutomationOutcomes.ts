@@ -1,12 +1,29 @@
 import { getUpgradeEffectTotal } from "../content/upgrades";
 import { getContactBaseStats } from "./athleteStats";
+import { getFormTrainingYear, isSummerBreak } from "./calendar";
 import { GAME_CONFIG } from "./config";
 import { nextRandom } from "./random";
 import {
   getSocialDoubleFollowerChance,
   getSocialFollowerChance,
 } from "./social";
-import type { GameState } from "./types";
+import type { Contact, GameState } from "./types";
+
+/**
+ * Preparazione atletica (Andrea, 14/10): only athletes who took Arena Tecnica or
+ * the Corso Agonisti in this school year grow. Members in the archive are never
+ * people. The course year starts in July, when no course can start: in July and
+ * August the courses of the year just ended still count.
+ */
+export function isAthleticPreparationTarget(
+  contact: Pick<Contact, "status" | "lastAgonistCourseYear">,
+  currentMonth: number,
+): boolean {
+  const year = getFormTrainingYear(currentMonth);
+  const course = contact.lastAgonistCourseYear;
+  return contact.status === "enrolled" && course !== undefined &&
+    (course === year || (isSummerBreak(currentMonth) && course === year - 1));
+}
 
 export function improveRandomAthletes(
   state: GameState,
@@ -18,7 +35,7 @@ export function improveRandomAthletes(
   const favoritePositionById = new Map<string, number>();
   for (let index = 0; index < state.contacts.length; index += 1) {
     const contact = state.contacts[index];
-    if (contact.status !== "enrolled") continue;
+    if (!isAthleticPreparationTarget(contact, state.school.currentMonth)) continue;
     enrolledPositionById.set(contact.id, enrolledIndices.length);
     enrolledIndices.push(index);
     if (contact.favorite === true) {

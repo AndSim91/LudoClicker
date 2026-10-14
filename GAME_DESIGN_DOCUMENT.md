@@ -645,14 +645,21 @@ sopra.
 | Eventi         | contatti trovati a ogni evento (`getEventContactMultiplier`)                            |
 | Iscrizioni     | probabilità base di iscrizione dopo la prova, fino al massimo della rarità              |
 | Social e Gadget | entrate dei follower (`getMonthlySocialIncome`) e vendite dei gadget, anche incrociate (non quote, non rendita; dal 04/10 al posto di Quote mensili, salvataggio v94) |
-| Formazione     | velocità di tutti i corsi: atleti, agonisti, Istruttori e Tecnici                       |
+| Formazione     | velocità di tutti i corsi: atleti, agonisti, Istruttori e Tecnici; dal 14/10 anche +20% a punto su quanto Forme e titoli di insegnamento aggiungono ad Arena e Stile (Forma 1 con un punto: +12% invece di +10%, `getFormBonusMultiplier`) |
 | Genetica       | valori di base di Arena e Stile dei nuovi atleti (non dei Leggendari) e miglioramenti della Preparazione atletica |
 | Rendita        | si consuma: vedi sotto                                                                  |
 
 I sei potenziamenti permanenti arrivano a 50 punti ciascuno (+1000%,
 `reputationUpgradeMaxLevel`) e non si azzerano mai
 (`network.reputationUpgrades`). Genetica vale per gli atleti che arrivano dopo
-la spesa: i cinque contatti iniziali di una scuola nascono senza. La **rendita
+la spesa: i cinque contatti iniziali di una scuola nascono senza.
+
+**Reputazione guadagnata (test del 14/10):** ogni punto di Reputazione
+guadagnato in carriera aggiunge +0,1 ad Arena e Stile tirati dei nuovi atleti,
+prima della Genetica (`athleteBaseStatsPerReputation`, `getAthleteBaseBonus`).
+Esempio: 10 punti guadagnati, tiro 100, Genetica 2 punti: (100 + 1) × 1,4 =
+141,4. Come la Genetica, non vale per i Leggendari né per i cinque contatti
+iniziali. La **rendita
 del Network** si consuma: ogni punto blocca il 10% (`networkRentPointShare`) del
 valore di rendita della scuola che si sta lasciando, `iscritti × 40 € × 10%`
 (`networkRentValueShare`), come rendita mensile fissa di quella scuola. I punti non restano come livelli: alla fondazione successiva
@@ -1542,9 +1549,15 @@ automazioni generiche, per l'efficacia di Nessun *Rancor*e e per la Genetica.
 **A luglio e agosto non si ferma ma rallenta: un miglioramento ogni 5 minuti**
 (decisioni di Andrea del 06/10; prima 1 al minuto e pausa estiva). Ogni
 miglioramento assegna +1 Arena oppure +1 Stile (50% ciascuno) a un iscritto.
+Dal 14/10 (Andrea) raggiunge solo gli iscritti che nell'anno scolastico hanno
+fatto Arena Tecnica o Corso Agonisti (`isAthleticPreparationTarget`); a luglio
+e agosto, quando i corsi non partono, contano quelli dell'anno appena chiuso.
+Gli iscritti in archivio non ne ricevono mai. Senza nessuno così, la
+Preparazione si ferma.
 
-La Preparazione atletica opera solo durante il gioco online. La selezione è
-casuale senza priorità legata alla debolezza dell'atleta e impedisce di
+La Preparazione atletica opera solo durante il gioco online. La selezione, tra
+chi ha fatto il corso, è casuale senza priorità legata alla debolezza
+dell'atleta e impedisce di
 scegliere lo stesso iscritto nel potenziamento immediatamente successivo, salvo
 il caso in cui sia l'unico iscritto disponibile. Nel 95% dei casi il tiro usa
 tutti gli iscritti disponibili; nel restante 5% usa soltanto gli iscritti nei

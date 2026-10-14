@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { getFormTrainingYear } from "./calendar";
 import { getAcquisitionEventDefinition } from "../content/events";
 import {
   getAvailableForms,
@@ -419,6 +420,7 @@ describe("game engine: progression", () => {
     const athlete = {
       ...initial.contacts[0],
       status: "enrolled" as const,
+      lastAgonistCourseYear: getFormTrainingYear(initial.school.currentMonth),
       arenaBase: 50,
       styleBase: 60,
     };
@@ -454,12 +456,14 @@ describe("game engine: progression", () => {
       {
         ...initial.contacts[0],
         status: "enrolled" as const,
+        lastAgonistCourseYear: getFormTrainingYear(initial.school.currentMonth),
         arenaBase: 50,
         styleBase: 60,
       },
       {
         ...initial.contacts[1],
         status: "enrolled" as const,
+        lastAgonistCourseYear: getFormTrainingYear(initial.school.currentMonth),
         arenaBase: 50,
         styleBase: 60,
       },
@@ -487,6 +491,7 @@ describe("game engine: progression", () => {
       ...initial.contacts[0],
       id: "favorite-athlete",
       status: "enrolled" as const,
+      lastAgonistCourseYear: getFormTrainingYear(initial.school.currentMonth),
       favorite: true,
       arenaBase: 50,
       styleBase: 50,
@@ -495,6 +500,7 @@ describe("game engine: progression", () => {
       ...initial.contacts[1],
       id: "ordinary-athlete",
       status: "enrolled" as const,
+      lastAgonistCourseYear: getFormTrainingYear(initial.school.currentMonth),
       favorite: false,
       arenaBase: 50,
       styleBase: 50,

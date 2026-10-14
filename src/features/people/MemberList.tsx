@@ -1,3 +1,4 @@
+import { getFormBonusMultiplier } from "../../game/reputation";
 import { useCallback, useDeferredValue, useMemo, useRef, useState } from "react";
 import { OfficialStatValue } from "../../components/common/OfficialStatValue";
 import { Icon } from "../../components/common/Icon";
@@ -200,7 +201,7 @@ function createMemberPresentationReader(
       nextForm: getMemberNextFormLabel(contact, context) ??
         "Nessuna Forma disponibile",
       preparation: hasVisibleStats
-        ? getContactPreparation(contact, student.forms, false, "instructorForms" in student ? student : undefined)
+        ? getContactPreparation(contact, student.forms, false, "instructorForms" in student ? student : undefined, context.formBonusMultiplier)
         : undefined,
     };
     cache.set(contact, presentation);
@@ -320,10 +321,12 @@ export function MemberList({
       departureRiskReduction: getDepartureRiskReduction(state.upgrades),
       courseXUnlocked,
       statsTier: getOfficialStatsVisibilityTier(state.upgrades),
+      formBonusMultiplier: getFormBonusMultiplier(state),
       collaboratorsByContactId,
     }),
     [
       collaboratorsByContactId,
+      state.network,
       currentMonth,
       annualTrainingLimit,
       state.upgrades,
@@ -336,7 +339,7 @@ export function MemberList({
   const presentationCache = useMemo<MemberPresentationCache>(
     () => new WeakMap(),
     // eslint-disable-next-line react-hooks/exhaustive-deps -- deps are the cache key
-    [currentMonth, annualTrainingLimit, state.upgrades, courseXUnlocked, immunityContext, state.unlocks.social],
+    [currentMonth, annualTrainingLimit, state.upgrades, courseXUnlocked, immunityContext, state.unlocks.social, state.network],
   );
   const getMemberPresentation = useMemo(
     () => createMemberPresentationReader(sortContext, state.unlocks.social, presentationCache),

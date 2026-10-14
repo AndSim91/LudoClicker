@@ -1,3 +1,4 @@
+import { getFormBonusMultiplier } from "./reputation";
 import { isSuperbaTournament } from "./reptileUnlock";
 import { getAthleteTournamentStats, hasCompletedFormOne } from "./athleteStats";
 import { ARENA_DECISIVENESS, createChampionsOpenAthletePairs } from "./tournamentSimulation";
@@ -196,7 +197,7 @@ function createHomeTeams(
   );
   const titlesByContactId = new Map(state.collaborators.map((entry) => [entry.contactId, entry]));
   const statsOf: StatsOf = (contact) =>
-    getAthleteTournamentStats(contact, contact.forms, false, titlesByContactId.get(contact.id));
+    getAthleteTournamentStats(contact, contact.forms, false, titlesByContactId.get(contact.id), getFormBonusMultiplier(state));
   const selected = selectHomeContacts(eligible, homeTeamCount * 2, eventsQuality, cursor, statsOf)
     .sort((a, b) => {
       const statsA = statsOf(a);

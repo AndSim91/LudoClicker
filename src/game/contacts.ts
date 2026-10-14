@@ -1,4 +1,4 @@
-import { getAthleteGeneticsMultiplier } from "./reputation";
+import { getAthleteBaseBonus, getAthleteGeneticsMultiplier } from "./reputation";
 import { getUpgradeEffectTotal } from "../content/upgrades";
 import { createRandomProspect } from "../content/prospectDirectory";
 import { createLegendaryEmailAddress } from "../content/emailAddresses";
@@ -350,6 +350,7 @@ export function createAcquiredContacts(
   let pipelineLegendaries = getPipelineLegendaryCount(state);
   let addedPipeline = 0;
   const geneticsMultiplier = getAthleteGeneticsMultiplier(state);
+  const baseBonus = getAthleteBaseBonus(state);
   const contacts = Array.from({ length: count }, (_, index) => {
     const queuePosition = currentSchoolContactCount + index + 1;
     const isInitialSchool = state.network.schoolCount === 0;
@@ -412,7 +413,7 @@ export function createAcquiredContacts(
       ? "legendary" as const
       : ordinary!.rarity;
     const rarity = rolledRarity;
-    const athleteStats = rollAthleteBaseStats(nextSeed, rarity, specialProfile?.id, geneticsMultiplier);
+    const athleteStats = rollAthleteBaseStats(nextSeed, rarity, specialProfile?.id, geneticsMultiplier, baseBonus);
     nextSeed = athleteStats.nextSeed;
     const retained = specialProfile
       ? getRetainedLegendaryProgress(progress, specialProfile.id)
@@ -486,7 +487,7 @@ export function materializePooledContact(
   const entryIndex = pool.findIndex((entry) => (target -= entry.count) < 0);
   const entry = pool[entryIndex];
   const { firstName, lastName, email } = createRandomProspect(afterRoll);
-  const stats = rollAthleteBaseStats(advanceRandomSeed(afterRoll, 3), entry.rarity, undefined, getAthleteGeneticsMultiplier(state));
+  const stats = rollAthleteBaseStats(advanceRandomSeed(afterRoll, 3), entry.rarity, undefined, getAthleteGeneticsMultiplier(state), getAthleteBaseBonus(state));
   let suffix = state.contacts.length;
   // A scan without building a Set: this runs once per email written.
   const isTaken = (id: string) => state.contacts.some((contact) => contact.id === id);
