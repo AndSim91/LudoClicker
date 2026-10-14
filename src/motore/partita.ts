@@ -48,6 +48,8 @@ export interface OpzioniPartita {
   maxScuole: number;
   /** Tetto di sicurezza in ore effettive. */
   maxOre: number;
+  /** Passo minimo del motore (ms di gioco): 1.000 come il gioco senza animazioni; 250 per i controlli. */
+  passoMinimoMs?: number;
   /** Ogni quanti minuti effettivi avvisare il chiamante (avanzamento). */
   onAvanzamento?: (registro: RegistroPartita, state: GameState) => void;
 }
@@ -82,7 +84,13 @@ function numeriRotti(state: GameState): string[] {
     .map(([key, value]) => `${key}=${value}`);
 }
 
-export function giocaPartita({ seed, maxScuole, maxOre, onAvanzamento }: OpzioniPartita): RegistroPartita {
+export function giocaPartita({
+  seed,
+  maxScuole,
+  maxOre,
+  passoMinimoMs = STEP_GIOCO_MS,
+  onAvanzamento,
+}: OpzioniPartita): RegistroPartita {
   const startedAt = START_MS + seed * 100_000;
   let state = createInitialState(startedAt, `Motore ${seed}`);
   let now = startedAt;
@@ -210,7 +218,9 @@ export function giocaPartita({ seed, maxScuole, maxOre, onAvanzamento }: Opzioni
     const speed = Math.max(1, Math.min(state.automation.gameSpeed ?? 1, getMaxGameSpeed(state.upgrades)));
     now += STEP_GIOCO_MS;
     const t0 = performance.now();
-    state = act(state, { type: "TICK", now });
+    // Passo minimo di 1 s, come il gioco senza animazioni o da 2× in su (getGameStepMs):
+    // con i 250 ms predefiniti il motore faceva fino a 4 passi per secondo di gioco.
+    state = act(state, { type: "TICK", now, minStepMs: passoMinimoMs });
     registro.msMotore += performance.now() - t0;
     registro.tick += 1;
     effettivoMs += STEP_GIOCO_MS / speed;

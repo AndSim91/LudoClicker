@@ -51,7 +51,7 @@ import {
   selectInstructorCapacity,
 } from "./selectors";
 import { getSocialContentCharacters } from "./social";
-import { getInstructorTeachingCounts } from "./runtimeIndexes";
+import { getContactsById, getInstructorTeachingCounts } from "./runtimeIndexes";
 import { getAutomaticFormCandidates } from "./formProgression";
 import { materializeGroupedMembers } from "./memberGroups";
 import { getAgonistCourseCost } from "./trainingFlow";
@@ -747,7 +747,7 @@ export function processAutomaticTeaching(
   const councilTappa = state.network.schoolCount === 0 &&
     state.tournaments.firstSchoolTournamentMonth !== undefined &&
     !state.collaboratorManagement.aggregateViewUnlocked;
-  const contactsById = new Map(state.contacts.map((contact) => [contact.id, contact]));
+  const contactsById = getContactsById(state.contacts);
   const capacity = selectInstructorCapacity(state);
   const instructorLoads = new Map(
     getInstructorTeachingCounts(state.contacts, state.collaborators),
@@ -853,9 +853,16 @@ export function processAutomaticTeaching(
   const automaticFormPriority = new Map(
     automaticFormOrder.map((formId, index) => [formId, index]),
   );
-  const originalOrder = new Map(students.map((student, index) => [student.id, index]));
+  // Position in the original list, the last tie-break; built only when a pass needs it.
+  let originalOrder: Map<string, number> | undefined;
+  const originalIndex = (id: string) =>
+    (originalOrder ??= new Map(students.map((student, index) => [student.id, index]))).get(id)!;
   const departureRiskReduction = getDepartureRiskReduction(state.upgrades);
-  const studentPriorities = new Map(students.map((student) => {
+  // Priorities are computed only for the students a pass can act on (14/10/2026: in
+  // big schools most of them can start nothing this step). The order is the same:
+  // each pass sorts its own students with the same total order.
+  const priorityCache = new Map<string, ReturnType<typeof computeStudentPriority>>();
+  const computeStudentPriority = (student: (typeof students)[number]) => {
     const contact = "acquiredAt" in student
       ? student
       : contactsById.get(student.contactId);
@@ -885,7 +892,7 @@ export function processAutomaticTeaching(
     const candidate = automaticFormCandidates.get(student.id)?.[0];
     const councilPriority = councilTappa && student.rarity === "ultra-rare" &&
       (candidate === "form-1" || candidate === "form-2" || candidate === "course-y");
-    return [student.id, {
+    return {
       departureRisk,
       isFavorite: councilPriority || ("acquiredAt" in student
         ? student.favorite === true
@@ -896,14 +903,19 @@ export function processAutomaticTeaching(
         ? automaticFormPriority.get(candidate) ?? Number.MAX_SAFE_INTEGER
         : Number.MAX_SAFE_INTEGER,
       acquiredAt: contact?.acquiredAt ?? 0,
-      originalOrder: originalOrder.get(student.id)!,
-    }];
-  }));
-  students.sort((left, right) => {
-    const leftPriority = studentPriorities.get(left.id)!;
-    const rightPriority = studentPriorities.get(right.id)!;
-    return compareAutomaticTeachingStudentPriority(leftPriority, rightPriority);
-  });
+      originalOrder: originalIndex(student.id),
+    };
+  };
+  const priorityOf = (student: (typeof students)[number]) => {
+    let priority = priorityCache.get(student.id);
+    if (!priority) {
+      priority = computeStudentPriority(student);
+      priorityCache.set(student.id, priority);
+    }
+    return priority;
+  };
+  const sortByPriority = (list: typeof students) => list.sort((left, right) =>
+    compareAutomaticTeachingStudentPriority(priorityOf(left), priorityOf(right)));
 
   const startedStudentIds = new Set<string>();
   const rememberStartedTraining = (
@@ -927,15 +939,38 @@ export function processAutomaticTeaching(
   // Corso Agonisti; without learnable Forme it is open from September.
   const calendarMonth = getCalendarMonth(state.school.currentMonth);
   const formsComeFirst = calendarMonth >= 9 || calendarMonth < 4;
-  for (const student of students) {
+  // Pass 1 can act only on who has a qualified Forma or must recover Corso X.
+  const formPassStudents = sortByPriority(students.filter((student) =>
+    (qualifiedFormCandidates.get(student.id)?.length ?? 0) > 0 ||
+    (
+      courseXUnlocked &&
+      needsCourseXRecovery(student.forms) &&
+      !("acquiredAt" in student) &&
+      student.assignment === "instructor"
+    )
+  ));
+  // Loads only grow during the pass: per Forma, the instructors before `firstFree`
+  // are full for good, so the search starts there (same instructor as a full scan).
+  const firstFree = new Map<FormId, number>();
+  const findFreeInstructor = (formId: FormId, studentId: string) => {
+    const instructors = instructorsByForm.get(formId);
+    if (!instructors) return undefined;
+    let index = firstFree.get(formId) ?? 0;
+    while (index < instructors.length && (instructorLoads.get(instructors[index].id) ?? 0) >= capacity) {
+      index += 1;
+    }
+    firstFree.set(formId, index);
+    for (let candidate = index; candidate < instructors.length; candidate += 1) {
+      const available = instructors[candidate];
+      if (available.id !== studentId && (instructorLoads.get(available.id) ?? 0) < capacity) return available;
+    }
+    return undefined;
+  };
+  for (const student of formPassStudents) {
     const qualifiedCandidates = qualifiedFormCandidates.get(student.id) ?? [];
     const candidate = qualifiedCandidates.find((formId) => {
       const definition = getFormDefinition(formId);
-      const instructor = instructorsByForm.get(formId)?.find(
-        (available) =>
-          available.id !== student.id &&
-          (instructorLoads.get(available.id) ?? 0) < capacity,
-      );
+      const instructor = findFreeInstructor(formId, student.id);
       return Boolean(
         definition &&
         instructor &&
@@ -961,16 +996,18 @@ export function processAutomaticTeaching(
       rememberStartedTraining(student.id, started);
     }
   }
-  for (const student of students) {
-    if (startedStudentIds.has(student.id)) continue;
-    const qualifiedCandidates = qualifiedFormCandidates.get(student.id) ?? [];
-    if (
-      (courseXUnlocked && needsCourseXRecovery(student.forms)) ||
-      qualifiedCandidates.length > 0 ||
-      (formsComeFirst && (learnableFormCandidates.get(student.id)?.length ?? 0) > 0) ||
-      instructorsWithAvailablePersonalForms.has(student.id) ||
-      (state.upgrades["technical-arena"] ?? 0) < 1
-    ) continue;
+  // Pass 2 (Arena Tecnica / Corso Agonisti): the students the old loop skipped are
+  // left out before sorting, so the order of the others does not change.
+  const agonistPassStudents = (state.upgrades["technical-arena"] ?? 0) < 1
+    ? []
+    : sortByPriority(students.filter((student) =>
+        !startedStudentIds.has(student.id) &&
+        !(courseXUnlocked && needsCourseXRecovery(student.forms)) &&
+        (qualifiedFormCandidates.get(student.id)?.length ?? 0) === 0 &&
+        !(formsComeFirst && (learnableFormCandidates.get(student.id)?.length ?? 0) > 0) &&
+        !instructorsWithAvailablePersonalForms.has(student.id)
+      ));
+  for (const student of agonistPassStudents) {
     if (trainingPlan.availableEuros < agonistCourseCost) break;
     let instructor: GameState["collaborators"][number] | undefined;
     let hasAvailableInstructor = false;

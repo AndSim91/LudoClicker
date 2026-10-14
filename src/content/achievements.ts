@@ -50,10 +50,35 @@ export interface SecretAchievement {
 const hasFormSeven = (forms: readonly FormId[]) => forms.some((form) => form.startsWith("form-7"));
 const MAESTRO_LEVEL = COLLABORATOR_MASTERY_LEVELS.findIndex((level) => level.name === "Maestro");
 
-function countFormSevenMembers(state: GameState): number {
-  return state.contacts.filter((contact) => contact.status === "enrolled" && hasFormSeven(contact.forms)).length +
-    (state.memberGroups ?? []).reduce((total, group) => total + (hasFormSeven(group.forms) ? group.count : 0), 0);
+/**
+ * The achievements are checked at every step: a count that scans a whole list is
+ * kept per list (the lists are rebuilt, never changed in place, when anything moves).
+ */
+function perList<T extends object, R>(compute: (list: T) => R): (list: T) => R {
+  const cache = new WeakMap<T, R>();
+  return (list) => {
+    if (cache.has(list)) return cache.get(list)!;
+    const value = compute(list);
+    cache.set(list, value);
+    return value;
+  };
 }
+
+const countEnrolledFormSeven = perList((contacts: GameState["contacts"]) =>
+  contacts.filter((contact) => contact.status === "enrolled" && hasFormSeven(contact.forms)).length);
+const countGroupedFormSeven = perList((groups: NonNullable<GameState["memberGroups"]>) =>
+  groups.reduce((total, group) => total + (hasFormSeven(group.forms) ? group.count : 0), 0));
+const NO_GROUPS: NonNullable<GameState["memberGroups"]> = [];
+
+function countFormSevenMembers(state: GameState): number {
+  return countEnrolledFormSeven(state.contacts) + countGroupedFormSeven(state.memberGroups ?? NO_GROUPS);
+}
+
+const countMasters = perList((collaborators: GameState["collaborators"]) =>
+  collaborators.filter((collaborator) =>
+    Object.values(collaborator.mastery ?? {}).some((xp) => getCollaboratorMasteryLevel(xp) >= MAESTRO_LEVEL)).length);
+const countInstructors = perList((collaborators: GameState["collaborators"]) =>
+  collaborators.filter((collaborator) => collaborator.instructorForms.length > 0).length);
 
 function getEverEnrolledLegendaryIds(state: GameState): Set<string> {
   return new Set<string>([
@@ -82,10 +107,9 @@ export const TIERED_ACHIEVEMENTS: readonly TieredAchievement[] = [
   { id: "collaborators", category: "Collaboratori", title: "Il Consiglio delle Onde", measure: "Collaboratori reclutati", thresholds: [1, 100, 1_000], value: (s) => s.statistics.collaboratorsRecruited },
   {
     id: "masters", category: "Collaboratori", title: "Maestri", measure: "Collaboratori al livello Maestro", thresholds: [1, 25, 250],
-    value: (s) => s.collaborators.filter((collaborator) =>
-      Object.values(collaborator.mastery ?? {}).some((xp) => getCollaboratorMasteryLevel(xp) >= MAESTRO_LEVEL)).length,
+    value: (s) => countMasters(s.collaborators),
   },
-  { id: "instructors", category: "Collaboratori", title: "Chi insegna, impara due volte", measure: "Collaboratori con attestato di Istruttore", thresholds: [1, 50, 500], value: (s) => s.collaborators.filter((collaborator) => collaborator.instructorForms.length > 0).length },
+  { id: "instructors", category: "Collaboratori", title: "Chi insegna, impara due volte", measure: "Collaboratori con attestato di Istruttore", thresholds: [1, 50, 500], value: (s) => countInstructors(s.collaborators) },
   { id: "national-titles", category: "Tornei", title: "Campione d'Italia", measure: "Titoli nazionali", thresholds: [1, 5, 20], value: (s) => getCareer(s).nationalTitles },
   { id: "champions", category: "Tornei", title: "Arena dei Campioni", measure: "Champion's Arena vinte", thresholds: [1, 3, 10], value: (s) => getCareer(s).championsWins },
   { id: "reptile", category: "Tornei", title: "Re della Superba", measure: "Reptile o Superba vinti", thresholds: [1, 3, 10], value: (s) => getCareer(s).reptileWins },
