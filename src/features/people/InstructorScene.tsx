@@ -3,10 +3,12 @@ import { GYM_SABER_COLORS, type GymRarityCounts } from "../../content/gymStages"
 import type { FormId } from "../../game/types";
 import { motionReduced } from "../../shared/motion";
 import { ATHLETE_INK, athleteBody } from "./athleteShape";
+import { Sleeve, TrouserDetails, Uniform } from "./instructorUniform";
 import {
   ROUND_BACK_MS,
   ROUND_STOP_MS,
   IDLE_TRICK_MS,
+  ROLE_COLORS,
   SCENE_HEIGHT,
   SCENE_TOP,
   idlePauseMs,
@@ -30,8 +32,6 @@ import {
  * animazioni» and without students.
  */
 
-const TUNIC = { instructor: "#1d5a45", technician: "#a68ad6" };
-const BELT = "#5b3a22";
 const INSTRUCTOR_BLADE = GYM_SABER_COLORS.legendary;
 
 function Blade({ x1, y1, x2, y2, color, width = 4 }: { x1: number; y1: number; x2: number; y2: number; color: string; width?: number }) {
@@ -41,30 +41,6 @@ function Blade({ x1, y1, x2, y2, color, width = 4 }: { x1: number; y1: number; x
       <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={color} strokeWidth={width} />
       <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="#fff" strokeWidth={width * 0.4} opacity={0.7} />
     </g>
-  );
-}
-
-/** The instructor's braid (concept T1, 13/10): short, the belt's brown, half width. */
-function Braid({ x, f }: { x: number; f: 1 | -1 }) {
-  const kx = x + 4.5 * f;
-  const links = [0, 2.4, 4.8, 7.2];
-  return (
-    <g fill="none" stroke={BELT} strokeWidth={1.1} strokeLinecap="round" strokeLinejoin="round">
-      {links.map((y) => <path key={y} d={`M${kx - 0.65} ${123 + y} L${kx} ${124.6 + y} L${kx + 0.65} ${123 + y}`} />)}
-      <circle cx={kx} cy={122} r={1} fill={BELT} stroke="none" />
-    </g>
-  );
-}
-
-/** LudoSport tunic (Andrea's photos): crossed collar, front slit, brown belt, the braid. */
-function Tunic({ x, f, color }: { x: number; f: 1 | -1; color: string }) {
-  return (
-    <>
-      <path d={`M${x - 6} 103 L${x + 6} 103 L${x + 9} 139 L${x + 1.2} 139 L${x} 131 L${x - 1.2} 139 L${x - 9} 139 Z`} fill={color} />
-      <path d={`M${x - 5 * f} 103 L${x + 4 * f} 113`} stroke="#000" strokeOpacity={0.3} strokeWidth={1.6} fill="none" />
-      <rect x={x - 7.4} y={120} width={14.8} height={3.2} rx={1} fill={BELT} />
-      <Braid x={x} f={f} />
-    </>
   );
 }
 
@@ -162,11 +138,13 @@ function Instructor({ x, tunic, level }: { x: number; tunic: string; level: Kata
     <FigureBox x={x}>
       <svg viewBox={boxView(x)} aria-hidden="true">
         <path className="iscene-limb" d={athleteBody(x)} />
-        <Tunic x={x} f={1} color={tunic} />
+        <TrouserDetails x={x} />
+        <Uniform x={x} f={1} color={tunic} />
         <circle cx={x} cy={96} r={7} fill={ATHLETE_INK} />
       </svg>
       <Arm x={x} f={1} level={level} delay={0}>
         <path className="iscene-limb" d={`M${x} 110 L${hand} 116`} />
+        <Sleeve shoulder={[x, 110]} hand={[hand, 116]} f={1} />
         <Blade x1={hand} y1={116} x2={hand + 4} y2={77} color={INSTRUCTOR_BLADE} />
       </Arm>
     </FigureBox>
@@ -178,9 +156,11 @@ function Walker({ x, f, tunic }: { x: number; f: 1 | -1; tunic: string }) {
   return (
     <FigureBox x={x} className="is-walking">
       <svg viewBox={boxView(x)} aria-hidden="true">
-        <path className="iscene-limb" d={`M${x} 104 L${x} 128 M${x} 110 L${x + 9 * f} 124`} />
-        <Tunic x={x} f={f} color={tunic} />
+        <path className="iscene-limb" d={`M${x} 104 L${x} 128`} />
+        <Uniform x={x} f={f} color={tunic} />
         <circle cx={x} cy={96} r={7} fill={ATHLETE_INK} />
+        <path className="iscene-limb" d={`M${x} 110 L${x + 9 * f} 124`} />
+        <Sleeve shoulder={[x, 110]} hand={[x + 9 * f, 124]} f={f} />
         <line x1={x + 9 * f} y1={124} x2={x + 12 * f} y2={132} stroke="#4a5866" strokeWidth={3.4} strokeLinecap="round" />
       </svg>
       <div className="iscene-step"><svg viewBox={boxView(x)} aria-hidden="true"><path className="iscene-limb" d={`M${x} 128 L${x - 8} 150 M${x} 128 L${x + 9} 150`} /></svg></div>
@@ -231,7 +211,8 @@ function Practicer({ tunic, moving }: { tunic: string; moving: boolean }) {
     <FigureBox key={turn.n} x={x} className={trick ? `iscene-idle is-trick-${trick}` : "iscene-idle"}>
       <svg viewBox={boxView(x)} aria-hidden="true">
         <path className="iscene-limb" d={athleteBody(x)} />
-        <Tunic x={x} f={1} color={tunic} />
+        <TrouserDetails x={x} />
+        <Uniform x={x} f={1} color={tunic} />
         <circle cx={x} cy={96} r={7} fill={ATHLETE_INK} />
       </svg>
       <div
@@ -240,7 +221,10 @@ function Practicer({ tunic, moving }: { tunic: string; moving: boolean }) {
           if (event.target === event.currentTarget) setTurn(advanceTurn);
         }}
       >
-        <svg viewBox={boxView(x)} aria-hidden="true"><path className="iscene-limb" d={`M${x} 110 L${hand} 116`} /></svg>
+        <svg viewBox={boxView(x)} aria-hidden="true">
+          <path className="iscene-limb" d={`M${x} 110 L${hand} 116`} />
+          <Sleeve shoulder={[x, 110]} hand={[hand, 116]} f={1} />
+        </svg>
         {trick === "i" ? [20, 40, 60].map((angle, index) => (
           <div key={angle} className="iscene-idle-ghost" style={{ "--g": `${-angle}deg`, opacity: 0.36 - index * 0.12 } as CSSProperties}>
             <div className="iscene-idle-spin"><Saber x={x} hand={hand} /></div>
@@ -364,7 +348,7 @@ export const InstructorScene = memo(function InstructorScene({
     }),
     [activeMembers, coverage, hasInstructors, rarityCounts, schoolYear, studentsInCourses, weaponShares, width],
   );
-  const tunic = hasTechnician ? TUNIC.technician : TUNIC.instructor;
+  const tunic = hasTechnician ? ROLE_COLORS.technician : ROLE_COLORS.instructor;
   const teaching = plan.students.length > 0;
   // The round does not follow the courses (Andrea, 13/10): only the screen and «Riduci animazioni».
   const active = onScreen && !motionReduced();

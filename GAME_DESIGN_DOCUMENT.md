@@ -2773,9 +2773,15 @@ La staffa e le due spade corte hanno entrambe le lame dello stesso colore. La
 sequenza si allunga con le Forme insegnabili (Forma 1 guardia e fendente,
 Forma 2 anche la parata alta, Corso Y anche l'affondo); la staffa ha l'elsa
 lunga al centro e i movimenti Otto, Mulino e Spazzata e cavatappi scelti a
-caso a ogni giro. L'Istruttore ha la tunica
-LudoSport verde scuro con la cintura marrone e una piccola treccia marrone (il
-segno dell'Istruttore), lilla quando la scuola ha almeno un Tecnico. Ogni 60–90
+caso a ogni giro. L'Istruttore porta la divisa
+LudoSport (concept N5, 14/10): kimono nero a maniche larghe fino al gomito sopra
+la sottotunica nel colore del ruolo (verde, lilla quando la scuola ha almeno un
+Tecnico), entrambi con il taglio a V rovesciata tra le gambe, più ampio quello
+del kimono così si vedono tutti e due; collo a V profondo con il colore del
+ruolo, cintura marrone con il capo che pende e la piccola treccia marrone (il
+segno dell'Istruttore), guanti neri, pantaloni neri con il logo LudoSport bianco
+sotto il ginocchio della gamba avanti (inclinato come la gamba), lo stesso logo
+sulla manica, suole bianche (`instructorUniform.tsx`). Ogni 60–90
 secondi spegne la spada e fa il **giro di correzione** tra le due file,
 fermandosi accanto a ogni allievo, poi torna al suo posto. Senza corsi in corso
 si allena da solo con la spada, un trick a caso alla volta (rin di polso, otto

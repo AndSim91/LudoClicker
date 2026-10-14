@@ -19,7 +19,7 @@ describe("InstructorScene", () => {
     expect(container.querySelectorAll(".is-back-row")).toHaveLength(4);
     expect(container.querySelectorAll(".iscene-staff").length).toBeGreaterThan(0);
     expect(container.querySelector(".iscene-arm.k3")).not.toBeNull();
-    expect(container.querySelector('path[fill="#1d5a45"]')).not.toBeNull();
+    expect(container.querySelector('path[fill="#2f8a64"]')).not.toBeNull();
   });
 
   it("turns the tunic lilac with a Tecnico and lets the instructor practise his sword tricks when no course runs", () => {

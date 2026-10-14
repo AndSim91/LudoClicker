@@ -15,6 +15,8 @@ export const INSTRUCTOR_SCENE_CAPS = [1, 2, 3, 4, 6, 8] as const;
 /** In a narrow panel (under 400 units) two rows of two at most. */
 export const NARROW_SCENE_UNITS = 400;
 export const SCENE_TOP = 50;
+/** The instructor's under-tunic (uniform N5, 14/10): green, lilac when the school has a Tecnico. */
+export const ROLE_COLORS = { instructor: "#2f8a64", technician: "#a68ad6" } as const;
 export const SCENE_HEIGHT = 128;
 
 export type SceneWeapon = "long" | "staff" | "dual";
