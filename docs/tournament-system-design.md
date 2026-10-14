@@ -530,11 +530,15 @@ Non comprende gli atleti della scuola, i posti vacanti o i Leggendari Segreti.
 | Accademico | 100 | 100 |
 | Nazionale | 200 | 200 |
 | Champion's | 400 | 400 |
-| Reptile (coppie esterne) | 500 × 1,1 per vittoria | 500 × 1,1 per vittoria |
+| Reptile (coppie esterne) | 300 × 1,1 per vittoria (tetto 1.000) | 300 × 1,1 per vittoria (tetto 1.000) |
+| Chronicles | 1.000 | 1.000 |
 
 Dal 07/10 (decisione di Andrea, con il voto di Stile assoluto): Accademico 100,
-Nazionale 200, Champion's 400 e Reptile 500 di base (`GAME_CONFIG.reptileStandard`,
-×1,1 per ogni vittoria precedente e ×1,25 con la Superba). Il prestigio si apre
+Nazionale 200, Champion's 400 e Reptile 500 di base. Dal 14/10/2026 il Reptile
+parte da **300** (`GAME_CONFIG.reptileStandard`): esterni ordinari entro ±35%
+della base, Leggendari Segreti della Champion's riportati × 300/400, ×1,1 per
+ogni vittoria precedente di un team di casa, mai oltre le Chronicles (1.000); la
+Superba non moltiplica più la difficoltà. Il prestigio si apre
 con il primo titolo all'Accademico. Prima: Accademico 90, Nazionale 110,
 Champion's 300 (e prima ancora 150 e 225), con il prestigio al Nazionale. I
 Leggendari Segreti dell'Accademico e del Nazionale sono stati alzati in

@@ -3637,7 +3637,7 @@ l'avanzamento.
     > **Da implementare:** non esiste una scena dedicata all'attrezzatura; usura e danni sono citati solo nel dialogo “Eventi e attrezzatura” del passo 4.
 
 13. **Il Laboratorio Gadget** Alla prima vittoria di un atleta della scuola
-    nella Champion's Arena, una scena in pausa annuncia lo sblocco e guida il
+    al Nazionale (in Arena o in Stile), una scena in pausa annuncia lo sblocco e guida il
     giocatore ad aprire **Gadget**. Il riepilogo spiega pubblico raggiungibile,
     produttività e ruolo dei Collaboratori; il catalogo introduce acquisto del
     progetto, sviluppo, prova qualità, vendita automatica, legame fra qualità,
@@ -4278,8 +4278,11 @@ vecchi messaggi «Riepilogo attività» della chiusura sono stati eliminati.
 Il settore **Gadget** si sblocca quando un atleta della scuola vince per la
 prima volta il Nazionale, in Arena o in Stile (decisione del 13/10/2026; dal
 06/10 era la Champion's Arena, prima ancora l'Arena del Torneo Accademico
-Alpha). In ogni nuova scuola va vinto di nuovo; la migrazione v113 apre i
-Gadget ai salvataggi che avevano già vinto il Nazionale nella scuola corrente. Lo sblocco apre la
+Alpha). Una volta aperto, dal 14/10/2026 il settore resta aperto da subito in
+ogni scuola fondata dopo, ripartendo dal primo prodotto (Portachiavi) e
+conservando le Maestrie (`schoolProgressionFlow.ts`); la migrazione v113 apre i
+Gadget ai salvataggi che avevano già vinto il Nazionale nella scuola corrente,
+la v115 a quelli che li avevano aperti in una scuola precedente. Lo sblocco apre la
 vista Gadget, il relativo incarico dei Collaboratori, il ramo di potenziamenti e
 il progetto Portachiavi. Il progetto deve comunque essere acquistato. Una scena
 tutorial salvata e non ripetibile presenta il settore, mantiene il tempo in pausa
@@ -4720,7 +4723,10 @@ Champion's Arena adattati alle coppie, incluse almeno due squadre Elite quando
 il campo lo consente. Ogni team esterno è specializzato: a caso, una delle due
 discipline riceve ×1,15 e l'altra ×0,85. Le apparizioni dei Leggendari Segreti
 seguono le regole dei tornei ordinari e ricevono un compagno generato della
-stessa scuola. La difficoltà parte dallo standard del Reptile (300) e viene
+stessa scuola. La difficoltà parte dallo standard del Reptile (**300**,
+`GAME_CONFIG.reptileStandard`, dal 14/10/2026; prima 500): gli esterni ordinari
+restano entro ±35% della base (195–405, `REPTILE_FIELD_SPREAD`), i Leggendari
+Segreti della Champion's sono riportati alla scala del Reptile (× 300/400). Poi viene
 moltiplicata cumulativamente per ×1,1 dopo ogni vittoria di un team di casa,
 mai oltre il livello delle Chronicles (1.000): le Chronicles sono il tetto del
 Reptile e della Superba. Fama e Superba non la alzano: la Fama porta più
@@ -4839,6 +4845,17 @@ difficoltà (tolto `superbaDifficultyMultiplier`).
 | Primo collaboratore        |               20–40 minuti |
 | Automazione percepibile    |               30–60 minuti |
 | Primo prestigio            | 60–90 minuti attivi        |
+
+Scuola in cui un giocatore medio deve poter vincere ogni torneo per la prima
+volta (Andrea, 14/10/2026; misurata con il motore di test, `npm run motore`):
+
+| Torneo      | Scuola |
+| ----------- | -----: |
+| Accademico  |      1 |
+| Nazionale   |    2–3 |
+| Reptile     |    3–5 |
+| Champion's  |    4–6 |
+| Chronicles  |   7–10 |
 
 La tabella resta un obiettivo di design. Il test automatico
 `src/game/balance.test.ts` ne controlla una parte simulando 120 partite a 6
@@ -5930,8 +5947,8 @@ qualunque funzione che possa far credere di inviare davvero email.
   liberamente. Non ha un livello generale, ma accumula maestria per settore:
   Novizio, Iniziato, Accademico, Cavaliere, Maestro, Leggenda.
 - Non esiste un limite massimo di collaboratori.
-- Gadget si sblocca con la prima vittoria della scuola al Nazionale;
-  il Portachiavi resta un progetto a pagamento e ogni prodotto successivo richiede
+- Gadget si sblocca con la prima vittoria della scuola al Nazionale e poi
+  resta aperto nelle scuole fondate dopo, dal primo prodotto; il Portachiavi resta un progetto a pagamento e ogni prodotto successivo richiede
   100 vendite del precedente.
 - La qualità Gadget non può diminuire; revisioni, pubblico, produttività dei
   Collaboratori, domanda ordinaria e vendite extra governano il catalogo.
