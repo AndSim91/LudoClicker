@@ -120,17 +120,11 @@ export function giocaPartita({
   let livelliInizioAnno = totaleLivelli(state);
   let ultimaPagella: number | undefined;
   const segretiVisti = new Map<string, string>();
-  /** Mese in cui il giocatore fonderà, dopo i mesi in più estratti a caso. */
+  /** Mese in cui il giocatore fonderà: un anno dopo il muro. */
   let fondaAlMese: number | undefined;
-  // Generatore deterministico (mulberry32) dal seme della partita.
-  let rngState = (seed * 2_654_435_761) >>> 0;
-  const casuale = () => {
-    rngState = (rngState + 0x6d2b79f5) >>> 0;
-    let t = rngState;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4_294_967_296;
-  };
+  /** Iscritti e livelli di Upgrade a ogni cambio di mese, per confrontare con 12 mesi prima. */
+  let mesi: { mese: number; iscritti: number; livelli: number }[] = [];
+  let ultimoMese = state.school.currentMonth;
 
   const annota = (tipo: string, chiave?: string, valore?: number, dati?: Record<string, unknown>) => {
     registro.eventi.push({
@@ -277,26 +271,31 @@ export function giocaPartita({
           fama: state.school.fame,
           formeCompletate: state.statistics.formsCompleted,
         });
-        // Andrea (14/10): scattato il criterio, il giocatore resta ancora da 0 a 2 anni
-        // di gioco (a caso, dal seme della partita) prima di fondare.
-        if (fondaAlMese === undefined && vuoleFondare(state, anno)) {
-          const extra = Math.floor(casuale() * (REGOLE.mesiExtraMassimi + 1));
-          fondaAlMese = state.school.currentMonth + extra;
-          annota("criterio-fondazione", String(scuola), extra, { iscritti: state.school.activeMembers });
-        }
         annoCorrente = getSchoolYear(state.school.currentMonth);
         anno = { iscrittiInizio: state.school.activeMembers, upgradeComprati: 0 };
         livelliInizioAnno = totaleLivelli(state);
       }
 
-      // Anno scolastico 16 iniziato = 15 anni finiti (l'anno 0 è il gennaio–agosto d'apertura).
-      const anniFiniti = getSchoolYear(state.school.currentMonth) - 1;
-      if (
-        fondaAlMese !== undefined &&
-        state.school.currentMonth >= fondaAlMese &&
-        anniFiniti >= REGOLE.anniMinimiPrimaDiFondare &&
-        canFoundSchool(state)
-      ) {
+      // Il muro (Andrea, 15/10): a ogni cambio di mese, il confronto con 12 mesi prima.
+      if (state.school.currentMonth !== ultimoMese) {
+        ultimoMese = state.school.currentMonth;
+        const livelliOra = totaleLivelli(state);
+        const unAnnoFa = [...mesi].reverse().find((m) => m.mese <= ultimoMese - 12);
+        mesi = [...mesi.filter((m) => m.mese > ultimoMese - 14), { mese: ultimoMese, iscritti: state.school.activeMembers, livelli: livelliOra }];
+        if (fondaAlMese === undefined && unAnnoFa && vuoleFondare(state, {
+          iscrittiInizio: unAnnoFa.iscritti,
+          upgradeComprati: livelliOra - unAnnoFa.livelli,
+        })) {
+          fondaAlMese = ultimoMese + REGOLE.mesiDopoIlMuro;
+          annota("criterio-fondazione", String(scuola), REGOLE.mesiDopoIlMuro, {
+            iscritti: state.school.activeMembers,
+            iscrittiUnAnnoFa: unAnnoFa.iscritti,
+            upgradeNeiDodiciMesi: livelliOra - unAnnoFa.livelli,
+          });
+        }
+      }
+
+      if (fondaAlMese !== undefined && state.school.currentMonth >= fondaAlMese && canFoundSchool(state)) {
         fondaAlMese = undefined;
         if (scuola >= maxScuole) {
           annota("fine", "scuola-completa");
@@ -321,6 +320,8 @@ export function giocaPartita({
             risultatiVisti = new Set();
             livelli = { ...state.upgrades } as Record<string, number>;
             ultimaPagella = undefined;
+            mesi = [];
+            ultimoMese = state.school.currentMonth;
             annoCorrente = getSchoolYear(state.school.currentMonth);
             anno = { iscrittiInizio: state.school.activeMembers, upgradeComprati: 0 };
             livelliInizioAnno = totaleLivelli(state);

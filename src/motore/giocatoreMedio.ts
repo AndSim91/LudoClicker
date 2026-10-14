@@ -45,10 +45,12 @@ export const REGOLE = {
   sogliaCrescita: 0.05,
   /** ...e nell'anno ha potuto comprare meno di 5 Upgrade. */
   sogliaUpgrade: 5,
-  /** Scattato il criterio, resta ancora da 0 a 24 mesi (0–2 anni) a caso prima di fondare. */
-  mesiExtraMassimi: 24,
-  /** Andrea (14/10): in ogni scuola si fonda solo dopo aver finito almeno 15 anni scolastici. */
-  anniMinimiPrimaDiFondare: 15,
+  /**
+   * Andrea (15/10): il «muro» è il primo mese in cui, rispetto a 12 mesi prima, gli
+   * iscritti sono cresciuti meno del 5% e sono stati comprati meno di 5 Upgrade.
+   * Dal muro il giocatore gioca ancora un anno, poi fonda.
+   */
+  mesiDopoIlMuro: 12,
   /** ponytail: quante spade compra in Pianificazione, da tarare: una ogni 4 iscritti. */
   spadePerIscritto: 0.25,
   prioritaCollaboratori: ["instructor", "writing", "gadget", "events", "equipment"] as const,
@@ -306,12 +308,13 @@ export function spesaReputazione(state: GameState, modo: ModoReputazione = "pari
   return { upgrades, rent: 0 };
 }
 
+/** Gli ultimi 12 mesi: iscritti all'inizio e livelli di Upgrade comprati. */
 export interface AnnoScolastico {
   iscrittiInizio: number;
   upgradeComprati: number;
 }
 
-/** Fonda quando la crescita è sotto il 5% e nell'anno ha comprato meno di 5 Upgrade. */
+/** Il muro: crescita sotto il 5% e meno di 5 Upgrade negli ultimi 12 mesi, con la fondazione disponibile. */
 export function vuoleFondare(state: GameState, anno: AnnoScolastico): boolean {
   if (!canFoundSchool(state)) return false;
   const crescita = (state.school.activeMembers - anno.iscrittiInizio) / Math.max(1, anno.iscrittiInizio);

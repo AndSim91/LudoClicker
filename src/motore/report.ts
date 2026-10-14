@@ -64,9 +64,9 @@ export function creaReport(analisi: Analisi, meta: { creato: string; partite: nu
     }</tbody></table>`);
 
   const scuole = sezione("scuole", "Scuole fondate",
-    "Domande A6–A7: quando si arriva alla scuola n (tempo totale dall'inizio), quanto dura ogni scuola e quanti anni scolastici. «Criterio» = quando scatta la regola di fondazione (crescita sotto il 5% e meno di 5 Upgrade nell'anno); poi il giocatore resta ancora da 0 a 24 mesi a caso.",
-    `<table><thead><tr><th>Scuola</th><th>Arrivo</th><th>Criterio</th><th>Mesi in più</th><th>Durata</th><th>Anni scolastici</th></tr></thead><tbody>${
-      analisi.scuole.map((scuola) => `<tr><th>${scuola.numero}</th>${cellaTempo(scuola.arrivo)}${cellaTempo(scuola.criterio)}${cellaNumero(scuola.mesiExtra)}${cellaTempo(scuola.durata)}${cellaNumero(scuola.anni)}</tr>`).join("")
+    "Domande A6–A7: quando si arriva alla scuola n (tempo totale dall'inizio), quanto dura ogni scuola e quanti anni scolastici. «Muro» = il primo mese in cui, rispetto a 12 mesi prima, gli iscritti sono cresciuti meno del 5% e si sono comprati meno di 5 Upgrade (con la fondazione disponibile); dal muro il giocatore gioca ancora un anno e poi fonda.",
+    `<table><thead><tr><th>Scuola</th><th>Arrivo</th><th>Muro</th><th>Anno scolastico del muro</th><th>Durata</th><th>Anni scolastici</th></tr></thead><tbody>${
+      analisi.scuole.map((scuola) => `<tr><th>${scuola.numero}</th>${cellaTempo(scuola.arrivo)}${cellaTempo(scuola.criterio)}${cellaNumero(scuola.annoMuro)}${cellaTempo(scuola.durata)}${cellaNumero(scuola.anni)}</tr>`).join("")
     }</tbody></table>`);
 
   const segreti = sezione("segreti", "Leggendari Segreti",

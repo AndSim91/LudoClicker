@@ -100,7 +100,7 @@ export function scuole(registri: RegistroPartita[]) {
       anni: distribuzione(anni),
       criterio: distribuzione(criterio.map((evento, index) =>
         evento ? evento.t - (inizioScuole(registri[index]).get(numero) ?? 0) : undefined)),
-      mesiExtra: distribuzione(criterio.map((evento) => evento?.valore)),
+      annoMuro: distribuzione(criterio.map((evento) => evento?.anno)),
     };
   });
 }
