@@ -12,7 +12,6 @@ import {
   isCourseXUnlocked,
 } from "../content/upgrades";
 import { getFormTrainingYear } from "../game/calendar";
-import { getAutomaticAssignmentRoles } from "../game/collaboratorManagement";
 import { GAME_CONFIG } from "../game/config";
 import { gameReducer } from "../game/engine";
 import { canStartAcquisitionEvent } from "../game/eventFlow";
@@ -167,16 +166,10 @@ export function distribuzioneACascata(state: GameState): CollaboratorAssignment[
 
 function assegnaCollaboratori(state: GameState, now: number): GameState {
   if (state.collaboratorManagement.aggregateViewUnlocked) {
-    let next = state.collaboratorManagement.automaticShares
+    // Le barre partono tutte a 3 e i settori aperti dopo entrano a 3 da soli (gioco, 14/10/2026).
+    return state.collaboratorManagement.automaticShares
       ? state
       : act(state, { type: "SET_AUTOMATIC_ASSIGNMENT", enabled: true });
-    // Un settore aperto dopo (Gadget) parte con la barra a zero: il giocatore medio la alza a 3,
-    // altrimenti nessuno ci lavora e il Reptile non finisce mai la preparazione (14/10/2026).
-    const shares = next.collaboratorManagement.automaticShares ?? {};
-    for (const role of getAutomaticAssignmentRoles(next)) {
-      if ((shares[role] ?? 0) === 0) next = act(next, { type: "CHANGE_AUTOMATIC_SHARE", assignment: role, level: 3 });
-    }
-    return next;
   }
   const wanted = distribuzioneACascata(state);
   // I primi arrivati tengono il posto più in alto nella lista.

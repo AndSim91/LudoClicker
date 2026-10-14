@@ -206,7 +206,8 @@ export const GAME_CONFIG = {
   // Reptile fame level at which the Open becomes, for good, the Torneo della Superba.
   superbaReptileFameLevel: 1,
   // Reptile: base Stile and Arena of the external pairs (×1,1 per earlier victory).
-  reptileStandard: 500,
+  // 14/10/2026: 300 (was 500, never won by the test engine); above the Nazionale (200).
+  reptileStandard: 300,
   superbaDifficultyMultiplier: 1.25,
 } as const;
 

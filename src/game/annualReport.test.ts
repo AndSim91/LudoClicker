@@ -108,7 +108,7 @@ describe("annual report", () => {
     expect(closeAnnualMonth(state, 1, 0).annual?.ledger?.months).toHaveLength(1);
   });
 
-  it("grades Risultati Agonistici on the most important tournament of the year (14/10/2026)", () => {
+  it("grades Risultati Agonistici on the best result beyond the Scolastico (14/10/2026)", () => {
     const state = createInitialState(0);
     const data = getAnnualYearData(state, 0);
     const entry = (level: TournamentResult["level"], place: number) => ({ result: { level } as TournamentResult, place });
@@ -119,6 +119,11 @@ describe("annual report", () => {
     // The Scolastico won no longer covers a poor Accademico.
     expect(grade([entry("school", 1), entry("academy", 20)])).toBe("E");
     expect(grade([entry("school", 1), entry("academy", 1)])).toBe("A");
+    // Winning the Accademico still counts in a year with a low Nazionale.
+    expect(grade([entry("academy", 1), entry("national", 40)])).toBe("A");
+    // Iscrizioni: the arrivals of the year alone, whatever the size of the school.
+    expect(gradeAnnualYear(state, { ...data, enrolled: 320 }).enrollment).toBe("A");
+    expect(gradeAnnualYear(state, { ...data, enrolled: 20 }).enrollment).toBe("E");
   });
 
   it("counts the June departures in the pagella of that year (14/10/2026)", () => {

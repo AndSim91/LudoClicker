@@ -50,6 +50,21 @@ function switchOn(state: GameState): GameState {
   return gameReducer(withCouncil(state), { type: "SET_AUTOMATIC_ASSIGNMENT", enabled: true });
 }
 
+/** On, with the bars matching the team as it is (the old start), so nobody moves. */
+function switchOnKeepingTeam(state: GameState): GameState {
+  const on = switchOn(state);
+  const counts = getCollaboratorAssignmentCounts(on);
+  const roles = Object.keys(on.collaboratorManagement.automaticShares ?? {}) as Array<keyof typeof counts>;
+  const largest = Math.max(...roles.map((role) => counts[role]));
+  return {
+    ...on,
+    collaboratorManagement: {
+      ...on.collaboratorManagement,
+      automaticShares: Object.fromEntries(roles.map((role) => [role, Math.round(counts[role] / largest * 100)])),
+    },
+  };
+}
+
 function setLevel(state: GameState, assignment: "writing" | "events" | "equipment" | "instructor", level: number) {
   return gameReducer(state, { type: "CHANGE_AUTOMATIC_SHARE", assignment, level });
 }
@@ -64,7 +79,7 @@ describe("Assegnazione automatica (4.7)", () => {
     expect(noCouncil.collaboratorManagement.automaticShares).toBeUndefined();
   });
 
-  it("starts the bars from the team the player left and only places free collaborators", () => {
+  it("starts every bar at 3 (14/10/2026) and only places free collaborators", () => {
     const on = switchOn(withCollaborators([
       collaborator(1, "writing"),
       collaborator(2, "writing"),
@@ -74,14 +89,24 @@ describe("Assegnazione automatica (4.7)", () => {
       collaborator(6),
     ]));
 
-    expect(on.collaboratorManagement.automaticShares).toMatchObject({ writing: 100, events: 50, equipment: 0, instructor: 0 });
+    expect(on.collaboratorManagement.automaticShares).toEqual({ writing: 60, events: 60, equipment: 60, instructor: 60 });
     expect(on.collaborators.slice(0, 3).map((entry) => entry.assignment)).toEqual(["writing", "writing", "events"]);
-    expect(getCollaboratorAssignmentCounts(on)).toMatchObject({ writing: 4, events: 2 });
+    expect(getCollaboratorAssignmentCounts(on)).toMatchObject({ writing: 2, events: 2, equipment: 1, instructor: 1 });
     expect(isValidGameState(on)).toBe(true);
   });
 
+  it("brings a sector opened later in at 3 and moves people there (14/10/2026)", () => {
+    const on = switchOn(withCollaborators([1, 2, 3, 4, 5, 6, 7, 8].map((index) => collaborator(index, "writing"))));
+    const gadgetOpen = gameReducer(
+      { ...on, unlocks: { ...on.unlocks, gadget: true } },
+      { type: "MARK_ALL_MESSAGES_READ" },
+    );
+    expect(gadgetOpen.collaboratorManagement.automaticShares?.gadget).toBe(60);
+    expect(getCollaboratorAssignmentCounts(gadgetOpen).gadget).toBeGreaterThan(0);
+  });
+
   it("moves the fewest people at once, choosing who yields relatively most there", () => {
-    const on = switchOn(withCollaborators([
+    const on = switchOnKeepingTeam(withCollaborators([
       collaborator(1, "writing"),
       collaborator(2, "writing", { mastery: { ...createInitialCollaboratorMastery(), events: 400 } }),
       collaborator(3, "writing"),
@@ -98,7 +123,7 @@ describe("Assegnazione automatica (4.7)", () => {
   });
 
   it("brings an Istruttore with Forms from another sector and fills the gap behind them", () => {
-    const on = switchOn(withCollaborators([
+    const on = switchOnKeepingTeam(withCollaborators([
       collaborator(1, "writing"),
       collaborator(2, "writing"),
       collaborator(3, "writing"),
@@ -118,7 +143,7 @@ describe("Assegnazione automatica (4.7)", () => {
     const student = collaborator(1, "writing", {
       training: { formId: "form-1", startedAt: 1_000, completesAt: 999_999, status: "running", instructorId: "collaborator-3" },
     });
-    const on = switchOn(withCollaborators([
+    const on = switchOnKeepingTeam(withCollaborators([
       student,
       collaborator(2, "writing"),
       teacher(3, ["form-1"]),
@@ -141,7 +166,7 @@ describe("Assegnazione automatica (4.7)", () => {
   });
 
   it("places newcomers where the bars say, without moving anyone else", () => {
-    const on = switchOn(withCollaborators([collaborator(1, "events"), collaborator(2, "writing")]));
+    const on = switchOnKeepingTeam(withCollaborators([collaborator(1, "events"), collaborator(2, "writing")]));
     const arrived = gameReducer(
       {
         ...on,

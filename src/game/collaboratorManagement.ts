@@ -469,7 +469,20 @@ export function moveOperationalPriority(
 /** Each notch of an effort bar is worth 20: five notches, 0–100. */
 export const AUTOMATIC_SHARE_PER_LEVEL = 20;
 export const AUTOMATIC_MAX_LEVEL = 5;
-const AUTOMATIC_SHARE_MAX = AUTOMATIC_SHARE_PER_LEVEL * AUTOMATIC_MAX_LEVEL;
+/** Where a bar starts: on switching the automation on, and for a sector opened later (Gadget). */
+const AUTOMATIC_DEFAULT_LEVEL = 3;
+
+/**
+ * A sector opened after the automation (Gadget, Social) joins at 3, not at zero,
+ * and people move there right away as if the player had raised its bar (14/10/2026).
+ */
+function withNewSectorShares(state: GameState): GameState {
+  const shares = state.collaboratorManagement.automaticShares;
+  if (!shares) return state;
+  return getAutomaticAssignmentRoles(state)
+    .filter((role) => shares[role] === undefined)
+    .reduce((next, role) => changeAutomaticShare(next, role, AUTOMATIC_DEFAULT_LEVEL), state);
+}
 
 export function getAutomaticAssignmentRoles(state: Pick<GameState, "unlocks">): CollaboratorMasteryRole[] {
   return COLLABORATOR_MASTERY_ROLES.filter((role) => isCollaboratorAssignmentAvailable(role, state.unlocks));
@@ -604,7 +617,7 @@ function assignFreeCollaboratorsAutomatically(state: GameState): GameState {
   });
 }
 
-/** On: the bars start from the proportions the player left (all at 3 if nobody is assigned). Off: hands back control. */
+/** On: every bar starts at 3, all sectors equal (Andrea, 14/10/2026). Off: hands back control. */
 export function setAutomaticAssignment(state: GameState, enabled: boolean): GameState {
   const { automaticShares, ...management } = state.collaboratorManagement;
   delete management.automaticPendingMoves;
@@ -612,14 +625,9 @@ export function setAutomaticAssignment(state: GameState, enabled: boolean): Game
   if (!enabled) return withTargetsFromAssignments({ ...state, collaboratorManagement: management });
   // Arrives with the Consiglio delle Onde (8 collaborators); old saves can still switch it off.
   if (!state.collaboratorManagement.aggregateViewUnlocked) return state;
-  const roles = getAutomaticAssignmentRoles(state);
-  const counts = getCollaboratorAssignmentCounts(state);
-  const largest = Math.max(...roles.map((role) => counts[role]));
-  const shares = Object.fromEntries(roles.map((role) => [
+  const shares = Object.fromEntries(getAutomaticAssignmentRoles(state).map((role) => [
     role,
-    largest > 0
-      ? Math.round(counts[role] / largest * AUTOMATIC_SHARE_MAX)
-      : 3 * AUTOMATIC_SHARE_PER_LEVEL,
+    AUTOMATIC_DEFAULT_LEVEL * AUTOMATIC_SHARE_PER_LEVEL,
   ]));
   return assignFreeCollaboratorsAutomatically({
     ...state,
@@ -679,6 +687,6 @@ export function reconcileCollaboratorManagement(state: GameState): GameState {
         },
       };
   return unlockedState.collaboratorManagement.automaticShares
-    ? assignFreeCollaboratorsAutomatically(settleAutomaticPendingMoves(unlockedState))
+    ? assignFreeCollaboratorsAutomatically(settleAutomaticPendingMoves(withNewSectorShares(unlockedState)))
     : rebalanceTargets(unlockedState);
 }

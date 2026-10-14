@@ -1412,9 +1412,10 @@ Regole:
   settore ha una **barra di impegno** di 5 tacche, indipendente dalle altre:
   alzarne una non muove le altre barre, cambia solo il numero di persone che
   ne deriva (la squadra divisa in proporzione alle tacche, resti più grandi).
-  All'accensione le barre partono dalle proporzioni lasciate dal giocatore
-  (tutte a 3 se nessuno è assegnato) e nessuno si sposta; liberi e nuovi
-  arrivati vanno nel settore più lontano dalla sua quota.
+  All'accensione tutte le barre partono a 3, settori alla pari (14/10/2026), e
+  nessuno si sposta; liberi e nuovi arrivati vanno nel settore più lontano dalla
+  sua quota. Un settore che si apre dopo (Gadget, Social) entra a 3 e le persone
+  si spostano subito, come se il giocatore avesse alzato la sua barra.
   Cambiando una barra le persone **si spostano subito**, il minimo
   indispensabile: dai settori in eccesso esce chi lì rende relativamente
   meno, e chi si sposta va dove rende relativamente di più. «Relativamente»
@@ -2334,7 +2335,7 @@ non punti percentuali aggiunti direttamente al risultato finale.
 | Materiale informativo chiaro | +1,5% del percorso | 150 / 300 / 600 / 1.200 / 2.400 € |
 | Lezione introduttiva collaudata | +2% del percorso | 300 / 600 / 1.200 / 2.400 / 4.800 € |
 | Sala preparata | +2,5% del percorso e −1 secondo alla prova; durata minima 10 secondi | 600 / 1.200 / 2.400 / 4.800 / 9.600 € |
-| Chat di Gruppo | −10% del rischio di non rinnovare a fine anno (§ 9.8); massimo −50% | 3.000 / 6.000 / 12.000 / 24.000 / 48.000 € |
+| Chat di Gruppo | −10% del rischio di non rinnovare a fine anno (§ 9.8); massimo −50% | 500 / 1.000 / 2.000 / 4.000 / 8.000 € (dal 14/10/2026, prima 3.000–48.000) |
 | Collaboratore dedicato | +3% del percorso e +10% efficacia del contributo Istruttori | 2.500 / 5.000 / 10.000 / 20.000 / 40.000 € |
 | Accoglienza dell'Ordine | +4% del percorso | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 € |
 | Esperienza memorabile | +6% del percorso e 5% di recuperare una prova fallita; massimo 25% | 10.000 / 25.000 / 50.000 / 100.000 / 200.000 € |
@@ -3382,15 +3383,15 @@ la conferma del piano (13/10). Nuove statistiche: `trialsCancelled`, `incomeBySo
 
 **Pagella.** Voti A–E, niente media né «Ammesso», confronto con l'anno prima e
 frecce dal secondo anno. Soglie provvisorie, da tarare giocando:
-- Iscrizioni: arrivati ÷ max(10, iscritti a inizio anno) ≥ 0,8 A · 0,5 B · 0,3 C · 0,15 D.
+- Iscrizioni: arrivati nell'anno, senza confronto con la dimensione della scuola
+  (14/10/2026): ≥ 300 A · 150 B · 75 C · 30 D.
 - Fidelizzazione: 1 − andati via ÷ (iscritti a inizio anno + arrivati) ≥ 0,9 · 0,8 · 0,7 · 0,55.
 - Didattica (solo con le Forme aperte): Forme insegnate ÷ iscritti ≥ 1 · 0,6 · 0,35 · 0,15.
 - Risultati Agonistici (solo con almeno un torneo disputato): miglior piazzamento
   pesato sul livello (1° 0,85, 2° 0,7, 3–4° 0,55, 5–8° 0,4, 9–16° 0,25, poi 0,1;
-  +0,05 per livello sopra lo Scolastico) ≥ 0,8 · 0,6 · 0,45 · 0,3. Conta solo il
-  torneo più importante disputato nell'anno (Scolastico, Accademico, Nazionale,
-  Champion's): dopo l'Accademico lo Scolastico vinto non alza più il voto
-  (14/10/2026).
+  +0,05 per livello sopra lo Scolastico) ≥ 0,8 · 0,6 · 0,45 · 0,3. Conta il
+  miglior risultato dell'anno escluso lo Scolastico, appena c'è un altro torneo
+  (14/10/2026): lo Scolastico, sempre vinto, non alza più il voto.
 - Amministrazione: prove annullate ÷ prove ≤ 2% A · 5% B · 10% C · 20% D; un voto
   in meno se più di un quarto delle spade è rotto.
 - Finanze: entrate medie al mese contro l'anno prima (il primo anno: ultimi due
@@ -4840,7 +4841,7 @@ atleti migliori, compra la catena di Insegnamento e le spade per le formazioni i
 attesa). Il test richiede che il primo prestigio non arrivi prima di 55
 minuti e che la mediana a ritmo intenso resti entro 90. Dal 07/10 il prestigio
 si apre con il primo titolo all'Accademico e gli standard sono Accademico 100,
-Nazionale 200 e Champion's 400 (Reptile 500 di base); misure su 6 partite:
+Nazionale 200 e Champion's 400 (Reptile 500 di base, 300 dal 14/10/2026); misure su 6 partite:
 intenso 56–80 minuti (mediana ~62), tranquillo 80–93. I Leggendari Segreti
 dell'Accademico e del Nazionale sono stati alzati in proporzione (×100/90 e
 ×200/110) per restare in cima al loro campo. Prima del 07/10:

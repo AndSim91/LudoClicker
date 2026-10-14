@@ -319,7 +319,8 @@ export function gradeAnnualYear(
 ): Partial<Record<AnnualSubject, AnnualGrade>> {
   const base = data.start.activeMembers + data.enrolled;
   const grades: Partial<Record<AnnualSubject, AnnualGrade>> = {
-    enrollment: scoreToGrade(data.enrolled / Math.max(10, data.start.activeMembers), [0.8, 0.5, 0.3, 0.15]),
+    // 14/10/2026: the arrivals alone, not compared with the size of the school.
+    enrollment: scoreToGrade(data.enrolled, [300, 150, 75, 30]),
     loyalty: scoreToGrade(1 - data.departed / Math.max(1, base), [0.9, 0.8, 0.7, 0.55]),
   };
   if (state.unlocks.forms) {
@@ -327,11 +328,10 @@ export function gradeAnnualYear(
   }
   const played = data.tournaments.filter((entry) => Number.isFinite(entry.place));
   if (played.length > 0) {
-    // 14/10/2026: only the most important tournament played in the year counts
-    // (after the Accademico the Scolastico, always won, no longer lifts the grade).
-    const rankOf = (entry: (typeof played)[number]) => TITLE_RANK[entry.result.level] ?? 0;
-    const top = Math.max(...played.map(rankOf));
-    const counted = top > 0 ? played.filter((entry) => rankOf(entry) === top) : played;
+    // 14/10/2026: the best result of the year, the Scolastico (always won) left out
+    // once another tournament was played.
+    const beyondSchool = played.filter((entry) => entry.result.level !== "school");
+    const counted = beyondSchool.length > 0 ? beyondSchool : played;
     const score = Math.max(...counted.map((entry) => placeScore(entry.place, entry.result.level)));
     grades.tournaments = scoreToGrade(score, [0.8, 0.6, 0.45, 0.3]);
   }

@@ -160,18 +160,33 @@ async function principale() {
   let motivo = "";
   let ultimaStampa = 0;
 
+  // Una riga di stato e, sotto, le partite in corso riassunte per scuola (non una per una).
   const stampa = (forza = false) => {
     if (!forza && Date.now() - ultimaStampa < 15_000) return;
     ultimaStampa = Date.now();
-    const partite = [...inCorso.values()]
-      .map((p) => `#${p.seed} scuola ${p.scuola} (${Math.round(p.minuti / 60)} h, ${Math.round(p.usataMb)}/${p.limiteMb} MB${p.pausa ? ", in pausa" : ""})`)
-      .join(", ");
+    const lista = [...inCorso.values()];
+    const inPausa = lista.filter((p) => p.pausa).length;
+    const gb = (mb) => `${(mb / 1024).toFixed(1).replace(".", ",")} GB`;
+    const intervallo = (valori, unita) => {
+      const min = Math.min(...valori);
+      const max = Math.max(...valori);
+      return min === max ? `${min} ${unita}` : `${min}–${max} ${unita}`;
+    };
+    const perScuola = new Map();
+    for (const p of lista) perScuola.set(p.scuola, (perScuola.get(p.scuola) ?? 0) + 1);
+    const scuole = [...perScuola.entries()].sort((a, b) => a[0] - b[0])
+      .map(([scuola, quante]) => `scuola ${scuola}: ${quante}`).join(" · ");
     console.log(
       `[${Math.round((Date.now() - t0) / 60_000)} min] finite ${registri.length}/${o.partite}` +
-      ` · attive ${attive().length}/${obiettivo} · altri programmi ${Math.round(altri * 100)}% CPU` +
-      ` · RAM libera ${Math.round(freemem() / MB)} MB` +
-      (motivo ? ` · ${motivo}` : "") +
-      (partite ? `\n   in corso: ${partite}` : ""),
+      ` · in corso ${lista.length - inPausa}${inPausa ? ` (+${inPausa} in pausa)` : ""}` +
+      ` · in coda ${coda.length}` +
+      ` · altri programmi ${Math.round(altri * 100)}% CPU · RAM libera ${gb(freemem() / MB)}` +
+      (motivo ? `\n   ⚠ ${motivo}` : "") +
+      (lista.length
+        ? `\n   ${scuole} (obiettivo: scuola ${o.scuole})` +
+          ` · gioco ${intervallo(lista.map((p) => Math.round(p.minuti / 60)), "h")}` +
+          ` · memoria ${intervallo(lista.map((p) => Math.round(p.usataMb)), "MB")} a partita`
+        : ""),
     );
   };
 
