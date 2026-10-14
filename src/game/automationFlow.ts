@@ -40,6 +40,7 @@ import { getAthleteImmunityStatus, isAthleteImmuneFromDeparture } from "./athlet
 import {
   compareAutomaticTeachingStudentPriority,
   getAutomaticTeachingRarityPriority,
+  type AutomaticTeachingStudentPriority,
 } from "./automaticTeachingPriority";
 import { getTeachingPriorityDepartureChance } from "./formulas";
 import { getDepartureRiskReduction } from "../content/upgrades";
@@ -51,7 +52,7 @@ import {
   selectInstructorCapacity,
 } from "./selectors";
 import { getSocialContentCharacters } from "./social";
-import { getContactsById, getInstructorTeachingCounts } from "./runtimeIndexes";
+import { getInstructorTeachingCounts } from "./runtimeIndexes";
 import { getAutomaticFormCandidates } from "./formProgression";
 import { materializeGroupedMembers } from "./memberGroups";
 import { getAgonistCourseCost } from "./trainingFlow";
@@ -202,6 +203,16 @@ function hasSameAutomaticTeachingCollaborators(
       previous.specialProfileId === collaborator.specialProfileId;
   });
 }
+
+/** Teaching priority per member object, with the settings it was computed for. */
+const memberPriorityCache = new WeakMap<object, {
+  key: string;
+  qualification: GameState["tournaments"]["qualification"];
+  priority: AutomaticTeachingStudentPriority;
+}>();
+
+/** Learnable Forms per student object, with the settings they were computed for. */
+const learnableFormCandidatesCache = new WeakMap<object, { key: string; forms: FormId[] }>();
 
 export function isAutomaticTeachingKnownIdle(state: GameState): boolean {
   const cached = automaticTeachingNoOpCache.get(state.historyArchive);
@@ -747,7 +758,12 @@ export function processAutomaticTeaching(
   const councilTappa = state.network.schoolCount === 0 &&
     state.tournaments.firstSchoolTournamentMonth !== undefined &&
     !state.collaboratorManagement.aggregateViewUnlocked;
-  const contactsById = getContactsById(state.contacts);
+  // Only collaborators need their contact (their priority reads it), so the index
+  // covers them alone and is built the first time one is asked for.
+  let collaboratorContacts: Map<string, GameState["contacts"][number]> | undefined;
+  const collaboratorContact = (contactId: string) => (collaboratorContacts ??= new Map(
+    state.contacts.flatMap((contact) => collaboratorContactIds.has(contact.id) ? [[contact.id, contact] as const] : []),
+  )).get(contactId);
   const capacity = selectInstructorCapacity(state);
   const instructorLoads = new Map(
     getInstructorTeachingCounts(state.contacts, state.collaborators),
@@ -774,19 +790,40 @@ export function processAutomaticTeaching(
     }
   }
   const instructorBranchCapacity = getInstructorStudentBranchCapacity(state.upgrades);
-  const automaticFormCandidates = new Map(students.map((student) => [
-    student.id,
-    getAutomaticFormCandidates(
-      student,
-      courseXUnlocked,
-      unrestrictedFormBranches,
-      instructorBranchCapacity,
-    ),
-  ]));
+  // 14/10/2026: the per-student lists are computed only for the students a pass looks
+  // at (in a big school thousands wait and a handful of places are free). Each list
+  // is read from the state at the start of the step, as before, so it is the same list.
+  const perStudent = <T>(compute: (student: (typeof students)[number]) => T) => {
+    const cache = new Map<string, T>();
+    return (student: (typeof students)[number]) => {
+      let value = cache.get(student.id);
+      if (value === undefined) {
+        value = compute(student);
+        cache.set(student.id, value);
+      }
+      return value;
+    };
+  };
+  // Already cached by the student's Forme (formProgression.ts).
+  const automaticFormCandidatesOf = (student: (typeof students)[number]) => getAutomaticFormCandidates(
+    student,
+    courseXUnlocked,
+    unrestrictedFormBranches,
+    instructorBranchCapacity,
+  );
   // Forms the student could learn this year, with or without a free Istruttore now.
-  const learnableFormCandidates = new Map(students.map((student) => [
-    student.id,
-    (automaticFormCandidates.get(student.id) ?? []).filter((formId) => {
+  // They depend only on the student (an unchanged object between steps) and on the
+  // settings in `learnableKey`, so they are kept across steps (14/10/2026).
+  const learnableKey = `${courseXUnlocked}|${unrestrictedFormBranches}|${instructorBranchCapacity}|${trainingYear}|${annualTrainingLimit}`;
+  const learnableFormCandidatesOf = (student: (typeof students)[number]) => {
+    const cached = learnableFormCandidatesCache.get(student);
+    if (cached?.key === learnableKey) return cached.forms;
+    const forms = computeLearnable(student);
+    learnableFormCandidatesCache.set(student, { key: learnableKey, forms });
+    return forms;
+  };
+  const computeLearnable = (student: (typeof students)[number]) =>
+    automaticFormCandidatesOf(student).filter((formId) => {
       const definition = getFormDefinition(formId);
       return Boolean(
         definition &&
@@ -805,15 +842,13 @@ export function processAutomaticTeaching(
           courseXUnlocked,
         )
       );
-    }),
-  ]));
-  const qualifiedFormCandidates = new Map(students.map((student) => [
-    student.id,
-    (learnableFormCandidates.get(student.id) ?? []).filter((formId) =>
+    });
+  const qualifiedFormCandidatesOf = perStudent((student) =>
+    learnableFormCandidatesOf(student).filter((formId) =>
       instructorsByForm.get(formId)?.some((instructor) => instructor.id !== student.id)
-    ),
-  ]));
-  const instructorsWithAvailablePersonalForms = new Set(
+    ));
+  let instructorsWithAvailablePersonalForms: Set<string> | undefined;
+  const hasAvailablePersonalForms = (studentId: string) => (instructorsWithAvailablePersonalForms ??= new Set(
     state.collaborators.filter((collaborator) => {
       if (
         collaborator.assignment !== "instructor" ||
@@ -832,7 +867,7 @@ export function processAutomaticTeaching(
         courseXUnlocked,
       ));
     }).map((collaborator) => collaborator.id),
-  );
+  )).has(studentId);
   const automaticFormOrder: FormId[] = [
     "form-1",
     "course-x",
@@ -865,7 +900,7 @@ export function processAutomaticTeaching(
   const computeStudentPriority = (student: (typeof students)[number]) => {
     const contact = "acquiredAt" in student
       ? student
-      : contactsById.get(student.contactId);
+      : collaboratorContact(student.contactId);
     const immunity = contact
       ? getAthleteImmunityStatus(
         {
@@ -888,7 +923,7 @@ export function processAutomaticTeaching(
         departureRiskReduction,
       )
       : 0;
-    const candidate = automaticFormCandidates.get(student.id)?.[0];
+    const candidate = automaticFormCandidatesOf(student)[0];
     const councilPriority = councilTappa && student.rarity === "ultra-rare" &&
       (candidate === "form-1" || candidate === "form-2" || candidate === "course-y");
     return {
@@ -905,10 +940,25 @@ export function processAutomaticTeaching(
       originalOrder: originalIndex(student.id),
     };
   };
+  // A member's priority depends only on the member (an unchanged object between
+  // steps) and on the settings in `priorityKey`, so it is kept across steps; only its
+  // position in today's list is set again (14/10/2026). Collaborators read their
+  // contact and the favorites, so they are computed every time.
+  const priorityKey = `${state.school.currentMonth}|${departureRiskReduction}|${councilTappa}|${courseXUnlocked}|${unrestrictedFormBranches}|${instructorBranchCapacity}`;
   const priorityOf = (student: (typeof students)[number]) => {
     let priority = priorityCache.get(student.id);
     if (!priority) {
-      priority = computeStudentPriority(student);
+      if ("acquiredAt" in student) {
+        const kept = memberPriorityCache.get(student);
+        if (kept?.key === priorityKey && kept.qualification === state.tournaments.qualification) {
+          priority = { ...kept.priority, originalOrder: originalIndex(student.id) };
+        } else {
+          priority = computeStudentPriority(student);
+          memberPriorityCache.set(student, { key: priorityKey, qualification: state.tournaments.qualification, priority });
+        }
+      } else {
+        priority = computeStudentPriority(student);
+      }
       priorityCache.set(student.id, priority);
     }
     return priority;
@@ -938,16 +988,46 @@ export function processAutomaticTeaching(
   // Corso Agonisti; without learnable Forme it is open from September.
   const calendarMonth = getCalendarMonth(state.school.currentMonth);
   const formsComeFirst = calendarMonth >= 9 || calendarMonth < 4;
-  // Pass 1 can act only on who has a qualified Forma or must recover Corso X.
-  const formPassStudents = sortByPriority(students.filter((student) =>
-    (qualifiedFormCandidates.get(student.id)?.length ?? 0) > 0 ||
-    (
-      courseXUnlocked &&
-      needsCourseXRecovery(student.forms) &&
-      !("acquiredAt" in student) &&
-      student.assignment === "instructor"
-    )
-  ));
+  const needsCourseXCourse = (student: (typeof students)[number]) =>
+    courseXUnlocked &&
+    needsCourseXRecovery(student.forms) &&
+    !("acquiredAt" in student) &&
+    student.assignment === "instructor";
+  // Pass 1 can act only on who must recover Corso X or has a qualified Forma with a
+  // free Istruttore and the funds for it. During the pass loads only grow and funds
+  // only shrink, so who cannot start at the beginning cannot start later either:
+  // leaving them out changes nothing but the work (14/10/2026).
+  const isFree = (instructor: GameState["collaborators"][number]) =>
+    (instructorLoads.get(instructor.id) ?? 0) < capacity;
+  // Who can still start a Forma now, with today's loads and funds.
+  const canActNow = () => {
+    const euros = trainingPlan.availableEuros;
+    // Per Forma: how many Istruttori are free and the first of them (a student can
+    // be an Istruttore himself, and cannot teach himself).
+    const free = new Map<FormId, { count: number; firstId: string }>();
+    for (const [formId, instructors] of instructorsByForm) {
+      for (const instructor of instructors) {
+        if (!isFree(instructor)) continue;
+        const entry = free.get(formId);
+        if (entry) entry.count += 1;
+        else free.set(formId, { count: 1, firstId: instructor.id });
+      }
+    }
+    return (student: (typeof students)[number]) =>
+      needsCourseXCourse(student) || (
+        automaticFormCandidatesOf(student).some((formId) => free.has(formId)) &&
+        qualifiedFormCandidatesOf(student).some((formId) => {
+          const definition = getFormDefinition(formId);
+          const entry = free.get(formId);
+          return Boolean(
+            definition &&
+            entry &&
+            (entry.count > 1 || entry.firstId !== student.id) &&
+            euros >= getStudentFormCost(definition.cost)
+          );
+        })
+      );
+  };
   // Loads only grow during the pass: per Forma, the instructors before `firstFree`
   // are full for good, so the search starts there (same instructor as a full scan).
   const firstFree = new Map<FormId, number>();
@@ -965,8 +1045,9 @@ export function processAutomaticTeaching(
     }
     return undefined;
   };
-  for (const student of formPassStudents) {
-    const qualifiedCandidates = qualifiedFormCandidates.get(student.id) ?? [];
+  /** The body of pass 1 for one student; true when a course started. */
+  const startFormFor = (student: (typeof students)[number]): boolean => {
+    const qualifiedCandidates = qualifiedFormCandidatesOf(student);
     const candidate = qualifiedCandidates.find((formId) => {
       const definition = getFormDefinition(formId);
       const instructor = findFreeInstructor(formId, student.id);
@@ -980,31 +1061,60 @@ export function processAutomaticTeaching(
     });
     if (candidate) {
       const started = trainingPlan.startFormTraining(student.id, candidate);
-      if (!started) continue;
-      rememberStartedTraining(student.id, started);
-      continue;
+      return started ? rememberStartedTraining(student.id, started) : false;
     }
-
-    if (
-      courseXUnlocked &&
-      needsCourseXRecovery(student.forms) &&
-      !("acquiredAt" in student) &&
-      student.assignment === "instructor"
-    ) {
-      const started = trainingPlan.startFormTraining(student.id, "course-x");
-      rememberStartedTraining(student.id, started);
+    if (needsCourseXCourse(student)) {
+      return rememberStartedTraining(student.id, trainingPlan.startFormTraining(student.id, "course-x"));
+    }
+    return false;
+  };
+  // Pass 1, students in priority order (14/10/2026, same order and same courses as a
+  // full sort). In a big school hundreds qualify and a couple of places are free, so
+  // the next student is picked from the pool instead of sorting everyone; after each
+  // start the pool keeps only who can still start (loads only grow, funds only shrink,
+  // so who cannot start now cannot start later in this pass). If someone in the pool
+  // starts nothing, the rest is sorted and walked as before.
+  let pool = students.filter(canActNow()).map((student) => ({ student, priority: priorityOf(student) }));
+  let ordered: typeof students | undefined;
+  for (let next = 0; ordered ? next < ordered.length : pool.length > 0;) {
+    let student: (typeof students)[number];
+    if (ordered) {
+      student = ordered[next];
+      next += 1;
+    } else {
+      let best = 0;
+      for (let index = 1; index < pool.length; index += 1) {
+        if (compareAutomaticTeachingStudentPriority(pool[index].priority, pool[best].priority) < 0) best = index;
+      }
+      student = pool[best].student;
+      pool[best] = pool[pool.length - 1];
+      pool.pop();
+    }
+    const started = startFormFor(student);
+    if (ordered) continue;
+    if (started) {
+      const canAct = canActNow();
+      pool = pool.filter((entry) => canAct(entry.student));
+    } else {
+      ordered = sortByPriority(pool.map((entry) => entry.student));
     }
   }
   // Pass 2 (Arena Tecnica / Corso Agonisti): the students the old loop skipped are
   // left out before sorting, so the order of the others does not change.
-  const agonistPassStudents = (state.upgrades["technical-arena"] ?? 0) < 1
+  // Without funds or a free Istruttore the loop below would stop at its first student.
+  const agonistPassStudents = (state.upgrades["technical-arena"] ?? 0) < 1 ||
+    trainingPlan.availableEuros < agonistCourseCost ||
+    !state.collaborators.some((collaborator) =>
+      collaborator.assignment === "instructor" &&
+      !pendingReleaseIds.has(collaborator.id) &&
+      isFree(collaborator))
     ? []
     : sortByPriority(students.filter((student) =>
         !startedStudentIds.has(student.id) &&
         !(courseXUnlocked && needsCourseXRecovery(student.forms)) &&
-        (qualifiedFormCandidates.get(student.id)?.length ?? 0) === 0 &&
-        !(formsComeFirst && (learnableFormCandidates.get(student.id)?.length ?? 0) > 0) &&
-        !instructorsWithAvailablePersonalForms.has(student.id)
+        qualifiedFormCandidatesOf(student).length === 0 &&
+        !(formsComeFirst && learnableFormCandidatesOf(student).length > 0) &&
+        !hasAvailablePersonalForms(student.id)
       ));
   for (const student of agonistPassStudents) {
     if (trainingPlan.availableEuros < agonistCourseCost) break;
