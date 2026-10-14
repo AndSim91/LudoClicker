@@ -48,16 +48,20 @@ function Dropped({ saber, color }: { saber: DroppedSaber; color: string }) {
 
 /**
  * The two athletes of a bout drawn from a BoutView (boutChoreography.ts): the
- * Arena final and the central pair of the gym show the same fight.
+ * Arena final and the central pair of the gym show the same fight. Only the
+ * tournaments name the techniques («Disarmo», «SAPD»…); in the Scuola the only
+ * written call is the «OH!» (Andrea, 14/10).
  */
 export function BoutPair({
   view,
   stage,
   sabers,
+  techniqueNames = true,
 }: {
   view: BoutView;
   stage: BoutStage;
   sabers: Record<BoutSide, string>;
+  techniqueNames?: boolean;
 }) {
   const fighter = (side: BoutSide) => {
     const pose = view.poses[side];
@@ -85,7 +89,7 @@ export function BoutPair({
       {fighter("a")}
       {fighter("b")}
       {view.dropped ? <Dropped saber={view.dropped} color={sabers[view.dropped.side]} /> : null}
-      {view.effects.map((effect) => <Effect key={effect.id} effect={effect} />)}
+      {view.effects.map((effect) => (techniqueNames || effect.kind !== "tech" ? <Effect key={effect.id} effect={effect} /> : null))}
     </>
   );
 }

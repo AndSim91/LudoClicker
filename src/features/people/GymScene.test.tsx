@@ -3,6 +3,8 @@ import { describe, expect, it, vi } from "vitest";
 import { getGymFighterCount, getGymSaberRarities, getGymStageIndex, GYM_STAGES } from "../../content/gymStages";
 import { createInitialState } from "../../game/engine";
 import { GymRackSwap } from "./GymRackSwap";
+import { BoutPair } from "../arena/BoutPair";
+import { startBoutView } from "../arena/boutChoreography";
 import { GymReferees } from "./GymReferees";
 import { getGymLayout, getRackSide } from "./gymHall";
 import { GymScene } from "./GymScene";
@@ -39,6 +41,23 @@ describe("GymScene", () => {
     expect(getGymFighterCount(2_000)).toBe(10);
     expect(view.container.querySelectorAll(".gym-rack")).toHaveLength(2);
     expect(view.container.querySelector(".gym-led")).not.toBeNull();
+  });
+
+  it("writes only the «OH!» in the Scuola's bouts, the technique names in the tournaments", () => {
+    const view = {
+      ...startBoutView(),
+      effects: [
+        { id: 1, kind: "tech" as const, x: 320, y: 60, moment: { kind: "SAPD" as const, name: "Disarmo" } },
+        { id: 2, kind: "oh" as const, x: 320, y: 70 },
+      ],
+    };
+    const props = { view, stage: { left: 290, right: 352 }, sabers: { a: "#6fb6ff", b: "#ffd166" } };
+    const tournament = render(<svg><BoutPair {...props} /></svg>);
+    expect(tournament.container.querySelector(".fd-tech")).not.toBeNull();
+    tournament.unmount();
+    const school = render(<svg><BoutPair {...props} techniqueNames={false} /></svg>);
+    expect(school.container.querySelector(".fd-tech")).toBeNull();
+    expect(school.container.querySelector(".fd-oh")).toHaveTextContent("OH!");
   });
 
   it("sends each pair to the rack on its own side from the championship", () => {

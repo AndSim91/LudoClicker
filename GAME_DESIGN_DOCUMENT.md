@@ -3209,7 +3209,9 @@ Un'unica pagina, in quest'ordine:
   centrale combatte come
   nella finale dei tornei (`boutChoreography.ts`, la stessa coreografia):
   qualche scambio e poi un taglio, nel 5% dei casi dopo un **Disarmo**; il
-  toccato chiama «OH!». Dopo il taglio, a volte,
+  toccato chiama «OH!», l'unica scritta: nella Scuola non compaiono i nomi delle
+  tecniche («Disarmo», «SAPD»), che restano solo nei combattimenti dei tornei
+  (14/10). Dopo il taglio, a volte,
   un cartellino (`gymMatch.ts`): nel 10% dei casi quello di Stile a scacchi dal
   giudice con il cellulare; in un altro 10% il bianco o il
   giallo dal giudice in maglietta blu. I cartellini si vedono solo mentre

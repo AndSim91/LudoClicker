@@ -11,7 +11,8 @@ import { CENTRAL_PACE, canSpar, nextIdleMs, rollsBout, type RackHold } from "./g
  * bouts are the Arena final's (boutChoreography.ts) and always end with a cut,
  * sometimes after a Disarmo. While a bout runs the pair is one small SVG layer
  * drawn by BoutPair; at rest it goes back to the compositor-only GymActors.
- * The point goes out with the «OH!» (onPoint).
+ * The point goes out with the «OH!» (onPoint), the only written call: no
+ * technique names in the Scuola (14/10).
  */
 export function GymBoutPair({
   leftX,
@@ -83,7 +84,7 @@ export function GymBoutPair({
   return (
     <GymLayer box={box} className="gym-bout">
       <g className="gym-pair is-sparring" style={{ "--gym-move": `${view.moveMs}ms` } as CSSProperties}>
-        <BoutPair view={view} stage={{ left: leftX, right: rightX }} sabers={{ a: sabers[0], b: sabers[1] }} />
+        <BoutPair view={view} stage={{ left: leftX, right: rightX }} sabers={{ a: sabers[0], b: sabers[1] }} techniqueNames={false} />
       </g>
     </GymLayer>
   );
