@@ -551,7 +551,7 @@ export function isValidGameState(value: unknown): value is GameState {
     typeof state.automation?.socialContentBuffer === "number" &&
     typeof state.automation?.equipmentPreparedWork === "number" &&
     state.automation.equipmentPreparedWork >= 0 &&
-    typeof state.automation?.offlineContactBuffer === "number" &&
+    typeof state.automation?.contactGainBuffer === "number" &&
     (state.automation?.lastImprovedAthlete === undefined ||
       typeof state.automation.lastImprovedAthlete === "string") &&
     (state.automation?.lastImprovedAthleteId === undefined ||

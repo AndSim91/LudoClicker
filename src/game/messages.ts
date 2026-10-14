@@ -25,9 +25,6 @@ const NARRATIVE_SUBJECTS = new Set(
 
 export function getMessageThreadKey(message: InboxMessage): InboxThreadKey | undefined {
   if (message.threadKey) return message.threadKey;
-  if (message.subject.includes("Riepilogo") && message.subject.includes("offline")) {
-    return "offline";
-  }
   if (
     message.subject.startsWith("Traguardo:") ||
     message.subject.startsWith("Obiettivo completato:")
@@ -41,7 +38,6 @@ export function getMessageThreadKey(message: InboxMessage): InboxThreadKey | und
 
 export function getInboxCategory(message: InboxMessage): InboxCategory {
   if (message.category) return message.category;
-  if (getMessageThreadKey(message) === "offline") return "other";
   if (
     message.subject.startsWith("Traguardo:") ||
     message.subject.startsWith("Obiettivo completato:")

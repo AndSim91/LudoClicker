@@ -145,7 +145,7 @@ export function migratePeopleState(state: MigratableState): MigratableState {
       ...migrated,
       version: 18,
       automation: migrated.automation
-        ? { ...migrated.automation, offlineContactBuffer: 0 }
+        ? { ...migrated.automation, contactGainBuffer: 0 }
         : migrated.automation,
       messages: normalizeStackedMessages(migrated.messages ?? []),
     };

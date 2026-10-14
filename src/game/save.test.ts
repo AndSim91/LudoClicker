@@ -768,10 +768,10 @@ describe("local save", () => {
     expect(migrated.emails[0].presentationLevel).toBe(4);
   });
 
-  it("migrates version 17 saves into balanced offline progress, digests and short goals", () => {
+  it("migrates version 17 saves into the contact buffer, digests and short goals", () => {
     const legacy = JSON.parse(JSON.stringify(createInitialState(1_000)));
     legacy.version = 17;
-    delete legacy.automation.offlineContactBuffer;
+    delete legacy.automation.contactGainBuffer;
     delete legacy.shortGoal;
     legacy.statistics.emailsSent = 12;
     legacy.messages = [
@@ -783,7 +783,7 @@ describe("local save", () => {
     const migrated = loadGame(1_000);
 
     expect(migrated.version).toBe(GAME_CONFIG.version);
-    expect(migrated.automation.offlineContactBuffer).toBe(0);
+    expect(migrated.automation.contactGainBuffer).toBe(0);
     expect(migrated.shortGoal.definitionId).toBe("send-emails");
     expect(migrated.shortGoal.baseline).toBe(12);
     expect(migrated.messages).toHaveLength(1);

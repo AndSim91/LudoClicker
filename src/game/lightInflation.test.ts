@@ -13,7 +13,7 @@ import {
 } from "./lightInflation";
 import { migrate } from "./saveMigrations";
 import { isValidGameState } from "./saveValidation";
-import { freezeGameState } from "./offline";
+import { freezeGameState } from "./gamePause";
 import { loadGame, saveGame } from "./save";
 
 describe("Inflazione di Luce", () => {

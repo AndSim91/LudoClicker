@@ -1,25 +1,13 @@
 import { mapPersonTrainings, type SlottedPerson } from "./trainingSlots";
 import type { GameState } from "./types";
 
-export interface OfflineSummary {
-  elapsedMs: number;
-  capped: false;
-  emailsCompleted: 0;
-  trialsBooked: 0;
-  trialsCompleted: 0;
-  membersEnrolled: 0;
-  membersDeparted: 0;
-  collaboratorsRecruited: 0;
-  eurosEarned: 0;
-  contactsAcquired: 0;
-}
-
 function shiftOptional(timestamp: number | undefined, elapsedMs: number) {
   return timestamp === undefined ? undefined : timestamp + elapsedMs;
 }
 
 /**
- * Congela interamente il gioco durante la chiusura. Tutti i timer attivi
+ * Il gioco avanza solo mentre è aperto (Andrea, 28/09 e 14/10/2026): alla
+ * riapertura riprende da dove era. Congela interamente il gioco durante la chiusura. Tutti i timer attivi
  * vengono traslati dello stesso intervallo, così conservano il tempo residuo.
  */
 export function freezeGameState(
@@ -107,11 +95,4 @@ export function freezeGameState(
 
 export function pauseGameState(state: GameState, now: number): GameState {
   return freezeGameState(state, now, now - state.lastSavedAt);
-}
-
-export function simulateOfflineProgress(
-  state: GameState,
-  now: number,
-): { state: GameState; summary: null } {
-  return { state: pauseGameState(state, now), summary: null };
 }

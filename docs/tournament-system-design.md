@@ -2,7 +2,7 @@
 
 Stato: specifica di progetto approvata, precedente all'implementazione.
 
-Questo documento raccoglie le decisioni confermate per il sistema competitivo e prevale, per questa feature, sulle indicazioni incompatibili presenti nel `GAME_DESIGN_DOCUMENT.md`. In particolare, il progresso offline viene disabilitato completamente.
+Questo documento raccoglie le decisioni confermate per il sistema competitivo e prevale, per questa feature, sulle indicazioni incompatibili presenti nel `GAME_DESIGN_DOCUMENT.md`. In particolare, il gioco avanza solo mentre è aperto.
 
 Le indicazioni sono classificate come:
 
@@ -307,11 +307,11 @@ del torneo (`FinalDuelLayer.tsx`), in non più di 30 secondi.
   punto dello sconfitto cade nel primo o nel secondo assalto e il telefono
   mostra dell'esterno solo il voto finale.
 
-## 6. Calendario e progresso offline
+## 6. Calendario e chiusura del gioco
 
-### 6.1 Nessun progresso offline
+### 6.1 Il gioco avanza solo mentre è aperto
 
-Il progresso offline viene disabilitato per l'intero gioco.
+Vale per l'intero gioco (vedi GDD § 18).
 
 Quando il gioco non è in esecuzione:
 

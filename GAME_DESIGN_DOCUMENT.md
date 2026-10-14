@@ -4154,38 +4154,39 @@ rendita (§ 5.7): ogni punto vale `iscritti × 40 € × 10% × 10%`. La rendita
 
 ---
 
-## 18. Progresso offline
+## 18. Chiusura del gioco: pausa totale
 
 ### 18.1 Regole
 
-Scelta di design confermata il 28/09: nessun progresso offline. Quando il gioco
-viene chiuso o messo in pausa, il calendario e tutte le attività
-temporizzate restano fermi. Non vengono prodotti caratteri, contenuti Social,
-Follower, contatti, rette o sponsorizzazioni e non viene creato alcun riepilogo
-offline. Alla ripresa tutte le scadenze vengono spostate in avanti della durata
-dell'interruzione, conservando il tempo residuo.
+Il gioco avanza solo mentre è aperto (decisione del 28/09, ribadita da Andrea
+il 14/10/2026: nessuna progressione a gioco chiuso, e nessun riferimento a
+essa nel gioco o nei documenti). Il tempo che conta è il tempo di gioco
+effettivo. Quando il gioco viene chiuso o messo in pausa, il calendario e
+tutte le attività temporizzate restano fermi: non vengono prodotti caratteri,
+contenuti Social, Follower, contatti, rette o sponsorizzazioni e non c'è alcun
+riepilogo alla riapertura. Alla ripresa tutte le scadenze vengono spostate in
+avanti della durata dell'interruzione, conservando il tempo residuo.
 
-Al caricamento (`freezeGameState`, `src/game/offline.ts`) vengono spostati:
-scadenza mensile, formazioni di iscritti e collaboratori, invii ed esiti delle
-email, prove programmate, eventi in corso, attese degli eventi in tempo reale e
-prossimo evento narrativo. Sviluppo e vendite Gadget ripartono dal momento del
-caricamento.
+Al caricamento (`pauseGameState` / `freezeGameState`, `src/game/gamePause.ts`)
+vengono spostati: scadenza mensile, formazioni di iscritti e collaboratori
+(tutti i posti), invii ed esiti delle email, prove programmate, eventi in
+corso, attese degli eventi in tempo reale e prossimo evento narrativo.
+Sviluppo e vendite Gadget ripartono dal momento del caricamento.
 
 Si spostano anche le barre del Torneo Reptile (`organizedAt`, `lastProgressAt`),
 che quindi non avanzano a gioco chiuso.
 
-### 18.2 Limiti
+### 18.2 Garanzie
 
-- nessun limite offline, perché non esiste produzione durante la chiusura;
-- nessuna produzione di email o Social;
+- nessuna produzione di email o Social a gioco chiuso;
 - nessun evento parte o termina;
 - nessuna scadenza mensile viene riscossa;
+- un intervallo negativo dell'orologio viene trattato come zero;
 - gli esiti casuali vengono determinati con un seed salvato.
 
-### 18.3 Riepilogo
-
-Non viene mostrato alcun riepilogo offline, perché lo stato operativo non
-cambia.
+La migrazione v114 ha tolto dai salvataggi gli ultimi nomi legati alla vecchia
+idea: il contatore dei contatti frazionari si chiama `contactGainBuffer` e i
+vecchi messaggi «Riepilogo attività» della chiusura sono stati eliminati.
 
 ---
 
@@ -4960,7 +4961,7 @@ src/
     emailFlow.ts, trialFlow.ts, eventFlow.ts, trainingFlow.ts,
     automationFlow.ts, gadgetFlow.ts, tournamentFlow.ts, reptileFlow.ts,
     chroniclesFlow.ts, narrativeFlow.ts, schoolProgressionFlow.ts, ...
-    offline.ts
+    gamePause.ts
     save.ts, saveCodec.ts, saveScheduler.ts, saveWorker.ts, saveValidation.ts
     saveMigrations.ts
     saveMigrations/         # una migrazione per argomento
@@ -5027,8 +5028,7 @@ le notifiche sono scritte direttamente nei moduli di gioco.
   minimo è 500 ms reali con le animazioni e 1 s senza (`getTickStepMs` in
   `useAppPreferences.ts`), moltiplicato per la velocità e limitato a 1 s di
   gioco, il massimo che l'automazione conta in un passo (`getGameStepMs`,
-  campo `minStepMs` dell'azione `TICK`; simulazioni e recupero offline restano
-  a 250 ms);
+  campo `minStepMs` dell'azione `TICK`; le simulazioni restano a 250 ms);
 - oltre 5.000 iscritti (2.000 fino al 13/10; con un margine di 250 prima di
   rifare i gruppi), gli ordinari senza tornei, formazione in corso o ruoli
   diventano contatori (`memberGroups`: rarità, provenienza, Forme, preferenze
@@ -5614,12 +5614,12 @@ sembra un'applicazione di posta reale.
 > **Da implementare:** una schermata di statistiche generali; i contatori di
 > `statistics` esistono ma servono a traguardi, obiettivi brevi e riepiloghi.
 
-### Fase 6 — Prestigio e offline
+### Fase 6 — Prestigio e salvataggio
 
 - fondazione nuova scuola;
 - scelta nome e città;
 - rete permanente;
-- progresso offline;
+- pausa totale alla chiusura (§ 18);
 - migrazioni del salvataggio;
 - export e import.
 
@@ -5628,9 +5628,8 @@ sembra un'applicazione di posta reale.
 > nessuna schermata la attiva e le Impostazioni non mostrano controlli di
 > prestigio.
 
-> **Da implementare:** il progresso offline: alla riapertura la partita resta
-> congelata e tutte le scadenze vengono spostate avanti del tempo di chiusura
-> (`src/game/offline.ts`). Migrazioni ed export/import sono presenti.
+Pausa alla chiusura (`src/game/gamePause.ts`), migrazioni ed export/import
+sono presenti.
 
 ### Fase 7 — Rifinitura
 
@@ -5687,21 +5686,12 @@ duplicating a period», «advances game months even without active members»)
 e `src/game/membershipCancellation.test.ts`; l'e2e «acquista un Upgrade, salva
 e mantiene il livello dopo il reload» controlla che l'acquisto scali gli Euro.
 
-### Offline
+### Chiusura del gioco
 
-- il progresso non supera il limite stabilito;
-- non vengono create email senza contatti;
-- gli eventi completati vengono risolti una volta sola;
-- il riepilogo corrisponde alle variazioni reali;
-- orologi anomali non producono valori negativi o infiniti.
-
-> **Da implementare:** questi criteri presuppongono un progresso offline che
-> il codice non ha. Oggi la chiusura congela la partita: quote, esiti email,
-> prove, eventi, cooldown in tempo reale, formazioni ed eventi narrativi vengono
-> spostati avanti del tempo trascorso, senza limite e senza riepilogo; un
-> intervallo negativo viene trattato come zero. Lo verifica
-> `src/game/offline.test.ts` («freezes fees and shifts every active deadline»,
-> «does not cap or process long closures»).
+- alla riapertura il calendario riprende da dove era: nessuna quota, esito,
+  prova, evento, formazione o evento narrativo avanza a gioco chiuso;
+- un intervallo negativo dell'orologio viene trattato come zero;
+- lo verifica `src/game/gamePause.test.ts`.
 
 ### Salvataggio
 
@@ -5883,10 +5873,8 @@ qualunque funzione che possa far credere di inviare davvero email.
 - Il primo prestigio deve arrivare dopo circa 60–90 minuti e offrire subito un bonus
   significativo.
 - Il gioco è infinito.
-- Il progresso offline è attivo.
-
-  > **Da implementare:** nel codice il progresso offline non c'è: a gioco
-  > chiuso la partita resta congelata e le scadenze vengono spostate avanti.
+- Il gioco avanza solo mentre è aperto: a gioco chiuso la partita resta
+  congelata e le scadenze vengono spostate avanti (§ 18).
 - Sono previsti almeno 100 testi email.
 - I destinatari sono inventati (i contatti ordinari hanno nomi e domini email
   inventati; i Leggendari hanno profili con nome fisso e indirizzo
@@ -5938,9 +5926,7 @@ completa:
     Fama, traguardi, statistiche, messaggi, obiettivo breve, stato dei
     Leggendari Segreti, vittoria ordinaria ai tornei e Arena/Stile naturali dei
     Leggendari; tutto il resto, Euro e potenziamenti compresi,
-    riparte da zero);
-15. durata massima definitiva del progresso offline (oggi non c'è progresso
-    offline: la partita si congela alla chiusura).
+    riparte da zero).
 
 ---
 

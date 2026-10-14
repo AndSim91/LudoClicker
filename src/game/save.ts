@@ -1,6 +1,6 @@
 import { createInitialState } from "./engine";
 import { recruitEnrolledLegendaryCollaborators } from "./collaboratorFlow";
-import { simulateOfflineProgress } from "./offline";
+import { pauseGameState } from "./gamePause";
 import { normalizeStackedMessages } from "./messages";
 import { STORAGE_KEYS } from "../shared/storageKeys";
 import { isSaveCompatible, isValidGameState } from "./saveValidation";
@@ -94,7 +94,7 @@ export function loadGame(now = Date.now()): GameState {
     return createInitialState(now);
   }
   const reconciled = compactTournamentHistory(recruitEnrolledLegendaryCollaborators(saved, now));
-  return simulateOfflineProgress(reconciled, now).state;
+  return pauseGameState(reconciled, now);
 }
 
 export function writePreparedGameSave(serialized: string): SaveGameResult {
@@ -195,7 +195,7 @@ export function importGame(raw: string): GameState | null {
     if (!isSaveCompatible(rawParsed)) return null;
     const parsed = migrateSave(rawParsed);
     return isValidGameState(parsed)
-      ? simulateOfflineProgress(
+      ? pauseGameState(
           recruitEnrolledLegendaryCollaborators(
             {
               ...parsed,
@@ -204,7 +204,7 @@ export function importGame(raw: string): GameState | null {
             now,
           ),
           now,
-        ).state
+        )
       : null;
   } catch {
     return null;

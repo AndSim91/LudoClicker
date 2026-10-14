@@ -28,7 +28,7 @@ export function createSaveScheduler(
   persist: PersistGame,
   prepareInBackground?: PreparePersistence,
 ): SaveScheduler {
-  // loadGame può aver applicato migrazioni o progresso offline: il primo stato
+  // loadGame può aver applicato migrazioni o la pausa della chiusura: il primo stato
   // va quindi consolidato almeno una volta, anche senza ulteriori azioni.
   let revision = 1;
   let savedRevision = 0;

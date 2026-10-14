@@ -20,14 +20,14 @@ export function scaleContactGain(
 ): { state: GameState; amount: number } {
   if (gainMultiplier >= 1) return { state, amount };
 
-  const total = state.automation.offlineContactBuffer + amount * Math.max(0, gainMultiplier);
+  const total = state.automation.contactGainBuffer + amount * Math.max(0, gainMultiplier);
   const scaledAmount = Math.floor(total + Number.EPSILON);
   return {
     state: {
       ...state,
       automation: {
         ...state.automation,
-        offlineContactBuffer: total - scaledAmount,
+        contactGainBuffer: total - scaledAmount,
       },
     },
     amount: scaledAmount,

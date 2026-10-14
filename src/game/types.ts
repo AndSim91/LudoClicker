@@ -193,7 +193,6 @@ export interface InboxMessage {
     | "training"
     | "progress"
     | "narrative"
-    | "offline"
     | "gadget"
     | "tournaments";
 }
@@ -1133,7 +1132,8 @@ export interface GameState {
     socialContentBuffer: number;
     equipmentBuffer: number;
     equipmentPreparedWork: number;
-    offlineContactBuffer: number;
+    /** Fractions of contact left over when gains are scaled down (`scaleContactGain`). */
+    contactGainBuffer: number;
     /** Fraction of a Frase perfetta the collaborators have built up. */
     perfectPhraseBuffer?: number;
     lastImprovedAthlete?: string;

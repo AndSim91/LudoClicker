@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addInboxMessage, getInboxCategory, normalizeStackedMessages } from "./messages";
+import { addInboxMessage, normalizeStackedMessages } from "./messages";
 import type { InboxMessage } from "./types";
 
 function message(id: string, subject = "Passaparola inatteso"): InboxMessage {
@@ -53,14 +53,5 @@ describe("inbox message digests", () => {
     expect(goal).toHaveLength(1);
     expect(goal[0].threadKey).toBe("progress");
     expect(goal[0].stackCount).toBe(2);
-  });
-
-  it("condenses offline summaries and moves them out of the priority inbox", () => {
-    const first = addInboxMessage([], message("message-1", "Riepilogo attività offline"));
-    const second = addInboxMessage(first, message("message-2", "Riepilogo attività offline"));
-
-    expect(second).toHaveLength(1);
-    expect(second[0]).toMatchObject({ threadKey: "offline", stackCount: 2 });
-    expect(getInboxCategory(second[0])).toBe("other");
   });
 });

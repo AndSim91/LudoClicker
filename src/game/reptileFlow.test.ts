@@ -23,7 +23,7 @@ import {
   processReptileCalendarTransition,
 } from "./reptileFlow";
 import { simulateReptileTournament } from "./reptileSimulation";
-import { freezeGameState } from "./offline";
+import { freezeGameState } from "./gamePause";
 import { unlockReptileFromTournamentResult } from "./reptileUnlock";
 import type { Collaborator, GameState, TournamentResult } from "./types";
 

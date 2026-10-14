@@ -69,7 +69,7 @@ export function migrateTrainingState(state: MigratableState): MigratableState {
         lessonBuffer: migrated.automation?.lessonBuffer ?? 0,
         socialBuffer: migrated.automation?.socialBuffer ?? 0,
         equipmentBuffer: migrated.automation?.equipmentBuffer ?? 0,
-        offlineContactBuffer: migrated.automation?.offlineContactBuffer ?? 0,
+        contactGainBuffer: migrated.automation?.contactGainBuffer ?? 0,
       },
     };
   }
@@ -89,7 +89,7 @@ export function migrateTrainingState(state: MigratableState): MigratableState {
         lessonBuffer: migrated.automation?.lessonBuffer ?? 0,
         socialBuffer: migrated.automation?.socialBuffer ?? 0,
         equipmentBuffer: migrated.automation?.equipmentBuffer ?? 0,
-        offlineContactBuffer: migrated.automation?.offlineContactBuffer ?? 0,
+        contactGainBuffer: migrated.automation?.contactGainBuffer ?? 0,
         lastImprovedAthlete: migrated.automation?.lastImprovedAthlete,
       },
       statistics: {

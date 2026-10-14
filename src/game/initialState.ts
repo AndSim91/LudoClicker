@@ -121,7 +121,7 @@ export function createInitialState(
       socialContentBuffer: 0,
       equipmentBuffer: 0,
       equipmentPreparedWork: 0,
-      offlineContactBuffer: 0,
+      contactGainBuffer: 0,
     },
     statistics: {
       inputs: 0,

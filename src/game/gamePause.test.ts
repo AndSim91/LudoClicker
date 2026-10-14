@@ -1,29 +1,26 @@
 import { describe, expect, it } from "vitest";
 import { createInitialState } from "./engine";
-import { freezeGameState, simulateOfflineProgress } from "./offline";
+import { freezeGameState, pauseGameState } from "./gamePause";
 
-describe("offline progress disabled", () => {
+describe("il gioco si ferma alla chiusura", () => {
   it("freezes fees and shifts every active deadline", () => {
     const initial = createInitialState(1_000);
     const state = {
       ...initial,
       school: { ...initial.school, activeMembers: 2, nextFeeAt: 61_000 },
     };
-    const result = simulateOfflineProgress(state, 121_000);
+    const result = { state: pauseGameState(state, 121_000) };
 
-    expect(result.summary).toBeNull();
     expect(result.state.school.euros).toBe(0);
     expect(result.state.school.currentMonth).toBe(1);
     expect(result.state.school.nextFeeAt).toBe(181_000);
-    expect(result.state.messages[0].subject).not.toBe("Riepilogo attività offline");
     expect(result.state.lastSavedAt).toBe(121_000);
   });
 
   it("does not cap or process long closures", () => {
     const initial = createInitialState(1_000);
-    const result = simulateOfflineProgress(initial, 90_001_000);
+    const result = { state: pauseGameState(initial, 90_001_000) };
 
-    expect(result.summary).toBeNull();
     expect(result.state.school.currentMonth).toBe(1);
     expect(result.state.school.nextFeeAt).toBe(initial.school.nextFeeAt + 90_000_000);
   });
@@ -43,11 +40,11 @@ describe("offline progress disabled", () => {
           }
         : contact),
     };
-    const result = simulateOfflineProgress(training, 101_000);
+    const result = { state: pauseGameState(training, 101_000) };
     expect(result.state.contacts[0].training?.completesAt).toBe(112_000);
   });
 
-  it("does not run athletic preparation during an offline interval", () => {
+  it("does not run athletic preparation while the game is closed", () => {
     const initial = createInitialState(1_000);
     const athlete = {
       ...initial.contacts[0],
@@ -59,7 +56,7 @@ describe("offline progress disabled", () => {
       ...initial,
       contacts: [athlete],
       collaborators: [{
-        id: "offline-instructor",
+        id: "closed-instructor",
         contactId: initial.contacts[1].id,
         displayName: "Istruttore",
         joinedAt: 1_000,
@@ -70,7 +67,7 @@ describe("offline progress disabled", () => {
       }],
       upgrades: { ...initial.upgrades, "agonist-course-intensity": 5 },
     };
-    const result = simulateOfflineProgress(state, 121_000);
+    const result = { state: pauseGameState(state, 121_000) };
 
     expect(result.state.contacts[0].arenaBase).toBe(50);
     expect(result.state.contacts[0].styleBase).toBe(50);
@@ -85,7 +82,7 @@ describe("offline progress disabled", () => {
       unlocks: { ...initial.unlocks, social: true },
       automation: { ...initial.automation, socialContentBuffer: 250 },
       collaborators: [{
-        id: "offline-social",
+        id: "closed-social",
         contactId: initial.contacts[0].id,
         displayName: "Collaboratore Social",
         joinedAt: 1_000,
@@ -96,7 +93,7 @@ describe("offline progress disabled", () => {
       }],
     };
 
-    const result = simulateOfflineProgress(state, 121_000);
+    const result = { state: pauseGameState(state, 121_000) };
 
     expect(result.state.automation.socialContentBuffer).toBe(250);
     expect(result.state.statistics.socialContentCycles).toBe(0);
