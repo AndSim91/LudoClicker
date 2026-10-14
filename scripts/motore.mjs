@@ -27,6 +27,10 @@
  *   soglia di sicurezza (3%, almeno 512 MB) l'ultima partita avviata viene fermata e
  *   rimessa in coda (riparte uguale: il seme è lo stesso).
  * Una partita usa un solo core: JavaScript non divide una partita su più core.
+ *
+ * Nel terminale un pannello fisso si ridisegna ogni 2 secondi: avanzamento totale,
+ * stima della fine e una riga per partita (scuola, ore di gioco, iscritti, cosa sta
+ * facendo). Con l'uscita in un file, una riga al minuto.
  */
 import { execSync } from "node:child_process";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -99,8 +103,12 @@ async function lavoratore() {
     maxScuole: scuole,
     maxOre: ore,
     reputazione,
-    onAvanzamento: (parziale) => parentPort.postMessage({
-      tipo: "avanzamento", minuti: parziale.minutiTotali, scuola: parziale.scuoleRaggiunte,
+    onAvanzamento: (parziale, state) => parentPort.postMessage({
+      tipo: "avanzamento",
+      minuti: parziale.minutiTotali,
+      scuola: parziale.scuoleRaggiunte,
+      iscritti: state.school.activeMembers,
+      stato: descriviStato(parziale),
     }),
     alPasso: () => {
       // In pausa il thread dorme qui finché il lanciatore non lo risveglia: 0% di CPU.
@@ -113,6 +121,31 @@ async function lavoratore() {
     },
   });
   parentPort.postMessage({ tipo: "fatta", registro });
+}
+
+const TITOLI = {
+  accademico: "titolo all'Accademico",
+  nazionale: "Nazionale vinto",
+  champions: "Champion's Arena vinta",
+  chronicles: "Chronicles vinte",
+  reptile: "Reptile vinto",
+};
+
+/** Cosa sta facendo la partita, dall'ultimo fatto importante della scuola in corso. */
+function descriviStato(registro) {
+  const scuola = registro.scuoleRaggiunte;
+  for (let index = registro.eventi.length - 1; index >= 0; index -= 1) {
+    const evento = registro.eventi[index];
+    // «fondazione disponibile» appartiene alla scuola in corso; le altre «fondazione» chiudono la precedente.
+    if (evento.tipo === "fondazione" && evento.chiave !== "disponibile") return "scuola appena fondata";
+    if (evento.scuola !== scuola) continue;
+    if (evento.tipo === "fondazione") return "può fondare, cresce ancora";
+    if (evento.tipo === "criterio-fondazione") return `pronta a fondare (attende ${evento.valore} mesi)`;
+    if (evento.tipo === "titolo" && TITOLI[evento.chiave]) return TITOLI[evento.chiave];
+    if (evento.tipo === "sblocco" && evento.chiave === "consiglio") return "nato il Consiglio delle Onde";
+    if (evento.tipo === "tappa" && evento.chiave === "primo-scolastico") return "primo Scolastico giocato";
+  }
+  return scuola === 1 ? "prima scuola" : "gioca";
 }
 
 /** Uso della CPU di tutto il PC e del solo motore (0–1) dall'ultima lettura. */
@@ -177,34 +210,120 @@ async function principale() {
   let motivo = "";
   let ultimaStampa = 0;
 
-  // Una riga di stato e, sotto, le partite in corso riassunte per scuola (non una per una).
-  const stampa = (forza = false) => {
-    if (!forza && Date.now() - ultimaStampa < 15_000) return;
-    ultimaStampa = Date.now();
+  // M1 «Pannello fisso» (Andrea, 14/10): in un terminale il pannello si ridisegna al suo
+  // posto; con l'uscita in un file, una riga semplice al minuto.
+  const tty = Boolean(process.stdout.isTTY);
+  const colore = (codice) => (testo) => tty ? `\x1b[${codice}m${testo}\x1b[0m` : testo;
+  const [tenue, azzurro, oro, verde, viola, rosso, forte] = [2, 36, 33, 32, 35, 31, 1].map(colore);
+  const ora = (data) => data.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
+  const avviato = new Date();
+  const finite = new Map(); // seme → { minuti, iscritti }
+  /** Minuti reali per scuola, per livello di scuola: servono alla stima della fine. */
+  const durate = new Map();
+  let righePannello = 0;
+  let ultimaRiga = 0;
+
+  const barra = (pieni, totale, larghezza, tinta) => {
+    const n = Math.max(0, Math.min(larghezza, Math.round((pieni / totale) * larghezza)));
+    return tinta("█".repeat(n)) + tenue("░".repeat(larghezza - n));
+  };
+  const oreGioco = (minuti) => `${Math.floor(minuti / 60)} h ${String(Math.floor(minuti % 60)).padStart(2, "0")}`;
+  const durataMedia = (livello) => {
+    const misure = durate.get(livello);
+    if (misure?.length) return misure.reduce((a, b) => a + b, 0) / misure.length;
+    // Livello non ancora visto: l'ultimo noto, un po' più lungo per ogni scuola in più.
+    const noti = [...durate.keys()].filter((k) => k < livello);
+    if (!noti.length) return undefined;
+    const base = Math.max(...noti);
+    return durataMedia(base) * 1.1 ** (livello - base);
+  };
+  /** Minuti reali che mancano a una partita, dalla scuola in cui è e da quanto ci è dentro. */
+  const mancaA = (scuola, dentroMin) => {
+    let totale = 0;
+    for (let livello = scuola; livello <= o.scuole; livello += 1) {
+      const media = durataMedia(livello);
+      if (media === undefined) return undefined;
+      totale += livello === scuola ? Math.max(media * 0.1, media - dentroMin) : media;
+    }
+    return totale;
+  };
+  const stimaFine = () => {
+    const adesso = Date.now();
     const lista = [...inCorso.values()];
-    const inPausa = lista.filter((p) => p.pausa).length;
-    const gb = (mb) => `${(mb / 1024).toFixed(1).replace(".", ",")} GB`;
-    const intervallo = (valori, unita) => {
-      const min = Math.min(...valori);
-      const max = Math.max(...valori);
-      return min === max ? `${min} ${unita}` : `${min}–${max} ${unita}`;
-    };
-    const perScuola = new Map();
-    for (const p of lista) perScuola.set(p.scuola, (perScuola.get(p.scuola) ?? 0) + 1);
-    const scuole = [...perScuola.entries()].sort((a, b) => a[0] - b[0])
-      .map(([scuola, quante]) => `scuola ${scuola}: ${quante}`).join(" · ");
-    console.log(
-      `[${Math.round((Date.now() - t0) / 60_000)} min] finite ${registri.length}/${o.partite}` +
-      ` · in corso ${lista.length - inPausa}${inPausa ? ` (+${inPausa} in pausa)` : ""}` +
-      ` · in coda ${coda.length}` +
-      ` · altri programmi ${Math.round(altri * 100)}% CPU · RAM libera ${gb(freemem() / MB)}` +
-      (motivo ? `\n   ⚠ ${motivo}` : "") +
-      (lista.length
-        ? `\n   ${scuole} (obiettivo: scuola ${o.scuole})` +
-          ` · gioco ${intervallo(lista.map((p) => Math.round(p.minuti / 60)), "h")}` +
-          ` · memoria ${intervallo(lista.map((p) => Math.round(p.usataMb)), "MB")} a partita`
-        : ""),
+    const resti = lista.map((p) => mancaA(p.scuola, (adesso - p.inizioScuola) / 60_000));
+    const intera = mancaA(1, 0);
+    if (resti.some((r) => r === undefined) || (coda.length && intera === undefined)) return undefined;
+    const lavoro = resti.reduce((a, b) => a + b, 0) + coda.length * intera;
+    const posti = Math.max(1, Math.min(obiettivo, lista.length + coda.length));
+    return Math.max(...resti, 0, lavoro / posti);
+  };
+  const avanzamento = () => {
+    let fatte = finite.size * o.scuole;
+    for (const p of inCorso.values()) fatte += p.scuola - 1;
+    return fatte;
+  };
+
+  const pannello = () => {
+    const lista = [...inCorso.values()];
+    const fatte = avanzamento();
+    const totali = o.partite * o.scuole;
+    const stima = stimaFine();
+    const fine = stima === undefined
+      ? tenue("stima dopo la prima scuola finita")
+      : stima < 1
+        ? oro("meno di un minuto")
+        : `${oro(`tra circa ${Math.round(stima)} min`)} ${tenue(`(verso le ${ora(new Date(Date.now() + stima * 60_000))})`)}`;
+    const righe = [
+      `${forte("MOTORE DI TEST")} ${tenue(`· ${o.partite} partite fino alla scuola ${o.scuole} · avviato alle ${ora(avviato)}`)}`,
+      "",
+      `  Avanzamento  ${barra(fatte, totali, 30, azzurro)}  ${forte(`${Math.round((fatte / totali) * 100)}%`)}   ${fatte} scuole su ${totali}`,
+      `  Fine stimata ${fine}   finite ${verde(`${finite.size}/${o.partite}`)}`,
+      "",
+      tenue(`  ${"PARTITA".padEnd(9)}${"SCUOLA".padEnd(o.scuole + 9)}${"GIOCO".padEnd(10)}${"ISCRITTI".padEnd(10)}STATO`),
+    ];
+    // Prima le partite in corso, poi (se c'è posto) le finite e quelle in coda.
+    const spazio = Math.max(4, (process.stdout.rows ?? 40) - 16);
+    const voci = [
+      ...lista.map((p) => ({ seed: p.seed, p })),
+      ...[...finite.keys()].map((seed) => ({ seed, finita: finite.get(seed) })),
+      ...coda.map((voce) => ({ seed: voce.seed, coda: true })),
+    ];
+    for (const voce of voci.slice(0, spazio)) {
+      const nome = `  #${voce.seed}`.padEnd(11);
+      if (voce.p) {
+        const p = voce.p;
+        const stato = p.pausa ? viola("in pausa (PC occupato)") : p.stato.startsWith("pronta") ? oro(p.stato) : tenue(p.stato);
+        righe.push(`${nome}${barra(p.scuola - 1, o.scuole, o.scuole, azzurro)} ${`${p.scuola}/${o.scuole}`.padEnd(7)}${oreGioco(p.minuti).padEnd(10)}${p.iscritti.toLocaleString("it-IT").padEnd(10)}${stato}`);
+      } else if (voce.finita) {
+        righe.push(`${nome}${verde("█".repeat(o.scuole))} ${verde("✓".padEnd(7))}${oreGioco(voce.finita.minuti).padEnd(10)}${voce.finita.iscritti.toLocaleString("it-IT").padEnd(10)}${verde("finita")}`);
+      } else {
+        righe.push(`${nome}${tenue("░".repeat(o.scuole))} ${"".padEnd(7)}${"".padEnd(20)}${tenue("in coda")}`);
+      }
+    }
+    if (voci.length > spazio) righe.push(tenue(`  … altre ${voci.length - spazio} (finite o in coda)`));
+    righe.push(
+      "",
+      tenue(`  PC: altri programmi ${Math.round(altri * 100)}% CPU · RAM libera ${(freemem() / MB / 1024).toFixed(1).replace(".", ",")} GB · priorità ${o.priorita}`),
+      ...(motivo ? [`  ${oro(`⚠ ${motivo}`)}`] : []),
+      ...problemi.slice(-3).map((testo) => `  ${rosso(`✗ ${testo}`)}`),
+      tenue("  Ctrl+C per fermare"),
     );
+    return righe;
+  };
+
+  const stampa = () => {
+    if (tty) {
+      const righe = pannello();
+      // Torna all'inizio del pannello precedente, cancella fino in fondo e ridisegna.
+      process.stdout.write(`${righePannello ? `\x1b[${righePannello}F` : ""}\x1b[J${righe.join("\n")}\n`);
+      righePannello = righe.length;
+      return;
+    }
+    if (Date.now() - ultimaRiga < 60_000) return;
+    ultimaRiga = Date.now();
+    const stima = stimaFine();
+    console.log(`[${ora(new Date())}] ${Math.round((avanzamento() / (o.partite * o.scuole)) * 100)}% · finite ${finite.size}/${o.partite}` +
+      (stima === undefined ? "" : ` · fine tra circa ${Math.round(stima)} min`) + (motivo ? ` · ${motivo}` : ""));
   };
 
   const attive = () => [...inCorso.values()].filter((p) => !p.pausa);
@@ -234,12 +353,23 @@ async function principale() {
         maxYoungGenerationSizeMb: Math.max(32, Math.min(512, Math.floor(limiteMb * 0.1))),
       },
     });
-    const p = { ...voce, worker, segnale: new Int32Array(pausa), pausa: false, minuti: 0, scuola: 1, usataMb: 0, limiteMb, finita: false, richiamata: false, memoriaFinita: false };
+    const p = { ...voce, worker, segnale: new Int32Array(pausa), pausa: false, minuti: 0, scuola: 1, iscritti: 0, stato: "prima scuola", inizioScuola: Date.now(), usataMb: 0, limiteMb, finita: false, richiamata: false, memoriaFinita: false };
     inCorso.set(voce.seed, p);
     worker.on("message", (message) => {
       if (message.tipo === "memoria") p.usataMb = message.mb;
-      else if (message.tipo === "avanzamento") { p.minuti = message.minuti; p.scuola = message.scuola; stampa(); }
-      else { p.finita = true; registri.push(message.registro); }
+      else if (message.tipo === "avanzamento") {
+        if (message.scuola !== p.scuola) {
+          // Una scuola finita: la sua durata reale aiuta la stima della fine.
+          durate.set(p.scuola, [...(durate.get(p.scuola) ?? []), (Date.now() - p.inizioScuola) / 60_000]);
+          p.inizioScuola = Date.now();
+        }
+        Object.assign(p, { minuti: message.minuti, scuola: message.scuola, iscritti: message.iscritti, stato: message.stato });
+      } else {
+        p.finita = true;
+        durate.set(p.scuola, [...(durate.get(p.scuola) ?? []), (Date.now() - p.inizioScuola) / 60_000]);
+        finite.set(voce.seed, { minuti: message.registro.minutiTotali, iscritti: p.iscritti });
+        registri.push(message.registro);
+      }
     });
     worker.on("error", (error) => {
       if (error.code === "ERR_WORKER_OUT_OF_MEMORY") p.memoriaFinita = true;
@@ -252,8 +382,8 @@ async function principale() {
         else if (p.memoriaFinita && voce.tentativi + 1 < TENTATIVI) coda.unshift({ seed: voce.seed, tentativi: voce.tentativi + 1 });
         else problemi.push(`partita ${voce.seed}: ${p.memoriaFinita ? `memoria esaurita (${limiteMb} MB)` : `thread uscito con codice ${code}`}`);
       }
-      stampa(true);
       regola(false);
+      stampa();
     });
     return true;
   };
