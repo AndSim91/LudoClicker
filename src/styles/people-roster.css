@@ -917,6 +917,7 @@
   cursor: default;
 }
 
+.member-permanence[data-level="-1"] { --permanence-color: #1b1b1b; }
 .member-permanence[data-level="1"] { --permanence-color: #107c41; }
 .member-permanence[data-level="2"] { --permanence-color: #5f8f1e; }
 .member-permanence[data-level="3"] { --permanence-color: #b38600; }
@@ -929,6 +930,12 @@
   flex: none;
   border-radius: 50%;
   background: var(--permanence-color);
+}
+
+/* Collaboratore delle Onde: the dot gets a ring, like the black-and-white banner of the Ordine. */
+.member-permanence[data-level="-1"] .member-permanence-dot {
+  outline: 1.5px solid var(--permanence-color);
+  outline-offset: 2px;
 }
 
 .member-permanence-tip {

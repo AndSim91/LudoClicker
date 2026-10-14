@@ -2394,9 +2394,9 @@ describe("PeopleView", () => {
     const memberFormLogo = memberRow?.querySelector(".form-path-node");
     expect(memberFormLogo).toHaveClass("is-learned", "is-instructor");
     expect(within(members).queryByText(/Esperienza tornei/)).not.toBeInTheDocument();
-    expect(memberRow?.querySelector(".member-status")).toHaveTextContent(
-      "Collaboratore Attrezzatura",
-    );
+    // 14/10/2026: «Collaboratore delle Onde», the assignment in the tooltip.
+    expect(memberRow?.querySelector(".member-status")).toHaveTextContent("Collaboratore delle Onde");
+    expect(memberRow?.querySelector(".member-permanence-tip")).toHaveTextContent("Incarico: Attrezzatura");
     const trainingCell = memberRow?.querySelector<HTMLElement>(".member-training-cell");
     expect(trainingCell).toHaveTextContent("Forma 2");
     expect(trainingCell?.querySelector(".training-control")).toHaveClass("training-roster");
@@ -2447,9 +2447,9 @@ describe("PeopleView", () => {
       .closest(".member-row");
     const trainingCell = memberRow?.querySelector<HTMLElement>(".member-training-cell");
 
-    expect(memberRow?.querySelector(".member-status")).toHaveTextContent(
-      "Collaboratore Istruttore",
-    );
+    // 14/10/2026: «Collaboratore delle Onde», the assignment in the tooltip.
+    expect(memberRow?.querySelector(".member-status")).toHaveTextContent("Collaboratore delle Onde");
+    expect(memberRow?.querySelector(".member-permanence-tip")).toHaveTextContent("Incarico: Istruttore");
     expect(trainingCell).toHaveTextContent("Forma 2");
     expect(trainingCell).not.toHaveTextContent("Forma 1");
     expect(trainingCell).not.toHaveTextContent("Corso Istruttori");

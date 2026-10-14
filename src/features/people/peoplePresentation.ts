@@ -17,6 +17,9 @@ export function formatFormPath(forms: FormId[], courseXUnlocked = true): string 
  * risk as a mood, from 0 (safe this year) to 5. No percentages on screen.
  */
 export const PERMANENCE_LABELS = ["Entusiasta", "Affezionato", "Felice", "Indifferente", "Infelice", "Ostile"] as const;
+/** Collaboratori (and so every Leggendario): one step above «Entusiasta». */
+export const COLLABORATOR_PERMANENCE_LEVEL = -1;
+export const COLLABORATOR_PERMANENCE_LABEL = "Collaboratore delle Onde";
 
 export interface MemberPermanence {
   level: number;

@@ -31,7 +31,13 @@ import { FormPathMap } from "./FormPathMap";
 import { MemberCard } from "./MemberCard";
 import { FormLogoStrip, PersonName } from "./PersonPresentation";
 import { TrainingControl } from "./TrainingControl";
-import { formatFormPath, getMemberPermanence, type MemberPermanence } from "./peoplePresentation";
+import {
+  COLLABORATOR_PERMANENCE_LABEL,
+  COLLABORATOR_PERMANENCE_LEVEL,
+  formatFormPath,
+  getMemberPermanence,
+  type MemberPermanence,
+} from "./peoplePresentation";
 import { MemberPermanenceLabel } from "./MemberPermanenceLabel";
 import {
   getContactPreparation,
@@ -150,9 +156,14 @@ function getDisplayedMemberStatus(
 ): { status: string; permanence?: MemberPermanence } {
   const collaborator = context.collaboratorsByContactId.get(contact.id);
   if (collaborator) {
-    if (!collaborator.assignment) return { status: "Collaboratore non assegnato" };
-    const assignmentLabel = getCollaboratorAssignmentLabel(collaborator.assignment, socialUnlocked);
-    return { status: `Collaboratore ${assignmentLabel}` };
+    // 14/10/2026: above «Entusiasta», with the assignment in the tooltip.
+    const detail = collaborator.assignment
+      ? `Incarico: ${getCollaboratorAssignmentLabel(collaborator.assignment, socialUnlocked)}`
+      : "Ancora senza incarico";
+    return {
+      status: COLLABORATOR_PERMANENCE_LABEL,
+      permanence: { level: COLLABORATOR_PERMANENCE_LEVEL, label: COLLABORATOR_PERMANENCE_LABEL, detail },
+    };
   }
   const student = getMemberStudent(contact, context);
   const immunity = getAthleteImmunityStatus(

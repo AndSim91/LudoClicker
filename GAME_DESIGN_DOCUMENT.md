@@ -3053,8 +3053,9 @@ rischio di abbandono di fine anno, già scontato da corso e Chat di Gruppo:
 (10–30%), **Indifferente** (30–50%), **Infelice** (50–70%), **Ostile** (dal 70%).
 Al passaggio del mouse (o al focus) un fumetto dice il perché: il motivo della
 protezione, oppure Forma, rarità e protezioni attive (corso dell'anno, Arena
-Tecnica, Corso Agonisti, Chat di Gruppo). Nessuna percentuale a schermo. I
-Collaboratori mostrano il loro incarico.
+Tecnica, Corso Agonisti, Chat di Gruppo). Nessuna percentuale a schermo. Sopra
+«Entusiasta» c'è **Collaboratore delle Onde**, per i Collaboratori (e quindi i
+Leggendari), con il pallino cerchiato e l'incarico nel fumetto.
 
 Dove si combatte si dice **arena** (in LudoSport è un cerchio di 7 metri di
 diametro), dove ci si allena **palestra** o **scuola**; mai «pedana».

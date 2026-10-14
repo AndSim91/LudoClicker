@@ -1384,6 +1384,7 @@
 
 /* Permanenza (14/10/2026): the mood dots on the Onde palette. */
 :root[data-theme="dark"] .member-permanence { --permanence-color: var(--onde-wave); }
+:root[data-theme="dark"] .member-permanence[data-level="-1"] { --permanence-color: var(--onde-foam); }
 :root[data-theme="dark"] .member-permanence[data-level="1"] { --permanence-color: #5fd3a0; }
 :root[data-theme="dark"] .member-permanence[data-level="2"] { --permanence-color: #9fd36c; }
 :root[data-theme="dark"] .member-permanence[data-level="3"] { --permanence-color: var(--onde-gold-bright); }
