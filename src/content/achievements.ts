@@ -47,7 +47,8 @@ export interface SecretAchievement {
   condition: (state: GameState) => boolean;
 }
 
-const hasFormSeven = (forms: readonly FormId[]) => forms.some((form) => form.startsWith("form-7"));
+// "form-7" is the only Forma 7 (FormId); includes() needs no closure per contact.
+const hasFormSeven = (forms: readonly FormId[]) => forms.includes("form-7");
 const MAESTRO_LEVEL = COLLABORATOR_MASTERY_LEVELS.findIndex((level) => level.name === "Maestro");
 
 /**
@@ -198,15 +199,23 @@ export function getReachedTier(definition: TieredAchievement, value: number): Ac
   return reached;
 }
 
+// Checked at every step (14/10/2026): the tier keys are built once and the set of
+// unlocked keys is kept per achievements list (a new list only when one is unlocked).
+const TIER_KEYS = new Map(TIERED_ACHIEVEMENTS.map((definition) => [
+  definition.id,
+  ACHIEVEMENT_TIERS.map((tier) => getTierKey(definition.id, tier)),
+]));
+const unlockedKeys = perList((achievements: GameState["achievements"]) => new Set(achievements));
+
 /** Keys reached now and not unlocked yet, in catalog order. */
 export function getNewAchievementKeys(state: GameState): AchievementKey[] {
-  const unlocked = new Set(state.achievements);
+  const unlocked = unlockedKeys(state.achievements);
   const keys: AchievementKey[] = [];
   for (const definition of TIERED_ACHIEVEMENTS) {
-    if (unlocked.has(getTierKey(definition.id, "gold"))) continue;
+    const tierKeys = TIER_KEYS.get(definition.id)!;
+    if (unlocked.has(tierKeys[tierKeys.length - 1])) continue;
     const value = definition.value(state);
-    ACHIEVEMENT_TIERS.forEach((tier, index) => {
-      const key = getTierKey(definition.id, tier);
+    tierKeys.forEach((key, index) => {
       if (value >= definition.thresholds[index] && !unlocked.has(key)) keys.push(key);
     });
   }
