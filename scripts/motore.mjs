@@ -62,6 +62,8 @@ function opzioni(argv) {
     ram: Math.max(10, Math.min(99, Number(get("ram", 99)))),
     priorita: priorita in PRIORITA ? priorita : "bassa",
     seme: Number(get("seme", 1)),
+    // Come il giocatore medio spende la Reputazione: «pari» (tutti i rami alla pari) o «genetica» (prima 5 punti in Genetica).
+    reputazione: get("reputazione", "pari") === "genetica" ? "genetica" : "pari",
     uscita: resolve(ROOT, get("uscita", join("motore-risultati", stamp))),
     core,
   };
@@ -87,13 +89,14 @@ async function impacchetta() {
 /** Una partita per thread: il thread finisce con la partita. */
 async function lavoratore() {
   const motore = await import(pathToFileURL(BUNDLE).href);
-  const { seed, scuole, ore, pausa } = workerData;
+  const { seed, scuole, ore, pausa, reputazione } = workerData;
   const segnale = new Int32Array(pausa);
   let prossimaMemoria = 0;
   const registro = motore.giocaPartita({
     seed,
     maxScuole: scuole,
     maxOre: ore,
+    reputazione,
     onAvanzamento: (parziale) => parentPort.postMessage({
       tipo: "avanzamento", minuti: parziale.minutiTotali, scuola: parziale.scuoleRaggiunte,
     }),
@@ -210,7 +213,7 @@ async function principale() {
     const limiteMb = Math.min(16_384, Math.floor(quota));
     const pausa = new SharedArrayBuffer(4);
     const worker = new Worker(fileURLToPath(import.meta.url), {
-      workerData: { seed: voce.seed, scuole: o.scuole, ore: o.ore, pausa },
+      workerData: { seed: voce.seed, scuole: o.scuole, ore: o.ore, pausa, reputazione: o.reputazione },
       resourceLimits: {
         maxOldGenerationSizeMb: Math.floor(limiteMb * 0.85),
         // Una generazione giovane più grande = meno pulizie della memoria.
@@ -295,7 +298,7 @@ async function principale() {
   const analisi = motore.analizza(registri);
   let commit = "";
   try { commit = execSync("git rev-parse --short HEAD", { cwd: ROOT }).toString().trim(); } catch { /* fuori da git */ }
-  const versione = `salvataggio v${motore.GAME_CONFIG.version}${commit ? ` · commit ${commit}` : ""}`;
+  const versione = `salvataggio v${motore.GAME_CONFIG.version}${commit ? ` · commit ${commit}` : ""} · Reputazione ${o.reputazione === "genetica" ? "prima in Genetica" : "alla pari"}`;
   const secondi = (Date.now() - t0) / 1000;
   mkdirSync(o.uscita, { recursive: true });
   writeFileSync(join(o.uscita, "dati.json"), JSON.stringify({ opzioni: o, versione, secondi, problemi, analisi, registri }));

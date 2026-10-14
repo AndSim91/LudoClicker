@@ -20,6 +20,7 @@ import {
   REGOLE,
   vuoleFondare,
   type AnnoScolastico,
+  type ModoReputazione,
 } from "./giocatoreMedio";
 
 export interface Evento {
@@ -48,6 +49,8 @@ export interface OpzioniPartita {
   maxScuole: number;
   /** Tetto di sicurezza in ore effettive. */
   maxOre: number;
+  /** Spesa della Reputazione: tutti i rami alla pari (regola di Andrea) o prima 5 punti in Genetica. */
+  reputazione?: ModoReputazione;
   /** Passo minimo del motore (ms di gioco): 1.000 come il gioco senza animazioni; 250 per i controlli. */
   passoMinimoMs?: number;
   /** Ogni quanti minuti effettivi avvisare il chiamante (avanzamento). */
@@ -90,6 +93,7 @@ export function giocaPartita({
   seed,
   maxScuole,
   maxOre,
+  reputazione = "pari",
   passoMinimoMs = STEP_GIOCO_MS,
   onAvanzamento,
   alPasso,
@@ -295,7 +299,7 @@ export function giocaPartita({
             upgradeTotali: UPGRADE_VISIBILI.length,
           });
           effettivoMs += REGOLE.reazioneMs;
-          state = fonda(state, scuola + 1, now);
+          state = fonda(state, scuola + 1, now, reputazione);
           if (state !== prima) {
             scuola += 1;
             registro.scuoleRaggiunte = scuola;

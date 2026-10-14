@@ -284,12 +284,17 @@ export function decidi(state: GameState, now: number): GameState {
 }
 
 /** Reputazione in parti uguali: un punto alla volta al ramo più basso, entro il tetto. */
-export function spesaReputazione(state: GameState): ReputationSpending {
+export type ModoReputazione = "pari" | "genetica";
+
+/** Esperimento del 14/10/2026: con «genetica» i primi 5 punti vanno in Genetica, poi alla pari. */
+const GENETICA_PRIMA = 5;
+
+export function spesaReputazione(state: GameState, modo: ModoReputazione = "pari"): ReputationSpending {
   let available = state.network.reputation + getPrestigeReputationPreview(state).points;
   const upgrades: Partial<Record<(typeof REPUTATION_UPGRADE_IDS)[number], number>> = {};
   const level = (id: (typeof REPUTATION_UPGRADE_IDS)[number]) => getReputationLevel(state, id) + (upgrades[id] ?? 0);
   while (available > 0) {
-    const target = REPUTATION_UPGRADE_IDS
+    const target = modo === "genetica" && level("genetics") < GENETICA_PRIMA ? "genetics" : REPUTATION_UPGRADE_IDS
       .filter((id) => level(id) < GAME_CONFIG.reputationUpgradeMaxLevel)
       .sort((left, right) => level(left) - level(right))[0];
     if (!target) break;
@@ -311,11 +316,11 @@ export function vuoleFondare(state: GameState, anno: AnnoScolastico): boolean {
   return crescita < REGOLE.sogliaCrescita && anno.upgradeComprati < REGOLE.sogliaUpgrade;
 }
 
-export function fonda(state: GameState, numero: number, now: number): GameState {
+export function fonda(state: GameState, numero: number, now: number, modo: ModoReputazione = "pari"): GameState {
   return act(state, {
     type: "FOUND_SCHOOL",
     details: { name: `Scuola ${numero}`, city: `Città ${numero}` },
     now,
-    spending: spesaReputazione(state),
+    spending: spesaReputazione(state, modo),
   });
 }
