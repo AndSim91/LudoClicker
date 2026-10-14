@@ -19,6 +19,7 @@ import { GAME_CONFIG } from "./config";
 import { scaleCurrencyGain } from "./economy";
 import { getWritingPower } from "./formulas";
 import { createInitialState } from "./initialState";
+import { openGadgetSector } from "./gadgetFlow";
 import { FOUNDATION_MOMENT } from "./moments";
 import { canFoundSchool } from "./progression";
 import { nextRandom } from "./random";
@@ -211,9 +212,16 @@ export function foundSchool(
     // Missions start again from series 1; the baseline is the career statistics carried over.
     shortGoal: createShortGoalFromStatistics(careerStatistics, 0, now),
   };
+  // Social and Gadget, once opened, are open from day one in every later school
+  // (Andrea, 14/10): followers from 0, Gadget from the first product, Maestrie kept.
+  const withCareerUnlocks: GameState = {
+    ...nextState,
+    unlocks: { ...nextState.unlocks, social: state.unlocks.social },
+  };
+  const opened = state.unlocks.gadget ? openGadgetSector(withCareerUnlocks) : withCareerUnlocks;
   // The new school's first pagella counts from today, not from the career totals
   // carried in the statistics (14/10/2026: it showed the whole previous school).
-  const withLedger: GameState = { ...nextState, annual: { ...nextState.annual, ledger: createAnnualLedger(nextState, now) } };
+  const withLedger: GameState = { ...opened, annual: { ...opened.annual, ledger: createAnnualLedger(opened, now) } };
   const announced = addMessage(
     refreshWritingCampaignCopies(withLedger),
     now,

@@ -97,6 +97,25 @@ describe("Maestria dei gadget", () => {
     );
     expect(next.network.gadgetMastery).toEqual({ wristband: ["common"] });
     expect(next.gadgets.products.wristband.rarities.common.quality).toBe(0);
+    // Gadget open from day one in the next school, starting again from the keychain (14/10).
+    expect(next.unlocks.gadget).toBe(true);
+    expect(next.gadgets.products.keychain.unlocked).toBe(true);
+    expect(next.gadgets.products.wristband.unlocked).toBe(false);
+    expect(next.unlocks.social).toBe(false);
+
+    // Social too, with the followers back to 0.
+    const social = foundSchool(
+      {
+        ...ready,
+        unlocks: { ...ready.unlocks, social: true },
+        school: { ...ready.school, fame: 5_000, followers: 40_000 },
+        tournaments: { ...ready.tournaments, nationalTitlesCurrentSchool: 1 },
+      },
+      { name: "Ordine del Faro", city: "Trieste" },
+      2_000,
+    );
+    expect(social.unlocks.social).toBe(true);
+    expect(social.school.followers).toBe(0);
   });
 
   it("skips the collaudo of a mastered rarity: development is paid and waited, quality is 100", () => {

@@ -88,9 +88,9 @@ export function didOwnedAthleteWinNational(result: TournamentResult): boolean {
   );
 }
 
-export function unlockGadgetSector(state: GameState, now: number): GameState {
-  if (state.unlocks.gadget) return state;
-  const unlockedState: GameState = {
+/** The Laboratorio is open: only the first product (the keychain) to start with. */
+export function openGadgetSector(state: GameState): GameState {
+  return {
     ...state,
     unlocks: { ...state.unlocks, gadget: true },
     gadgets: {
@@ -104,8 +104,12 @@ export function unlockGadgetSector(state: GameState, now: number): GameState {
       },
     },
   };
+}
+
+export function unlockGadgetSector(state: GameState, now: number): GameState {
+  if (state.unlocks.gadget) return state;
   return addMessage(
-    unlockedState,
+    openGadgetSector(state),
     now,
     "Apre il Laboratorio Gadget",
     "Vinto il Nazionale, e qualcuno ha già pensato ai portachiavi celebrativi. Compra il progetto e mettici qualche collaboratore.",
