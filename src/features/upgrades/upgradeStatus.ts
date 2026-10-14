@@ -120,5 +120,9 @@ export function getUpgradeStatus(state: GameState, definition: UpgradeDefinition
  * secret paths keep their own lock, since finding them is the point.
  */
 export function isUpgradeHidden(state: GameState, definition: UpgradeDefinition): boolean {
-  return definition.category !== "secrets" && getUpgradeStatus(state, definition) === "locked";
+  // A node already bought stays visible even when its next level is still locked
+  // (e.g. «Il tempo è denaro» 3× waiting for the fifth school).
+  return definition.category !== "secrets" &&
+    (state.upgrades[definition.id] ?? 0) === 0 &&
+    getUpgradeStatus(state, definition) === "locked";
 }
