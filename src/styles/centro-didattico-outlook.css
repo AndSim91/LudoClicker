@@ -141,24 +141,22 @@
 }
 
 :root[data-theme="light"] .instructor-quick-training .instructor-quick-max {
-  --quick-accent: var(--blue-600);
-  width: 46px;
-  padding: 2px 4px;
+  width: 34px;
+  padding: 3px 0;
   border: 1px solid var(--line-strong);
-  border-radius: 3px;
-  color: var(--accent-ink);
-  background: var(--surface-muted);
+  border-radius: 4px;
+  color: var(--ink);
+  background: var(--surface);
 }
 
 :root[data-theme="light"] .instructor-quick-training .instructor-quick-max:hover:not(:disabled) {
-  background: var(--surface);
-  border-color: var(--quick-accent);
+  background: var(--surface-muted);
 }
 
 :root[data-theme="light"] .instructor-quick-training .instructor-quick-max:disabled {
-  border-style: dashed;
+  border-style: solid;
   color: var(--ink-muted);
-  background: transparent;
+  background: var(--surface-muted);
 }
 
 /* Contatore dei corsi prima dell'Ufficio: riquadro bianco come le sue righe. */

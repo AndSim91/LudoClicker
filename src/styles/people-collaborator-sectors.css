@@ -796,63 +796,72 @@ button.shift-control-sector:focus-visible {
   gap: 8px;
 }
 
-/* «Max» dentro ogni pulsante, a destra (Andrea, 14/10): un pulsante fratello sopra il bordo destro. */
+/* «Max» dentro ogni pulsante, a destra (Andrea, 14/10): piccolo, con i colori del suo pulsante. */
 .instructor-quick-item {
+  --quick-accent: #2f8a57;
   position: relative;
   display: flex;
   min-width: 0;
   flex: 1 1 190px;
 }
 
+.instructor-quick-item.is-technician {
+  --quick-accent: #8b5cf6;
+}
+
 .instructor-quick-training .instructor-quick-item > button:first-child {
   min-width: 0;
   flex: 1 1 auto;
-  padding-right: 62px;
+  padding-right: 48px;
 }
 
 .instructor-quick-training .instructor-quick-max {
-  --quick-accent: #c9952f;
+  /* È anche lui un «button» dell'Ufficio: riprende il colore del riquadro, non il verde di base. */
+  --quick-accent: inherit;
   position: absolute;
-  top: 6px;
-  right: 6px;
-  bottom: 6px;
+  top: 50%;
+  right: 7px;
   display: flex;
-  width: 46px;
+  width: 34px;
   min-width: 0;
   flex: none;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   gap: 0;
-  padding: 2px 4px;
-  border: 1px solid color-mix(in srgb, var(--quick-accent) 60%, transparent);
+  padding: 3px 0;
+  border: 1px solid color-mix(in srgb, var(--quick-accent) 55%, transparent);
   border-radius: 5px;
-  color: color-mix(in srgb, var(--quick-accent) 70%, var(--ink));
-  background: color-mix(in srgb, var(--quick-accent) 14%, var(--surface));
-  text-align: center;
+  color: color-mix(in srgb, var(--quick-accent) 60%, var(--ink));
+  background: color-mix(in srgb, var(--quick-accent) 10%, var(--surface));
+  line-height: 1.05;
+  transform: translateY(-50%);
 }
 
 .instructor-quick-max strong {
-  font-size: 11.5px;
-  font-weight: 800;
-  letter-spacing: 0.04em;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
 }
 
 .instructor-quick-max span {
-  font-size: 13px;
+  font-size: 11.5px;
   font-weight: 700;
-  line-height: 1.1;
 }
 
 .instructor-quick-training .instructor-quick-max:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--quick-accent) 26%, var(--surface));
+  background: color-mix(in srgb, var(--quick-accent) 20%, var(--surface));
+}
+
+.instructor-quick-training .instructor-quick-max:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--quick-accent) 45%, transparent);
+  outline-offset: 2px;
 }
 
 .instructor-quick-training .instructor-quick-max:disabled {
   border-style: dashed;
   color: var(--ink-muted);
-  background: transparent;
-  opacity: 0.7;
+  background: var(--surface-muted);
 }
 
 /* Con i pulsanti dell'Ufficio la colonna è più piena: Maestria e link su una riga sola. */
