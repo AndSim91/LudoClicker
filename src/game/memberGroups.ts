@@ -4,7 +4,7 @@ import { getAthleteImmunityStatus, getYearlyRiskReduction, isAthleteImmuneFromDe
 import { advanceRandomSeed, RARITY_BASE_RANGE, rollAthleteBaseStats } from "./athleteStats";
 import { getFormTrainingYear, getSchoolYear, isSummerBreak } from "./calendar";
 import { getFormTrainingCount } from "../content/forms";
-import { areAllFormBranchesUnlocked, getAnnualFormTrainingLimit, getInstructorStudentBranchCapacity, isCourseXUnlocked } from "../content/upgrades";
+import { areAllFormBranchesUnlocked, getAnnualFormTrainingLimit, getInstructorStudentBranchCapacity, isAgonistCourseUnlocked, isCourseXUnlocked } from "../content/upgrades";
 import { getAutomaticFormCandidates } from "./formProgression";
 import { GAME_CONFIG } from "./config";
 import { makeGameId } from "./ids";
@@ -311,6 +311,7 @@ export function departGroupedMembers(
     currentMonth: state.school.currentMonth,
     tournamentQualification: state.tournaments.qualification,
     activeMembers,
+    agonistCourseGrantsStats: isAgonistCourseUnlocked(state.upgrades),
   };
   let seed = state.randomSeed;
   let departed = 0;

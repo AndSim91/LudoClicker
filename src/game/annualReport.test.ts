@@ -12,7 +12,8 @@ import { GAME_CONFIG } from "./config";
 import { createInitialState, gameReducer } from "./engine";
 import { collectFees } from "./membershipFlow";
 import { addAdminMembers } from "./adminFlow";
-import type { AnnualMark, TournamentResult } from "./types";
+import type { AnnualMark, FormId, TournamentResult } from "./types";
+import { getSchoolYear } from "./calendar";
 
 describe("annual report", () => {
   it("writes the pagella; the Pianificazione waits for the first Torneo Scolastico and can be switched off", () => {
@@ -128,4 +129,23 @@ describe("annual report", () => {
     expect(state.statistics.membersDeparted).toBeGreaterThan(0);
     expect(loyalty).toBe(`${state.statistics.membersDeparted} andati via, ${state.school.activeMembers} rimasti`);
   });
+
+  it("from 500 Iscritti a course of the year lowers the departures instead of cancelling them", () => {
+    const run = (members: number) => {
+      let state = addAdminMembers(createInitialState(0), members);
+      const year = getSchoolYear(18);
+      state = {
+        ...state,
+        school: { ...state.school, currentMonth: 13 },
+        contacts: state.contacts.map((contact) => contact.status === "enrolled"
+          ? { ...contact, forms: ["form-1", "form-2", "course-y", "form-3-long"] as FormId[], lastFormTrainingYear: year }
+          : contact),
+      };
+      for (let month = 0; month < 6; month += 1) state = collectFees(state, state.school.nextFeeAt, 1);
+      return state.statistics.membersDeparted;
+    };
+    expect(run(450)).toBe(0);
+    expect(run(800)).toBeGreaterThan(100);
+  });
 });
+

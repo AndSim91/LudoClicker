@@ -95,8 +95,8 @@ export const GAME_CONFIG = {
   // the protected ones. Andrea 14/10/2026: the first school stops around 1.000
   // Iscritti, later schools higher. Both numbers grow by `eventContactSchoolGrowth`
   // per founded school (1,27^19 ≈ 100: school 20 about a hundred times school 1).
-  // ponytail: first guesses, tuned with the test engine.
-  eventContactProtectedActiveMembers: 300,
+  // ponytail: tuned with the test engine (4 games, school 1 stops at 950–1.020).
+  eventContactProtectedActiveMembers: 520,
   eventContactHalvingMembers: 130,
   eventContactSchoolGrowth: 1.27,
   ultraRareMinimumAppearanceChance: 0.015,
@@ -116,12 +116,13 @@ export const GAME_CONFIG = {
   equipmentMaximumUpgradeWearReduction: 0.5,
   officialSwordCost: 330,
   legendaryEnrollmentChancePerFailure: 0.03,
-  formSevenDepartureChance: {
-    common: 0.025,
-    rare: 0.005,
-    "ultra-rare": 0.0025,
-    legendary: 0,
-  },
+  // Abbandoni annuali (Andrea, 14/10/2026): rischio di un Comune per Forma più alta
+  // (nessuna Forma, F1 … F7; Corso X e Corso Y valgono la Forma prima di loro).
+  // Rari 15 punti in meno, Ultra Rari 30 in meno; Leggendari mai.
+  annualDepartureChanceByForm: [0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2],
+  rarityDepartureDiscount: { common: 0, rare: 0.15, "ultra-rare": 0.3, legendary: 1 },
+  // Course of the year, from 500 Iscritti (below it saves): share of the risk taken away.
+  courseDepartureReduction: { form: 0.5, arenaTecnica: 0.75, agonist: 0.9 },
   departureChancePerFoundedSchool: 0.005,
   collaboratorWritingPerSecond: 5,
   socialEmailWritingShare: 0.95,

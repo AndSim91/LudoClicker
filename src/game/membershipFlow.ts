@@ -11,7 +11,7 @@ import { isSchoolYearDepartureMonth } from "./calendar";
 import { GAME_CONFIG } from "./config";
 import { roundCurrency, scaleCurrencyGain } from "./economy";
 import { getMemberAnnualDepartureChance } from "./formulas";
-import { getDepartureRiskReduction } from "../content/upgrades";
+import { getDepartureRiskReduction, isAgonistCourseUnlocked } from "../content/upgrades";
 import { departGroupedMembers } from "./memberGroups";
 import { makeGameId } from "./ids";
 import {
@@ -46,6 +46,7 @@ export function departMembers(
   const immunityContext = {
     currentMonth: state.school.currentMonth,
     tournamentQualification: state.tournaments.qualification,
+    activeMembers: state.school.activeMembers,
   };
   const departed = state.contacts.filter(
     (contact) => {
@@ -215,6 +216,7 @@ function processMemberDepartures(
     currentMonth: state.school.currentMonth,
     tournamentQualification: state.tournaments.qualification,
     activeMembers: state.school.activeMembers,
+    agonistCourseGrantsStats: isAgonistCourseUnlocked(state.upgrades),
   };
   const riskReduction = getDepartureRiskReduction(state.upgrades);
   const reductionById = new Map<string, number>();

@@ -66,12 +66,9 @@ describe("athlete immunity", () => {
     expect(isAthleteImmuneFromDeparture(status, "unexpected-event")).toBe(false);
   });
 
-  it("saves with the course of the year below 500 Iscritti, halves the risk from 500 on (14/10/2026)", () => {
-    const athlete = {
-      ...createInitialState(1_000).contacts[0],
-      enrolledMonth: 1,
-      lastFormTrainingYear: getSchoolYear(30),
-    };
+  it("saves with the course of the year below 500 Iscritti, lowers the risk from 500 on (14/10/2026)", () => {
+    const year = getSchoolYear(30);
+    const athlete = { ...createInitialState(1_000).contacts[0], enrolledMonth: 1, lastFormTrainingYear: year };
     const small = getAthleteImmunityStatus({ currentMonth: 30, activeMembers: 499 }, athlete);
     const large = getAthleteImmunityStatus({ currentMonth: 30, activeMembers: 500 }, athlete);
 
@@ -79,7 +76,16 @@ describe("athlete immunity", () => {
     expect(isAthleteImmuneFromDeparture(large, "annual-rollout")).toBe(false);
     expect(large.message).toBeNull();
     expect(getYearlyRiskReduction(large, 0)).toBe(0.5);
-    expect(getYearlyRiskReduction(large, 0.2)).toBeCloseTo(0.6);
+    expect(getYearlyRiskReduction(large, 0.5)).toBe(0.75);
     expect(getYearlyRiskReduction(small, 0.2)).toBe(0.2);
+
+    // Arena Tecnica 75%, Corso Agonisti 90%.
+    const agonist = { ...athlete, lastFormTrainingYear: undefined, lastAgonistCourseYear: year };
+    expect(getYearlyRiskReduction(getAthleteImmunityStatus({ currentMonth: 30, activeMembers: 500 }, agonist)))
+      .toBe(0.75);
+    expect(getYearlyRiskReduction(getAthleteImmunityStatus(
+      { currentMonth: 30, activeMembers: 500, agonistCourseGrantsStats: true },
+      agonist,
+    ))).toBeCloseTo(0.9);
   });
 });

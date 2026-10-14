@@ -111,8 +111,6 @@ export function getWritingPower(state: GameState) {
   return localPower * getReputationMultiplier(state, "writing");
 }
 
-const ANNUAL_DEPARTURE_CHANCE_BY_FORM = [0.8, 0.65, 0.5, 0.35, 0.25, 0.15, 0.1, 0.05] as const;
-
 function getHighestFormLevel(forms: FormId[]): number {
   return forms.reduce((highest, formId) => {
     const match = /^form-(\d)/.exec(formId);
@@ -125,26 +123,29 @@ function getDepartureChanceAtFormLevel(
   rarity: PersonRarity,
   foundedSchools: number,
 ): number {
-  if (level >= 7) {
-    return Math.round(clamp(
-      GAME_CONFIG.formSevenDepartureChance[rarity] +
-        Math.max(0, foundedSchools) * GAME_CONFIG.departureChancePerFoundedSchool,
-      0,
-      1,
-    ) * 1_000) / 1_000;
-  }
-  return ANNUAL_DEPARTURE_CHANCE_BY_FORM[Math.max(0, level)];
+  const table = GAME_CONFIG.annualDepartureChanceByForm;
+  const index = clamp(level, 0, table.length - 1);
+  // Forma 7 only: +0,5% per founded school, as before.
+  const schools = index === table.length - 1
+    ? Math.max(0, foundedSchools) * GAME_CONFIG.departureChancePerFoundedSchool
+    : 0;
+  return roundChance(clamp(table[index] - GAME_CONFIG.rarityDepartureDiscount[rarity] + schools, 0, 1));
+}
+
+/** To the hundredth of a percent: 1,25% stays 1,25% (14/10/2026). */
+function roundChance(chance: number): number {
+  return Math.round(chance * 10_000) / 10_000;
 }
 
 function reduceDepartureChance(chance: number, riskReduction: number): number {
-  return riskReduction > 0 ? Math.round(chance * (1 - riskReduction) * 1_000) / 1_000 : chance;
+  return riskReduction > 0 ? roundChance(chance * (1 - riskReduction)) : chance;
 }
 
 export function getMemberAnnualDepartureChance(
   forms: FormId[],
   rarity: PersonRarity = "common",
   foundedSchools = 0,
-  /** Chat di Gruppo: share of the risk taken away (0–0,5). */
+  /** Chat di Gruppo and the course of the year: share of the risk taken away. */
   riskReduction = 0,
 ): number {
   if (rarity === "legendary") return 0;

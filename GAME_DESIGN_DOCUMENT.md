@@ -308,15 +308,19 @@ scolastico 1 (decisione del 08/10/2026). L'anno scolastico,
 sempre visibile nella barra superiore, va da Settembre ad Agosto; la formazione
 si ferma a Luglio e Agosto e gli eventuali abbandoni vengono verificati nel
 passaggio tra Giugno e Luglio. La probabilità annuale di abbandono dipende
-dalla Forma più alta raggiunta (80% senza Forme, poi 65%, 50%, 35%, 25%, 15%,
-10%; con la Forma 7 scende a 2,5% per i Comuni, 0,5% per i Rari e 0,25% per gli
-Ultra Rari, +0,5% per ogni scuola fondata); i Leggendari non abbandonano mai.
+dalla Forma più alta raggiunta e dalla rarità (14/10/2026): per un Comune 90%
+senza Forme, poi 80%, 70%, 60%, 50%, 40%, 30% e 20% con la Forma 7 (+0,5% per
+ogni scuola fondata); Corso X e Corso Y valgono la Forma che li precede (F1 e
+F2). I Rari hanno 15 punti in meno, gli Ultra Rari 30 (dal Corso Y sono
+Collaboratori e non abbandonano); i Leggendari non abbandonano mai.
 Per il tutorial, una scuola con al massimo 9 iscritti non perde nessuno a fine
 anno: dal decimo iscritto gli abbandoni sono possibili (08/10/2026).
 Un corso iniziato nell'anno scolastico (Forma, Corso Y, Arena Tecnica/Corso
 Agonisti) protegge dall'abbandono di fine anno finché la scuola ha meno di 500
-iscritti; da 500 in su non salva più ma **dimezza** il rischio rimasto dopo la
-Forma e la Chat di Gruppo (decisione del 14/10/2026). Gli abbandoni di Giugno
+iscritti; da 500 in su non salva più ma toglie una quota del rischio: −50% per
+una Forma, il Corso X o il Corso Y, −75% per Arena Tecnica, −90% per il Corso
+Agonisti, moltiplicata con la Chat di Gruppo (es. Raro con Forma 7: 5%, con un
+corso 2,5%, con anche Chat di Gruppo liv. 5 1,25%; decisione del 14/10/2026). Gli abbandoni di Giugno
 entrano nella pagella di quell'anno. Ai primi abbandoni senza Collaboratori assegnati agli Istruttori, A.N.D.E.R.
 spiega che senza Istruttori e corsi durante l'anno la gente si annoia e se ne va.
 Ogni abbandono è registrato come «Mancato rinnovo». L'evento narrativo
@@ -1237,7 +1241,7 @@ indicazioni generiche di esito e resa, mai queste percentuali.
 
 Il bacino dei contatti usa esclusivamente gli iscritti attivi. I primi dieci non
 applicano penalità; oltre quella soglia i contatti degli eventi **si dimezzano
-ogni 130 iscritti oltre i primi 300** (× 0,5^((iscritti − 300) / 130),
+ogni 130 iscritti oltre i primi 520** (× 0,5^((iscritti − 520) / 130),
 `eventContactProtectedActiveMembers` e `eventContactHalvingMembers`); entrambe
 le soglie crescono di ×1,27 per ogni scuola fondata (`eventContactSchoolGrowth`),
 così la prima scuola si ferma intorno ai 1.000 iscritti e la scuola 20 circa
@@ -1827,7 +1831,7 @@ Regole:
   automatica soggetta al toggle globale dell'insegnamento. La formazione
   costa **€500 per atleta**, dura 120 secondi, non migliora le statistiche ma
   protegge subito l'allievo dal controllo annuale degli abbandoni (da 500
-  iscritti ne dimezza il rischio);
+  iscritti ne toglie il 75%, il 90% come Corso Agonisti);
 - il livello 2 costa **€2.000** e porta la durata base di Arena Tecnica a **100
   secondi**;
 - il livello 3 costa **€5.000** e porta la durata base di Arena Tecnica a **80

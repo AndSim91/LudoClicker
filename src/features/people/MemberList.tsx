@@ -291,11 +291,13 @@ export function MemberList({
   const foundedSchools = state.network.schoolCount;
   // Only the 500-Iscritti threshold matters here, so the list does not rebuild at every enrollment.
   const courseOnly = state.school.activeMembers >= COURSE_IMMUNITY_MEMBER_LIMIT;
+  const agonistCourseGrantsStats = isAgonistCourseUnlocked(state.upgrades);
   const immunityContext = useMemo(() => ({
     currentMonth,
     tournamentQualification: state.tournaments.qualification,
     activeMembers: courseOnly ? COURSE_IMMUNITY_MEMBER_LIMIT : 0,
-  }), [currentMonth, state.tournaments.qualification, courseOnly]);
+    agonistCourseGrantsStats,
+  }), [currentMonth, state.tournaments.qualification, courseOnly, agonistCourseGrantsStats]);
   const sortContext = useMemo(
     () => ({
       currentTrainingYear: getFormTrainingYear(currentMonth),

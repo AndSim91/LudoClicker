@@ -886,20 +886,27 @@ describe("game engine: funnel", () => {
   });
 
   it("reduces annual departure risk and applies the Form 7 rarity curve", () => {
-    expect(getMemberAnnualDepartureChance([])).toBe(0.8);
-    expect(getMemberAnnualDepartureChance(["form-1", "course-x"])).toBe(0.65);
-    expect(getMemberAnnualDepartureChance(["form-1", "course-x", "form-2", "course-y"])).toBe(0.5);
+    // 14/10/2026: 90% … 20% for Comuni; Corso X and Corso Y count as the Forma before them.
+    expect(getMemberAnnualDepartureChance([])).toBe(0.9);
+    expect(getMemberAnnualDepartureChance(["form-1", "course-x"])).toBe(0.8);
+    expect(getMemberAnnualDepartureChance(["form-1", "course-x", "form-2", "course-y"])).toBe(0.7);
+    expect(getMemberAnnualDepartureChance(["form-1"], "rare")).toBe(0.65);
+    expect(getMemberAnnualDepartureChance(["form-1"], "ultra-rare")).toBe(0.5);
+    expect(getMemberAnnualDepartureChance(["form-1", "course-x", "form-2"], "ultra-rare")).toBe(0.4);
     expect(getMemberAnnualDepartureChance([], "legendary")).toBe(0);
 
     const formSeven = ["form-1", "course-x", "form-2", "course-y", "form-3-staff", "form-4-staff", "form-5-staff", "form-6", "form-7"] as const;
-    expect(getMemberAnnualDepartureChance([...formSeven], "common", 0)).toBe(0.025);
-    expect(getMemberAnnualDepartureChance([...formSeven], "rare", 0)).toBe(0.005);
+    expect(getMemberAnnualDepartureChance([...formSeven], "common", 0)).toBe(0.2);
+    expect(getMemberAnnualDepartureChance([...formSeven], "rare", 0)).toBe(0.05);
+    // Raro Forma 7: course of the year → 2,5%, with Chat di Gruppo 5 too → 1,25%.
+    expect(getMemberAnnualDepartureChance([...formSeven], "rare", 0, 0.5)).toBe(0.025);
+    expect(getMemberAnnualDepartureChance([...formSeven], "rare", 0, 0.75)).toBe(0.0125);
     expect(getMemberAnnualDepartureChance([...formSeven], "legendary", 0)).toBe(0);
-    expect(getMemberAnnualDepartureChance([...formSeven], "common", 1)).toBeCloseTo(0.03);
-    expect(getMemberAnnualDepartureChance([...formSeven], "rare", 1)).toBeCloseTo(0.01);
+    expect(getMemberAnnualDepartureChance([...formSeven], "common", 1)).toBeCloseTo(0.205);
+    expect(getMemberAnnualDepartureChance([...formSeven], "rare", 1)).toBeCloseTo(0.055);
     expect(getMemberAnnualDepartureChance([...formSeven], "legendary", 1)).toBe(0);
-    expect(getMemberAnnualDepartureChance([...formSeven], "common", 3)).toBeCloseTo(0.04);
-    expect(getMemberAnnualDepartureChance([...formSeven], "rare", 3)).toBeCloseTo(0.02);
+    expect(getMemberAnnualDepartureChance([...formSeven], "common", 3)).toBeCloseTo(0.215);
+    expect(getMemberAnnualDepartureChance([...formSeven], "rare", 3)).toBeCloseTo(0.065);
     expect(getMemberAnnualDepartureChance([...formSeven], "legendary", 3)).toBe(0);
   });
 
