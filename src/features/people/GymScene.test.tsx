@@ -4,6 +4,7 @@ import { getGymFighterCount, getGymSaberRarities, getGymStageIndex, GYM_STAGES }
 import { createInitialState } from "../../game/engine";
 import { GymRackSwap } from "./GymRackSwap";
 import { GymReferees } from "./GymReferees";
+import { getGymLayout, getRackSide } from "./gymHall";
 import { GymScene } from "./GymScene";
 
 describe("GymScene", () => {
@@ -11,7 +12,8 @@ describe("GymScene", () => {
     expect(GYM_STAGES[getGymStageIndex(0)].name).toBe("Sala in affitto");
     expect(GYM_STAGES[getGymStageIndex(49)].name).toBe("Prima rastrelliera");
     expect(GYM_STAGES[getGymStageIndex(100)].name).toBe("Allenamento di gruppo");
-    expect(GYM_STAGES[getGymStageIndex(10_000)].name).toBe("Palazzetto");
+    expect(GYM_STAGES[getGymStageIndex(999)].name).toBe("Palazzetto");
+    expect(GYM_STAGES[getGymStageIndex(10_000)].name).toBe("Stadio delle Onde");
   });
 
   it("names the current stage and the next milestone", () => {
@@ -22,16 +24,30 @@ describe("GymScene", () => {
     expect(screen.getByText("Prossimo traguardo: prima rastrelliera, a 25 iscritti")).toBeInTheDocument();
   });
 
-  it("puts three pairs on the mat from 100 members and the scoreboard in the palazzetto", () => {
+  it("puts three pairs on the mat from 100 members, five and two racks at the championship", () => {
     const initial = createInitialState(1_000);
-    const view = render(<GymScene state={{ ...initial, school: { ...initial.school, activeMembers: 100 } }} />);
+    const at = (activeMembers: number) => <GymScene state={{ ...initial, school: { ...initial.school, activeMembers } }} />;
+    const view = render(at(100));
     expect(getGymFighterCount(100)).toBe(6);
-    expect(view.container.querySelector(".gym-scoreboard")).toBeNull();
-    view.rerender(<GymScene state={{ ...initial, school: { ...initial.school, activeMembers: 500 } }} />);
+    view.rerender(at(500));
     expect(view.container.querySelector(".gym-stage")).toHaveClass("is-hall");
-    expect(screen.getByText("Player 1 0 – 0 Player 2")).toBeInTheDocument();
     expect(view.container.querySelectorAll(".gym-judge")).toHaveLength(2);
     expect(view.container.querySelector(".gym-judge-card")).toBeNull();
+    expect(view.container.querySelectorAll(".gym-rack")).toHaveLength(1);
+    expect(screen.getByText(/^Prossimo traguardo: arena delle Onde, a 1.?000 iscritti$/)).toBeInTheDocument();
+    view.rerender(at(2_000));
+    expect(getGymFighterCount(2_000)).toBe(10);
+    expect(view.container.querySelectorAll(".gym-rack")).toHaveLength(2);
+    expect(view.container.querySelector(".gym-led")).not.toBeNull();
+  });
+
+  it("sends each pair to the rack on its own side from the championship", () => {
+    const onde = getGymLayout(GYM_STAGES.findIndex((stage) => stage.name === "Arena delle Onde"));
+    expect(onde.racks).toEqual([1, -1]);
+    expect(onde.pairSpots.map((_, pair) => getRackSide(onde, pair))).toEqual([1, 1, 1]);
+    const championship = getGymLayout(GYM_STAGES.findIndex((stage) => stage.name === "Arena da Campionato"));
+    // Central, inner left, inner right, outer left, outer right.
+    expect(championship.pairSpots.map((_, pair) => getRackSide(championship, pair))).toEqual([1, -1, 1, -1, 1]);
   });
 
   it("raises the chequered card on the phone judge, white and yellow on the one in the blue T-shirt", () => {
@@ -92,6 +108,19 @@ describe("GymScene", () => {
     const blades = view.container.querySelectorAll(".gym-saber-line");
     expect(blades[0]).toHaveStyle({ color: "#ffd166" });
     expect(blades[1]).toHaveStyle({ color: "#d4aeff" });
+    vi.useRealTimers();
+  });
+
+  it("walks to the left rack facing left", () => {
+    vi.useFakeTimers();
+    const rack = { claim: () => true, release: vi.fn() };
+    const view = render(
+      <GymRackSwap id={8} homes={[-50, 12]} sabers={[["#4aa8ff", "#ffd166"], ["#6bf0b0", "#d4aeff"]]} rack={rack} onDone={vi.fn()} side={-1} />,
+    );
+    const walkers = () => [...view.container.querySelectorAll<HTMLElement>(".gym-walker")].map((walker) => Number(walker.style.getPropertyValue("--dx")));
+    for (let step = 0; step < 5; step += 1) act(() => vi.advanceTimersByTime(7_000));
+    // At the left rack (stop at 640 − 742 = −102): the left athlete leads, the other a step behind.
+    expect(walkers()).toEqual([-102 - -50, -102 + 36 - 12]);
     vi.useRealTimers();
   });
 

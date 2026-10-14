@@ -10,8 +10,8 @@ import type { FormBranch, FormId } from "../../game/types";
  * Scene units: a band 128 tall (y 50–178, feet at 150), as wide as the panel.
  */
 
-/** Students on the mat by gym stage (gymStages.ts): 1, 2, 3, 4, 6 and 8 in the palazzetto. */
-export const INSTRUCTOR_SCENE_CAPS = [1, 2, 3, 4, 6, 8] as const;
+/** Students on the mat by gym stage (gymStages.ts): 1, 2, 3, 4, 6, then 8 from the palazzetto on. */
+export const INSTRUCTOR_SCENE_CAPS = [1, 2, 3, 4, 6, 8, 8, 8, 8, 8] as const;
 /** In a narrow panel (under 400 units) two rows of two at most. */
 export const NARROW_SCENE_UNITS = 400;
 export const SCENE_TOP = 50;

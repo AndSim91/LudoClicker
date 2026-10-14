@@ -3166,8 +3166,9 @@ Creare un evento usa un modulo simile a un vero appuntamento Outlook.
 Un'unica pagina, in quest'ordine:
 
 - la palestra illustrata, che cresce con la scuola (solo Modalità Onde; decisioni
-  di Andrea del 06/10, soglie del 07/10, `gymStages.ts`, `GymScene.tsx`). Sei livelli, ognuno con
-  il suo nome nella didascalia e il prossimo traguardo:
+  di Andrea del 06/10, soglie del 07/10, `gymStages.ts`, `GymScene.tsx`; dal
+  palazzetto in poi concept del 14/10, `gymHall.ts`, `GymHallScenery.tsx`). Dieci
+  livelli, ognuno con il suo nome nella didascalia e il prossimo traguardo:
   - **Sala in affitto** (0 iscritti): porta, finestra, una lampadina che oscilla;
   - **Prima rastrelliera** (25): tappeto e rastrelliera con le spade che ronzano;
   - **Vessillo dell'Ordine** (50): lo stendardo e due fari al posto della lampadina;
@@ -3175,21 +3176,45 @@ Un'unica pagina, in quest'ordine:
   - **Arena e giudici** (250): tribuna, trofei, il cerchio dell'Arena al centro e
     due giudici a bordo Arena, uno con il cellulare e uno con la maglietta blu
     dell'Ordine;
-  - **Palazzetto** (500): la scena resta alta 170 px ma la telecamera si
-    allontana (capriate, gradinate ai lati, due fari che spazzano l'Arena) e
-    compare il tabellone «Player 1 – Player 2».
+  - **Palazzetto** (500, «Luci da evento»): la scena resta alta 170 px ma la
+    telecamera si allontana: capriate, gradinate ai lati e una sala buia, senza
+    finestra, porta, trofei né tabellone. Il pubblico è fermo, in controluce
+    (sagome con un filo di luce sulla testa; la fila dietro il tappeto senza,
+    perché si leggano prima gli atleti). Due fari dal fascio stretto spazzano
+    l'Arena, una pozza di luce sul tappeto e una nebbiolina azzurra che sale piano;
+  - **Arena delle Onde** (1.000): due stendardi neri con il logo bianco
+    dell'Ordine delle Onde ai lati del traliccio, una seconda rastrelliera
+    speculare a sinistra e una fascia LED a tutta larghezza dietro il tappeto,
+    con il nome dell'Ordine e gli spazi per gli sponsor (in pixel-art, da fare
+    con un codice a sé);
+  - **Arena da Campionato** (2.000): cinque coppie su un tappeto più lungo, con
+    l'incontro arbitrato al centro e i giudici accanto all'Arena; un anello di
+    luci sul bordo dell'Arena, bandierine lungo il traliccio, un piano di
+    gradinate in più con il pubblico che alza le spade accese (ferme, in tutti i
+    colori di spada del gioco) e una telecamera in fondo a sinistra;
+  - **Palasport** (5.000): una gradinata di fondo dietro l'Arena (anche lì con le
+    spade accese), quattro fari, nessuna telecamera; tutti gli stendardi, anche
+    quello della scuola, scendono piccoli sul muro in lontananza, appesi alla
+    balaustra della gradinata di fondo sotto il pubblico;
+  - **Stadio delle Onde** (10.000): all'aperto, di sera, cielo stellato e torri
+    faro al posto del traliccio, curve che salgono fino al cielo, due
+    telecamere, una per lato; lontano la Lanterna con il fascio che gira e ogni
+    tanto un fuoco d'artificio.
 
   Gli atleti seguono gli iscritti: 1 da 1 iscritto, una coppia da 25, tre coppie
-  da 100, con le spade del colore delle rarità. La coppia centrale combatte come
+  da 100, cinque da 2.000, con le spade del colore delle rarità. Ogni coppia
+  cambia spada alla rastrelliera dopo 120–180 s, una coppia alla volta per
+  rastrelliera; dall'Arena da Campionato ognuna va a quella dalla sua parte (le
+  due coppie di sinistra a sinistra, il centro e la destra a destra). La coppia
+  centrale combatte come
   nella finale dei tornei (`boutChoreography.ts`, la stessa coreografia):
   qualche scambio e poi un taglio, nel 5% dei casi dopo un **Disarmo**; il
-  toccato chiama «OH!» e il punto va a chi ha tagliato. Dopo il taglio, a volte,
+  toccato chiama «OH!». Dopo il taglio, a volte,
   un cartellino (`gymMatch.ts`): nel 10% dei casi quello di Stile a scacchi dal
-  giudice con il cellulare, che non cambia nulla; in un altro 10% il bianco o il
-  giallo dal giudice in maglietta blu: il bianco annulla il punto, il giallo lo
-  dà all'altro atleta. I cartellini si vedono solo mentre vengono alzati. Il
-  tabellone del palazzetto conta al meglio dei 5: a 3 si torna a 0:0. Le altre
-  due coppie fanno solo scambi;
+  giudice con il cellulare; in un altro 10% il bianco o il
+  giallo dal giudice in maglietta blu. I cartellini si vedono solo mentre
+  vengono alzati; non c'è più un tabellone che conti i punti (14/10). Le altre
+  coppie fanno solo scambi;
 - Collaboratori (dal primo Collaboratore delle Onde): elenco individuale con
   assegnazioni, che dall'ottavo Collaboratore diventa una gestione aggregata per
   settore con i tasti + e −, i settori secondari e le priorità operative;

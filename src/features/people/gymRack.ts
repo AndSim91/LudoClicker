@@ -8,7 +8,7 @@ import type { GymRarity, GymRarityCounts } from "../../content/gymStages";
 export const GYM_LIFESPAN_MS: [number, number] = [120_000, 180_000];
 /** On opening the page the clocks start already staggered, so nobody leaves together. */
 export const GYM_FIRST_LIFESPAN_MS: [number, number] = [20_000, 180_000];
-/** Pairs walking to the rack at the same time (13/10: the whole pair goes). */
+/** Pairs walking to each rack at the same time (13/10: the whole pair goes; 14/10: two racks from the Arena delle Onde). */
 export const GYM_MAX_WALKING_PAIRS = 1;
 
 export const between = (random: () => number, [min, max]: [number, number]) => min + random() * (max - min);

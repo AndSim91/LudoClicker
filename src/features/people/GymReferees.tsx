@@ -1,7 +1,6 @@
 import type { CSSProperties } from "react";
-import type { BoutSide } from "../arena/boutChoreography";
 import { GymLayer } from "./GymLayers";
-import type { GymCard, GymScore } from "./gymMatch";
+import type { GymCard } from "./gymMatch";
 import { JudgeFigure } from "./JudgeFigure";
 import { judgeChair, judgeShape, type JudgeKind, type JudgePose } from "./judgeShape";
 
@@ -81,7 +80,10 @@ export function GymReferees({
   card,
   styleJudgeUp = false,
   reading = false,
+  xs = [100, 550],
 }: {
+  /** Where the two judges stand: next to the central Arena, closer at the championship. */
+  xs?: [number, number];
   card?: RaisedCard;
   styleJudgeUp?: boolean;
   /** The Style judge is writing on Servizio after a point. */
@@ -89,25 +91,8 @@ export function GymReferees({
 }) {
   return (
     <>
-      <GymJudge x={100} kind="phone" pose={styleJudgeUp ? "standing" : "seated"} reading={reading} raised={card?.card === "style" ? card : undefined} />
-      <GymJudge x={550} kind="shirt" pose="standing" raised={card && card.card !== "style" ? card : undefined} />
+      <GymJudge x={xs[0]} kind="phone" pose={styleJudgeUp ? "standing" : "seated"} reading={reading} raised={card?.card === "style" ? card : undefined} />
+      <GymJudge x={xs[1]} kind="shirt" pose="standing" raised={card && card.card !== "style" ? card : undefined} />
     </>
-  );
-}
-
-/** The palazzetto's scoreboard: Player 1 against Player 2, best of 5. */
-export function GymScoreboard({ score }: { score: GymScore }) {
-  const label = (side: BoutSide) => `Player ${side === "a" ? 1 : 2}`;
-  return (
-    <GymLayer box={{ x: 440, y: -6, w: 180, h: 56 }} className="gym-scoreboard">
-      <path className="gym-scoreboard-wire" d="M466 -6 V8 M594 -6 V8" />
-      <rect className="gym-scoreboard-box" x={444} y={8} width={172} height={40} rx={3} />
-      <text className="gym-scoreboard-team" x={452} y={21}>{label("a").toUpperCase()}</text>
-      <text className="gym-scoreboard-team" x={608} y={21} textAnchor="end">{label("b").toUpperCase()}</text>
-      <text className="gym-scoreboard-num" x={520} y={41} textAnchor="end">{score.a}</text>
-      <text className="gym-scoreboard-num" x={530} y={40} textAnchor="middle">:</text>
-      <text className="gym-scoreboard-num" x={540} y={41}>{score.b}</text>
-      <title>{`${label("a")} ${score.a} – ${score.b} ${label("b")}`}</title>
-    </GymLayer>
   );
 }
