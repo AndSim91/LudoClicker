@@ -796,6 +796,63 @@ button.shift-control-sector:focus-visible {
   gap: 8px;
 }
 
+/* «Max» a destra dei due pulsanti, alto quanto loro (Andrea, 14/10). */
+.instructor-quick-office {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.instructor-quick-office > .instructor-quick-training {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.instructor-quick-max {
+  --quick-accent: #c9952f;
+  display: flex;
+  min-width: 62px;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 7px 10px;
+  border: 1px solid color-mix(in srgb, var(--quick-accent) 60%, transparent);
+  border-radius: 6px;
+  color: color-mix(in srgb, var(--quick-accent) 70%, var(--ink));
+  background: color-mix(in srgb, var(--quick-accent) 12%, var(--surface));
+}
+
+.instructor-quick-max strong {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.instructor-quick-max span {
+  color: var(--ink-muted);
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.instructor-quick-max:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--quick-accent) 22%, var(--surface));
+}
+
+.instructor-quick-max:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--quick-accent) 45%, transparent);
+  outline-offset: 2px;
+}
+
+.instructor-quick-max:disabled {
+  border-style: dashed;
+  color: var(--ink-muted);
+  background: var(--surface-muted);
+  cursor: not-allowed;
+}
+
 /* Con i pulsanti dell'Ufficio la colonna è più piena: Maestria e link su una riga sola. */
 .instructor-coverage:has(.instructor-quick-training) {
   gap: 10px;

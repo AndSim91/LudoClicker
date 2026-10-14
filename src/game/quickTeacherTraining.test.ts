@@ -2,7 +2,12 @@ import { describe, expect, it } from "vitest";
 import { createInitialCollaboratorMastery } from "../content/mastery";
 import { gameReducer } from "./engine";
 import { createInitialState } from "./initialState";
-import { countTeacherCoverage, previewQuickTeacherTraining, startQuickTeacherTraining } from "./quickTeacherTraining";
+import {
+  countTeacherCoverage,
+  previewQuickTeacherTraining,
+  startAllQuickTeacherTrainings,
+  startQuickTeacherTraining,
+} from "./quickTeacherTraining";
 import type { Collaborator, Contact, FormId, GameState } from "./types";
 
 function instructor(index: number, forms: FormId[], instructorForms: FormId[], masteryXp = 0): Collaborator {
@@ -71,6 +76,23 @@ describe("Ufficio formazione", () => {
     const twice = startQuickTeacherTraining(once, "instructor", 5_000);
     expect(once.collaborators[0].instructorCourse?.formId).toBe("form-1");
     expect(twice.collaborators[1].instructorCourse?.formId).toBe("form-2");
+  });
+
+  it("Max starts every course it can, spread over the least covered Forms", () => {
+    const state = school([
+      instructor(1, ["form-1", "form-2"], [], 400),
+      instructor(2, ["form-1", "form-2"], []),
+    ], [100, 100]);
+    const batch = startAllQuickTeacherTrainings(state, 5_000);
+    // Each qualifies on a different Form and, in parallel, learns the next one (Corso Y).
+    expect(batch.started).toBe(4);
+    expect(batch.state.collaborators.map((c) => [c.instructorCourse?.formId, c.training?.formId]))
+      .toEqual([["form-1", "course-y"], ["form-2", "course-y"]]);
+    expect(batch.cost).toBeCloseTo(state.school.euros - batch.state.school.euros);
+    const next = gameReducer(state, { type: "START_QUICK_TEACHER_TRAINING", kind: "all", now: 5_000 });
+    expect(next.collaborators.map((c) => c.instructorCourse?.formId)).toEqual(["form-1", "form-2"]);
+    // Nothing left: Max does nothing.
+    expect(startAllQuickTeacherTrainings(batch.state, 5_000)).toMatchObject({ started: 0, cost: 0 });
   });
 
   it("lets someone with only Forma 1 learn Forma 2 when Corso X is locked", () => {

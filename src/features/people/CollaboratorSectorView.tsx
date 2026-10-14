@@ -368,7 +368,7 @@ function InstructorSectorCard({
   onDecrement: () => void;
   onOpen: () => void;
   onToggleAutomaticTeaching: (enabled: boolean) => void;
-  onQuickTeacherTraining?: (kind: "instructor" | "technician") => void;
+  onQuickTeacherTraining?: (kind: "instructor" | "technician" | "all") => void;
 }) {
   const state = useGameStateSlices(
     ["acquisitionEvents", "automation", "collaboratorManagement", "collaborators", "contacts", "equipment", "gadgets", "memberGroups", "network", "school", "unlocks", "upgrades"],
@@ -636,7 +636,7 @@ export function CollaboratorSectorView({
   onStartTraining: (personId: string, formId: FormId) => void;
   onBookTechnicianCourse?: (collaboratorId: string, formId: FormId) => void;
   onToggleAutomaticTeaching?: (enabled: boolean) => void;
-  onQuickTeacherTraining?: (kind: "instructor" | "technician") => void;
+  onQuickTeacherTraining?: (kind: "instructor" | "technician" | "all") => void;
 }) {
   const state = useGameStateSlices(
     ["acquisitionEvents", "automation", "collaboratorManagement", "collaborators", "contacts", "equipment", "gadgets", "network", "school", "unlocks", "upgrades"],

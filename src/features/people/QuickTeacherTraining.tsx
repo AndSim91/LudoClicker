@@ -1,7 +1,7 @@
 import { Icon } from "../../components/common/Icon";
 import { getFormDefinition } from "../../content/forms";
 import { getGameMonthName } from "../../game/calendar";
-import type { QuickTrainingKind, QuickTrainingPreview } from "../../game/quickTeacherTraining";
+import type { QuickTrainingKind, QuickTrainingPreview, QuickTrainingRequest } from "../../game/quickTeacherTraining";
 import { getNextSISStartMonth } from "../../game/teacherTrainingFlow";
 import type { QuickTrainingPreviews } from "./useQuickTrainingPreviews";
 import { formatCurrency } from "../../shared/formatters";
@@ -49,26 +49,44 @@ export function QuickTeacherTraining({
 }: {
   previews: QuickTrainingPreviews;
   currentMonth: number;
-  onStart: (kind: QuickTrainingKind) => void;
+  onStart: (kind: QuickTrainingRequest) => void;
 }) {
   if (!previews.enabled) return null;
+  const { started, cost } = previews.max;
+  const maxDetail = started === 0
+    ? "nessun corso da avviare"
+    : `avvia ${started} ${started === 1 ? "corso" : "corsi"} · ${formatCurrency(cost)}`;
   return (
-    <div className="instructor-quick-training" role="group" aria-label="Ufficio formazione">
-      <QuickButton kind="instructor" preview={previews.instructor} course="Corso Istruttori" onStart={onStart} />
-      {previews.technicianEnabled ? (
-        <QuickButton
-          kind="technician"
-          preview={previews.technician}
-          course={`Corso Tecnici SIS da ${getGameMonthName(getNextSISStartMonth(currentMonth)).toLowerCase()}`}
-          onStart={onStart}
-        />
-      ) : (
-        // Altezza fissa (06/10): il secondo posto c'è già, in attesa della SIS.
-        <div className="instructor-quick-slot" aria-hidden="true">
-          <strong>Forma un Tecnico</strong>
-          <span>Con la SIS, dagli Upgrade</span>
-        </div>
-      )}
+    <div className="instructor-quick-office" role="group" aria-label="Ufficio formazione">
+      <div className="instructor-quick-training">
+        <QuickButton kind="instructor" preview={previews.instructor} course="Corso Istruttori" onStart={onStart} />
+        {previews.technicianEnabled ? (
+          <QuickButton
+            kind="technician"
+            preview={previews.technician}
+            course={`Corso Tecnici SIS da ${getGameMonthName(getNextSISStartMonth(currentMonth)).toLowerCase()}`}
+            onStart={onStart}
+          />
+        ) : (
+          // Altezza fissa (06/10): il secondo posto c'è già, in attesa della SIS.
+          <div className="instructor-quick-slot" aria-hidden="true">
+            <strong>Forma un Tecnico</strong>
+            <span>Con la SIS, dagli Upgrade</span>
+          </div>
+        )}
+      </div>
+      {/* «Max» (Andrea, 14/10): tutti i corsi che si possono pagare, sulle Forme più scoperte. */}
+      <button
+        type="button"
+        className="instructor-quick-max"
+        disabled={started === 0}
+        title={maxDetail}
+        aria-label={`Max · ${maxDetail}`}
+        onClick={() => onStart("all")}
+      >
+        <strong>Max</strong>
+        <span>{started === 0 ? "—" : `${started} ${started === 1 ? "corso" : "corsi"}`}</span>
+      </button>
     </div>
   );
 }

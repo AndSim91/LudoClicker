@@ -135,6 +135,22 @@
   color: var(--accent-ink);
 }
 
+:root[data-theme="light"] .instructor-quick-max {
+  --quick-accent: var(--blue-600);
+  border-radius: 4px;
+  color: var(--ink);
+  background: var(--surface);
+}
+
+:root[data-theme="light"] .instructor-quick-max:hover:not(:disabled) {
+  background: var(--surface-muted);
+}
+
+:root[data-theme="light"] .instructor-quick-max:disabled {
+  border-style: solid;
+  border-color: var(--line-strong);
+}
+
 /* Contatore dei corsi prima dell'Ufficio: riquadro bianco come le sue righe. */
 :root[data-theme="light"] .instructor-available-courses {
   border-radius: 4px;

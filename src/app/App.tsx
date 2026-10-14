@@ -551,7 +551,7 @@ export function App() {
     [dispatch, getGameNow],
   );
   const startQuickTeacherTraining = useCallback(
-    (kind: "instructor" | "technician") =>
+    (kind: "instructor" | "technician" | "all") =>
       dispatch({ type: "START_QUICK_TEACHER_TRAINING", kind, now: getGameNow() }),
     [dispatch, getGameNow],
   );

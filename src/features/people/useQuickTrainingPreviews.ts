@@ -1,7 +1,11 @@
 import { useMemo } from "react";
 
 import { isQuickTeacherTrainingUnlocked, isSISTechnicianCourseUnlocked } from "../../content/upgrades";
-import { previewQuickTeacherTraining, type QuickTrainingPreview } from "../../game/quickTeacherTraining";
+import {
+  previewQuickTeacherTraining,
+  startAllQuickTeacherTrainings,
+  type QuickTrainingPreview,
+} from "../../game/quickTeacherTraining";
 import type { GameState } from "../../game/types";
 
 export interface QuickTrainingPreviews {
@@ -9,6 +13,8 @@ export interface QuickTrainingPreviews {
   technicianEnabled: boolean;
   instructor?: QuickTrainingPreview;
   technician?: QuickTrainingPreview;
+  /** «Max»: quanti corsi partirebbero adesso, con i Fondi veri, e quanto costano. */
+  max: { started: number; cost: number };
 }
 
 /** Ufficio formazione: cosa farebbero i due pulsanti adesso (Forma e costo). */
@@ -21,6 +27,8 @@ export function useQuickTrainingPreviews(state: GameState, now: number): QuickTr
       technicianEnabled,
       instructor: enabled ? previewQuickTeacherTraining(state, "instructor", now) : undefined,
       technician: technicianEnabled ? previewQuickTeacherTraining(state, "technician", now) : undefined,
+      // ponytail: simula tutti i corsi a ogni render; se pesa con molti Istruttori, ricalcolare solo all'hover.
+      max: enabled ? startAllQuickTeacherTrainings(state, now) : { started: 0, cost: 0 },
     };
   }, [state, now]);
 }

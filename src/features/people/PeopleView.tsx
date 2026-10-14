@@ -48,7 +48,7 @@ export function PeopleView({
     mode?: FormTrainingStartMode,
   ) => void;
   onToggleAutomaticTeaching?: (enabled: boolean) => void;
-  onQuickTeacherTraining?: (kind: "instructor" | "technician") => void;
+  onQuickTeacherTraining?: (kind: "instructor" | "technician" | "all") => void;
   onToggleFavorite?: (contactId: string) => void;
   onCancelEnrollment?: (contactId: string) => void;
   onBookTechnicianCourse?: (collaboratorId: string, formId: FormId) => void;
