@@ -12,7 +12,8 @@
     "test:watch": "vitest",
     "test:scale": "vitest run -c vitest.scale.config.mjs --reporter=default",
     "test:e2e": "node scripts/run-playwright.mjs",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "motore": "node scripts/motore.mjs"
   },
   "dependencies": {
     "@fontsource/barlow": "^5.3.0",

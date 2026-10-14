@@ -7,3 +7,7 @@ test-results/
 *.local
 *.tsbuildinfo
 .codex-vite.*.log
+
+# Motore di test (npm run motore)
+.motore/
+motore-risultati/
