@@ -323,7 +323,8 @@ describe("game engine: narrative", () => {
         },
       },
       statistics: { ...initial.statistics, eventsCompleted: 25, emailsSent: 30 },
-      upgrades: { ...initial.upgrades, "comfortable-keyboard": 2, "project-x": 1 },
+      upgrades: { ...initial.upgrades, "comfortable-keyboard": 2, "project-x": 1, "time-is-money": 2 },
+      automation: { ...initial.automation, gameSpeed: 3 },
       secretUpgradeDiscoveries: ["project-x" as const],
       tournaments: {
         ...initial.tournaments,
@@ -387,7 +388,10 @@ describe("game engine: narrative", () => {
       expect.arrayContaining(initial.legendaryCollaborators.encounteredProfileIds),
     );
     expect(founded.upgrades["comfortable-keyboard"]).toBe(0);
-    expect(founded.upgrades["project-x"]).toBe(0);
+    // Corso X and «Il tempo è denaro» stay for the whole career (14/10), with the chosen speed.
+    expect(founded.upgrades["project-x"]).toBe(1);
+    expect(founded.upgrades["time-is-money"]).toBe(2);
+    expect(founded.automation.gameSpeed).toBe(3);
     expect(founded.secretUpgradeDiscoveries).toEqual(["project-x"]);
     // The Accademico title (counted from the national one) 2 points, 150 Fama 1 (√(150/115)),
     // the national title and the Champion's Arena 2 each. Nothing spent.

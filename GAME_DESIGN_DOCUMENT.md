@@ -2184,7 +2184,8 @@ evento», «probabilità che chi fa la prova si iscriva»), non quelle del codic
 ramo** (20% fino al 06/10): prezzo = catalogo × 0,25 × 1,25^(punti del ramo), arrotondato all'euro
 (`UPGRADE_PRICING` e `getUpgradeCost` in `src/content/upgrades.ts`). Gli altri
 rami non cambiano. In una nuova scuola gli Upgrade ripartono da zero e con
-loro i prezzi: è il motivo per fondare, e le cime dei rami si raggiungono
+loro i prezzi (tranne gli upgrade fissi: Corso X e «Il tempo è denaro», vedi
+§ 17.6): è il motivo per fondare, e le cime dei rami si raggiungono
 scuola dopo scuola con la Reputazione. Network delle Onde e Percorsi Segreti
 tengono i prezzi di catalogo. Non c'è più la maggiorazione del 15% per scuola
 fondata (decisioni di Andrea del 05/10; misure in § 10.10).
@@ -2656,8 +2657,9 @@ La velocità si sceglie con il pulsante «avanti veloce» accanto alla pausa
 solo con il nodo comprato. Accelera l'orologio del gioco (`gameClock.ts`): mesi
 e quote, eventi, prove, corsi, tornei e collaboratori; non la scrittura delle
 email né i minigiochi in tempo reale. La scelta è salvata in
-`automation.gameSpeed` e limitata dal livello (`getPlayerGameSpeed`): alla
-fondazione di una nuova scuola il nodo riparte da zero e il gioco torna a 1×. Il
+`automation.gameSpeed` e limitata dal livello (`getPlayerGameSpeed`). Dal
+14/10 è un upgrade fisso: alla fondazione i livelli comprati restano, con la
+velocità scelta, e i successivi si comprano nelle scuole dopo (§ 17.6). Il
 selettore del pannello Admin (fino a 100×) ha la precedenza fino al ricaricamento.
 La corsia del Network ha dieci nodi: una corsia con più di nove nodi usa una
 colonna per nodo.
@@ -2675,7 +2677,7 @@ colonna per nodo.
 | 16 | Leggende in visita | +20% probabilità di Leggendari tra i nuovi contatti per livello | 2.000.000 / 6.000.000 / 18.000.000 € |
 | 20 | Gran Consiglio | raddoppia la Reputazione della prossima fondazione | 10.000.000 € |
 
-Come gli altri Upgrade, i livelli si azzerano alla fondazione: Lettere di
+Come gli altri Upgrade (tranne «Il tempo è denaro»), i livelli si azzerano alla fondazione: Lettere di
 raccomandazione e Gran Consiglio valgono per la fondazione della scuola in cui
 si comprano, e la finestra «Se fondi ora» della pagina Network li mostra nel
 conto (+N, ×2). Il raddoppio si applica dopo le Lettere. Scambio di Istruttori
@@ -4141,6 +4143,12 @@ Nel codice, per ogni scuola fondata:
 
 - **costi:** gli Upgrade ripartono da zero e i prezzi tornano a quelli di
   partenza (la curva per ramo, § 10, riparte);
+- **upgrade fissi** (decisione del 14/10, `PERMANENT_UPGRADE_IDS` in
+  `src/content/upgrades.ts`): Corso X e «Il tempo è denaro» restano per tutta la
+  carriera con i livelli comprati (la velocità scelta resta anche lei); i
+  livelli mancanti si comprano nelle scuole successive. Network e Percorsi
+  Segreti non hanno punti del ramo, quindi i prezzi degli altri nodi non
+  cambiano. Vale da ora in poi: il passato non si ricostruisce;
 - **obiettivi:** ogni ciclo richiede di nuovo un titolo all'Accademico (§ 17.2);
 - **complessità organizzativa:** il Network delle Onde (§ 10.13) apre un nodo
   alla 1ª, 2ª, 3ª, 5ª, 7ª, 10ª, 13ª, 16ª e 20ª scuola fondata;

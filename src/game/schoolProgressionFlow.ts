@@ -1,6 +1,7 @@
 import { addCareer, getSchoolGadgetsSold, recordCareer } from "./career";
 import { getSchoolYear } from "./calendar";
 import { describeAchievementKey, getNewAchievementKeys } from "../content/achievements";
+import { getPermanentUpgradeLevels } from "../content/upgrades";
 import {
   SHORT_GOALS,
   createNextShortGoal,
@@ -168,6 +169,12 @@ export function foundSchool(
       name: details.name.trim(),
       city: details.city.trim(),
     },
+    // Corso X and «Il tempo è denaro» stay for the whole career (Andrea, 14/10),
+    // with the game speed the player had chosen.
+    upgrades: { ...fresh.upgrades, ...getPermanentUpgradeLevels(state.upgrades) },
+    automation: state.automation.gameSpeed === undefined
+      ? fresh.automation
+      : { ...fresh.automation, gameSpeed: state.automation.gameSpeed },
     network: {
       reputation: availableReputation - getSpentReputation(spending),
       reputationUpgrades: Object.fromEntries(REPUTATION_UPGRADE_IDS.map((id) => [

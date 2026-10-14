@@ -326,6 +326,26 @@ export function getUpgradeDefinition(id: UpgradeId) {
 // Per levels object: the game never modifies one in place (new object on purchase).
 const categoryPointsCache = new WeakMap<UpgradeLevels, Map<UpgradeCategory, number>>();
 
+/**
+ * Upgrades that stay for the whole career (Andrea, 14/10): the levels bought
+ * survive every foundation and the next ones are bought in later schools. They
+ * cost no branch points: the Network and the Percorsi Segreti have none.
+ */
+export const PERMANENT_UPGRADE_IDS: readonly UpgradeId[] = ["project-x", "time-is-money"];
+
+export function isPermanentUpgrade(upgradeId: UpgradeId): boolean {
+  return PERMANENT_UPGRADE_IDS.includes(upgradeId);
+}
+
+/** The levels of the permanent upgrades, to lay over a new school's fresh upgrades. */
+export function getPermanentUpgradeLevels(levels: UpgradeLevels): UpgradeLevels {
+  const kept: UpgradeLevels = {};
+  for (const id of PERMANENT_UPGRADE_IDS) {
+    if ((levels[id] ?? 0) > 0) kept[id] = levels[id];
+  }
+  return kept;
+}
+
 export function getUpgradeCategoryPoints(
   levels: UpgradeLevels,
   category: UpgradeCategory,
