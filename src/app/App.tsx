@@ -551,8 +551,8 @@ export function App() {
     [dispatch, getGameNow],
   );
   const startQuickTeacherTraining = useCallback(
-    (kind: "instructor" | "technician" | "all") =>
-      dispatch({ type: "START_QUICK_TEACHER_TRAINING", kind, now: getGameNow() }),
+    (kind: "instructor" | "technician", max?: boolean) =>
+      dispatch({ type: "START_QUICK_TEACHER_TRAINING", kind, max, now: getGameNow() }),
     [dispatch, getGameNow],
   );
   const toggleMemberFavorite = useCallback(

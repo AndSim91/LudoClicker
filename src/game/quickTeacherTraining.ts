@@ -184,8 +184,6 @@ function pickQuickTeacherTraining(
   return none;
 }
 
-export type QuickTrainingRequest = QuickTrainingKind | "all";
-
 export interface QuickTrainingBatch {
   state: GameState;
   started: number;
@@ -193,35 +191,26 @@ export interface QuickTrainingBatch {
 }
 
 /**
- * «Max» dell'Ufficio formazione (Andrea, 14/10): avvia tutti i corsi che si possono
- * pagare, uno alla volta con la stessa scelta dei due pulsanti. Istruttori e
- * Tecnici si alternano, così con pochi Fondi nessuno dei due resta a secco; ogni
- * corso avviato conta nella copertura, quindi il successivo va sulla Forma più scoperta.
+ * «Max» dentro ogni pulsante dell'Ufficio formazione (Andrea, 14/10): avvia tutti i
+ * corsi Istruttori (o Tecnici) che i Fondi permettono, uno alla volta con la stessa
+ * scelta del pulsante. Ogni corso avviato conta nella copertura, quindi il successivo
+ * va sulla Forma più scoperta; se la più scoperta costa troppo, ne prova una più economica.
  */
-export function startAllQuickTeacherTrainings(state: GameState, now: number): QuickTrainingBatch {
+export function startAllQuickTeacherTrainings(state: GameState, kind: QuickTrainingKind, now: number): QuickTrainingBatch {
   let current = state;
   let started = 0;
-  const kinds: QuickTrainingKind[] = ["instructor", "technician"];
   // ponytail: tetto di sicurezza; ogni giro avvia un corso o si ferma.
   for (let guard = 0; guard < 1_000; guard += 1) {
-    let progressed = false;
-    for (const kind of kinds) {
-      const next = pickQuickTeacherTraining(current, kind, now).state;
-      if (next !== current) {
-        current = next;
-        started += 1;
-        progressed = true;
-      }
-    }
-    if (!progressed) break;
+    const next = pickQuickTeacherTraining(current, kind, now).state;
+    if (next === current) break;
+    current = next;
+    started += 1;
   }
   const cost = Math.round((state.school.euros - current.school.euros) * 100) / 100;
   return { state: current, started, cost };
 }
 
-/** Il reducer: un pulsante dell'Ufficio formazione oppure «Max». */
-export function runQuickTeacherTraining(state: GameState, request: QuickTrainingRequest, now: number): GameState {
-  return request === "all"
-    ? startAllQuickTeacherTrainings(state, now).state
-    : startQuickTeacherTraining(state, request, now);
+/** Il reducer: un corso, oppure tutti quelli possibili («Max»). */
+export function runQuickTeacherTraining(state: GameState, kind: QuickTrainingKind, now: number, max = false): GameState {
+  return max ? startAllQuickTeacherTrainings(state, kind, now).state : startQuickTeacherTraining(state, kind, now);
 }

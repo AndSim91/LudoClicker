@@ -239,6 +239,7 @@ export function createGameActionHandlers(
       state,
       action.kind,
       action.now,
+      action.max,
     ),
     BOOK_TECHNICIAN_COURSE: (state, action) => bookTechnicianCourse(
       state,

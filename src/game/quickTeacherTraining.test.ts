@@ -78,21 +78,27 @@ describe("Ufficio formazione", () => {
     expect(twice.collaborators[1].instructorCourse?.formId).toBe("form-2");
   });
 
-  it("Max starts every course it can, spread over the least covered Forms", () => {
+  it("Max starts every Istruttori course the funds allow, spread over the least covered Forms", () => {
     const state = school([
       instructor(1, ["form-1", "form-2"], [], 400),
       instructor(2, ["form-1", "form-2"], []),
     ], [100, 100]);
-    const batch = startAllQuickTeacherTrainings(state, 5_000);
+    const batch = startAllQuickTeacherTrainings(state, "instructor", 5_000);
     // Each qualifies on a different Form and, in parallel, learns the next one (Corso Y).
     expect(batch.started).toBe(4);
     expect(batch.state.collaborators.map((c) => [c.instructorCourse?.formId, c.training?.formId]))
       .toEqual([["form-1", "course-y"], ["form-2", "course-y"]]);
     expect(batch.cost).toBeCloseTo(state.school.euros - batch.state.school.euros);
-    const next = gameReducer(state, { type: "START_QUICK_TEACHER_TRAINING", kind: "all", now: 5_000 });
+    const next = gameReducer(state, { type: "START_QUICK_TEACHER_TRAINING", kind: "instructor", max: true, now: 5_000 });
     expect(next.collaborators.map((c) => c.instructorCourse?.formId)).toEqual(["form-1", "form-2"]);
+    // Only the courses the funds allow.
+    const poor = { ...state, school: { ...state.school, euros: batch.cost / 2 } };
+    const limited = startAllQuickTeacherTrainings(poor, "instructor", 5_000);
+    expect(limited.started).toBeGreaterThan(0);
+    expect(limited.started).toBeLessThan(4);
+    expect(limited.state.school.euros).toBeGreaterThanOrEqual(0);
     // Nothing left: Max does nothing.
-    expect(startAllQuickTeacherTrainings(batch.state, 5_000)).toMatchObject({ started: 0, cost: 0 });
+    expect(startAllQuickTeacherTrainings(batch.state, "instructor", 5_000)).toMatchObject({ started: 0, cost: 0 });
   });
 
   it("lets someone with only Forma 1 learn Forma 2 when Corso X is locked", () => {

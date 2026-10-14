@@ -1,21 +1,25 @@
 import { Icon } from "../../components/common/Icon";
 import { getFormDefinition } from "../../content/forms";
 import { getGameMonthName } from "../../game/calendar";
-import type { QuickTrainingKind, QuickTrainingPreview, QuickTrainingRequest } from "../../game/quickTeacherTraining";
+import type { QuickTrainingKind, QuickTrainingPreview } from "../../game/quickTeacherTraining";
 import { getNextSISStartMonth } from "../../game/teacherTrainingFlow";
-import type { QuickTrainingPreviews } from "./useQuickTrainingPreviews";
+import type { QuickTrainingMax, QuickTrainingPreviews } from "./useQuickTrainingPreviews";
 import { formatCurrency } from "../../shared/formatters";
+
+type StartQuickTraining = (kind: QuickTrainingKind, max?: boolean) => void;
 
 function QuickButton({
   kind,
   preview,
+  max,
   course,
   onStart,
 }: {
   kind: QuickTrainingKind;
   preview?: QuickTrainingPreview;
+  max: QuickTrainingMax;
   course: string;
-  onStart: (kind: QuickTrainingKind) => void;
+  onStart: StartQuickTraining;
 }) {
   const action = kind === "instructor" ? "Forma un Istruttore" : "Forma un Tecnico";
   const formName = preview ? getFormDefinition(preview.formId)?.longName ?? preview.formId : undefined;
@@ -24,21 +28,38 @@ function QuickButton({
     : preview.affordable
       ? `${course} · ${formatCurrency(preview.cost)}`
       : `Servono ${formatCurrency(preview.cost)}`;
+  const maxLabel = max.started === 0
+    ? "Max · nessun corso pagabile adesso"
+    : `Max · avvia ${max.started} ${max.started === 1 ? "corso" : "corsi"} · ${formatCurrency(max.cost)}`;
   return (
-    <button
-      type="button"
-      className={kind === "technician" ? "is-technician" : undefined}
-      disabled={!preview?.affordable}
-      onClick={() => onStart(kind)}
-    >
-      <span className="instructor-quick-main">
-        {kind === "instructor"
-          ? <Icon name="people" />
-          : <span className="technician-course-badge" aria-hidden="true">SIS</span>}
-        {formName ? `${action} · ${formName}` : action}
-      </span>
-      <span className="instructor-quick-detail"><span className="sr-only"> · </span>{detail}</span>
-    </button>
+    // «Max» dentro il riquadro, a destra (Andrea, 14/10): due pulsanti fratelli, perché un pulsante dentro l'altro non è HTML valido.
+    <div className={`instructor-quick-item${kind === "technician" ? " is-technician" : ""}`}>
+      <button
+        type="button"
+        className={kind === "technician" ? "is-technician" : undefined}
+        disabled={!preview?.affordable}
+        onClick={() => onStart(kind)}
+      >
+        <span className="instructor-quick-main">
+          {kind === "instructor"
+            ? <Icon name="people" />
+            : <span className="technician-course-badge" aria-hidden="true">SIS</span>}
+          {formName ? `${action} · ${formName}` : action}
+        </span>
+        <span className="instructor-quick-detail"><span className="sr-only"> · </span>{detail}</span>
+      </button>
+      <button
+        type="button"
+        className="instructor-quick-max"
+        disabled={max.started === 0}
+        title={maxLabel}
+        aria-label={maxLabel}
+        onClick={() => onStart(kind, true)}
+      >
+        <strong>Max</strong>
+        <span>{max.started}</span>
+      </button>
+    </div>
   );
 }
 
@@ -49,44 +70,33 @@ export function QuickTeacherTraining({
 }: {
   previews: QuickTrainingPreviews;
   currentMonth: number;
-  onStart: (kind: QuickTrainingRequest) => void;
+  onStart: StartQuickTraining;
 }) {
   if (!previews.enabled) return null;
-  const { started, cost } = previews.max;
-  const maxDetail = started === 0
-    ? "nessun corso da avviare"
-    : `avvia ${started} ${started === 1 ? "corso" : "corsi"} · ${formatCurrency(cost)}`;
   return (
-    <div className="instructor-quick-office" role="group" aria-label="Ufficio formazione">
-      <div className="instructor-quick-training">
-        <QuickButton kind="instructor" preview={previews.instructor} course="Corso Istruttori" onStart={onStart} />
-        {previews.technicianEnabled ? (
-          <QuickButton
-            kind="technician"
-            preview={previews.technician}
-            course={`Corso Tecnici SIS da ${getGameMonthName(getNextSISStartMonth(currentMonth)).toLowerCase()}`}
-            onStart={onStart}
-          />
-        ) : (
-          // Altezza fissa (06/10): il secondo posto c'è già, in attesa della SIS.
-          <div className="instructor-quick-slot" aria-hidden="true">
-            <strong>Forma un Tecnico</strong>
-            <span>Con la SIS, dagli Upgrade</span>
-          </div>
-        )}
-      </div>
-      {/* «Max» (Andrea, 14/10): tutti i corsi che si possono pagare, sulle Forme più scoperte. */}
-      <button
-        type="button"
-        className="instructor-quick-max"
-        disabled={started === 0}
-        title={maxDetail}
-        aria-label={`Max · ${maxDetail}`}
-        onClick={() => onStart("all")}
-      >
-        <strong>Max</strong>
-        <span>{started === 0 ? "—" : `${started} ${started === 1 ? "corso" : "corsi"}`}</span>
-      </button>
+    <div className="instructor-quick-training" role="group" aria-label="Ufficio formazione">
+      <QuickButton
+        kind="instructor"
+        preview={previews.instructor}
+        max={previews.instructorMax}
+        course="Corso Istruttori"
+        onStart={onStart}
+      />
+      {previews.technicianEnabled ? (
+        <QuickButton
+          kind="technician"
+          preview={previews.technician}
+          max={previews.technicianMax}
+          course={`Corso Tecnici SIS da ${getGameMonthName(getNextSISStartMonth(currentMonth)).toLowerCase()}`}
+          onStart={onStart}
+        />
+      ) : (
+        // Altezza fissa (06/10): il secondo posto c'è già, in attesa della SIS.
+        <div className="instructor-quick-slot" aria-hidden="true">
+          <strong>Forma un Tecnico</strong>
+          <span>Con la SIS, dagli Upgrade</span>
+        </div>
+      )}
     </div>
   );
 }

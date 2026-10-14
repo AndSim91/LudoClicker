@@ -1395,8 +1395,9 @@ export type GameAction =
     }
   | {
       type: "START_QUICK_TEACHER_TRAINING";
-      /** "all" = «Max»: tutti i corsi che si possono pagare. */
-      kind: "instructor" | "technician" | "all";
+      kind: "instructor" | "technician";
+      /** «Max»: tutti i corsi che i Fondi permettono, non uno solo. */
+      max?: boolean;
       now: number;
     }
   | {

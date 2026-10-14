@@ -373,7 +373,8 @@
   background: none;
 }
 
-.instructor-sector-side .instructor-quick-training button,
+.instructor-sector-side .instructor-quick-training > button,
+.instructor-sector-side .instructor-quick-training > .instructor-quick-item,
 .instructor-sector-side .instructor-quick-slot {
   flex: 0 0 auto;
 }
@@ -588,6 +589,7 @@
 @container instructor-side (min-width: 492px) {
   .instructor-sector-side .instructor-quick-training { flex-direction: row; }
   .instructor-sector-side .instructor-quick-training > button,
+  .instructor-sector-side .instructor-quick-training > .instructor-quick-item,
   .instructor-sector-side .instructor-quick-training > .instructor-quick-slot { flex: 1 1 0; min-width: 0; }
 }
 
