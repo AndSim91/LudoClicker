@@ -78,7 +78,8 @@ it("spends points for good: permanent upgrades stay, rent points only lock this 
   expect(first.network.reputation).toBe(4);
   expect(first.network.reputationUpgrades?.writing).toBe(2);
   expect(getReputationMultiplier(first, "writing")).toBeCloseTo(1.4);
-  expect(first.player.writingPower).toBeCloseTo(1.4);
+  // Scrittura (14/10): +1 character per input per point, not +20%.
+  expect(first.player.writingPower).toBe(3);
   // 125 members × 40 € × 10% = 500 € of rent value; 4 points = 40% = 200 €.
   expect(first.network.monthlyRent).toBe(200);
   // The map keeps name, city and the Fama the school had.
@@ -181,8 +182,8 @@ it("raises the base values by 20% a point, probabilities up to their maximum", (
   });
   const levelled = boosted({ writing: 5, events: 5, enrollment: 2, training: 10, genetics: 2 });
 
-  // Email/Social: characters per input, for the player and for Redazione and Social.
-  expect(getWritingPower(levelled)).toBeCloseTo(getWritingPower(initial) * 2);
+  // Scrittura: +1 character per input a point, for the player and for Redazione and Social.
+  expect(getWritingPower(levelled)).toBe(getWritingPower(initial) + 5);
   // Eventi: more contacts at every event.
   expect(getEventContactMultiplier(levelled)).toBeCloseTo(getEventContactMultiplier(initial) * 2);
   // Iscrizioni: 62.5% enrollment base × 1.4 = 87.5%; the booking chance has no branch any more.

@@ -11,7 +11,7 @@ import {
   getEventCharismaBonus,
   getEventCollaboratorMultiplier,
 } from "./eventRewards";
-import { getReputationMultiplier } from "./reputation";
+import { getReputationLevel, getReputationMultiplier } from "./reputation";
 import type { FormId, GameState, PersonRarity } from "./types";
 
 function clamp(value: number, minimum: number, maximum: number) {
@@ -106,9 +106,12 @@ export function getEventFunnelOutcome(
   return { peopleMet, demonstrationsGiven, emailShareChance };
 }
 
-export function getWritingPower(state: GameState) {
-  const localPower = 1 + getUpgradeEffectTotal(state.upgrades, "writingPower");
-  return localPower * getReputationMultiplier(state, "writing");
+/**
+ * Characters per input, for the player and for Redazione and Social. Reputation
+ * «Scrittura» (14/10, was Email/Social +20%) adds one character per point.
+ */
+export function getWritingPower(state: Pick<GameState, "network" | "upgrades">) {
+  return 1 + getUpgradeEffectTotal(state.upgrades, "writingPower") + getReputationLevel(state, "writing");
 }
 
 export function getHighestFormLevel(forms: FormId[]): number {

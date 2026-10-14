@@ -8,7 +8,8 @@ import type { FoundedSchool, GameState } from "./types";
  * 2 for a national title,
  * √(Fama / 115) points, +2 each for the Champion's Arena, the Reptile
  * (or the Superba it became) and the Chronicles won by the school left behind. Points are spent at the foundation, for good:
- * - six permanent upgrades, +20% of their base value per point, up to 50 points;
+ * - six permanent upgrades, +20% of their base value per point (Scrittura: +1
+ *   character per input instead, 14/10), up to 50 points;
  * - the network rent, which is consumed: each point locks 10% of the rent value
  *   of the school being left (members × base fee × 10%) as a fixed monthly
  *   rent. The points do not stay as levels, so the next school starts from 0%.
@@ -27,7 +28,7 @@ export type ReputationUpgradeId = (typeof REPUTATION_UPGRADE_IDS)[number];
 export type ReputationUpgradeLevels = Partial<Record<ReputationUpgradeId, number>>;
 
 export const REPUTATION_UPGRADES: Record<ReputationUpgradeId, { label: string; description: string }> = {
-  writing: { label: "Email/Social", description: "caratteri per input, nelle email e nei contenuti social" },
+  writing: { label: "Scrittura", description: "+1 carattere a ogni input, anche per Redazione e Social" },
   events: { label: "Eventi", description: "contatti trovati a ogni evento" },
   enrollment: { label: "Iscrizioni", description: "probabilità base di iscrizione dopo la prova" },
   socialGadgets: { label: "Social e Gadget", description: "entrate dai follower e dalle vendite dei gadget" },
@@ -41,6 +42,13 @@ export interface ReputationSpending {
 }
 
 export const NO_REPUTATION_SPENDING: ReputationSpending = { upgrades: {}, rent: 0 };
+
+/** What `level` points give, as the Network page and the foundation show it. */
+export function formatReputationEffect(id: ReputationUpgradeId, level: number): string {
+  return id === "writing"
+    ? `+${level} ${level === 1 ? "carattere" : "caratteri"}`
+    : `+${Math.round(level * GAME_CONFIG.reputationStep * 100)}%`;
+}
 
 export function getReputationLevel(
   state: Pick<GameState, "network">,

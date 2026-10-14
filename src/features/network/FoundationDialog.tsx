@@ -3,6 +3,7 @@ import { GAME_CONFIG } from "../../game/config";
 import {
   REPUTATION_UPGRADES,
   REPUTATION_UPGRADE_IDS,
+  formatReputationEffect,
   getReputationLevel,
   getMonthlyNetworkRent,
   getSpentReputation,
@@ -15,7 +16,6 @@ import type { GameState, SchoolFoundationDetails } from "../../game/types";
 import { formatCurrency, formatStat } from "../../shared/formatters";
 
 const points = (value: number) => `${formatStat(value)} ${value === 1 ? "punto" : "punti"}`;
-const percent = (level: number) => `+${Math.round(level * GAME_CONFIG.reputationStep * 100)}%`;
 
 export function FoundationDialog({
   state,
@@ -91,7 +91,7 @@ export function FoundationDialog({
             return (
               <div key={id} className="foundation-row">
                 <LevelRing base={level} extra={extra} />
-                <span>{REPUTATION_UPGRADES[id].label}<small>{REPUTATION_UPGRADES[id].description} · <Change from={percent(level)} to={percent(level + extra)} changed={extra > 0} /></small></span>
+                <span>{REPUTATION_UPGRADES[id].label}<small>{REPUTATION_UPGRADES[id].description} · <Change from={formatReputationEffect(id, level)} to={formatReputationEffect(id, level + extra)} changed={extra > 0} /></small></span>
                 <Stepper label={REPUTATION_UPGRADES[id].label} base={level} added={extra} onDown={() => change(id, -1)} onUp={() => change(id, 1)} canUp={canAdd(id)} />
               </div>
             );

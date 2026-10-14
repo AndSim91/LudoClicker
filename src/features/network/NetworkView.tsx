@@ -8,6 +8,7 @@ import { canFoundSchool, hasPrestigeTitle } from "../../game/progression";
 import {
   REPUTATION_UPGRADES,
   REPUTATION_UPGRADE_IDS,
+  formatReputationEffect,
   getMonthlyNetworkRent,
   getPrestigeReputationPreview,
   getReputationLevel,
@@ -133,7 +134,7 @@ export function NetworkView({
         </section>
 
         <section className="network-panel" aria-labelledby="network-upgrades-title" data-tutorial-region="network-upgrades">
-          <h2 id="network-upgrades-title">Potenziamenti <small>+{Math.round(GAME_CONFIG.reputationStep * 100)}% a punto · massimo {GAME_CONFIG.reputationUpgradeMaxLevel}</small></h2>
+          <h2 id="network-upgrades-title">Potenziamenti <small>+{Math.round(GAME_CONFIG.reputationStep * 100)}% a punto (Scrittura +1 carattere) · massimo {GAME_CONFIG.reputationUpgradeMaxLevel}</small></h2>
           <div className="network-dials">
             {REPUTATION_UPGRADE_IDS.map((id) => {
               const level = getReputationLevel(state, id);
@@ -145,7 +146,7 @@ export function NetworkView({
                     <text x="27" y="31" textAnchor="middle">{level}</text>
                   </svg>
                   <span>{REPUTATION_UPGRADES[id].label}</span>
-                  <small>+{Math.round(level * GAME_CONFIG.reputationStep * 100)}%</small>
+                  <small>{formatReputationEffect(id, level)}</small>
                   {/* Outlook draws a row with a bar instead of the ring (06/10): hidden in Onde. */}
                   <em className="network-dial-desc">{REPUTATION_UPGRADES[id].description}</em>
                   <em className="network-dial-level">{level}/{GAME_CONFIG.reputationUpgradeMaxLevel}</em>

@@ -41,7 +41,7 @@ it("founds a new school from one page: name and city, old points white and fixed
   fireEvent.click(screen.getByRole("button", { name: "Aggiungi un punto a Genetica" }));
   expect(screen.getByLabelText("Genetica: 4")).toHaveTextContent("3+1");
   expect(screen.getByText("+80%", { selector: ".foundation-now" })).toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button", { name: "Aggiungi un punto a Email/Social" }));
+  fireEvent.click(screen.getByRole("button", { name: "Aggiungi un punto a Scrittura" }));
   expect(screen.getByRole("button", { name: "Aggiungi un punto a Genetica" })).toBeDisabled();
   fireEvent.click(screen.getByRole("button", { name: "Togli un punto da Genetica" }));
   expect(screen.getByLabelText("Genetica: 3")).toHaveTextContent(/^3$/);

@@ -635,12 +635,13 @@ punti, Fama 10.000 ne dà 11 e Fama 30.000 ne dà 18
 **Spesa.** I punti si spendono alla fondazione, nella finestra «Fonda una nuova
 scuola» della pagina Network (§ 17.3); la spesa è definitiva e i punti non spesi
 restano per la fondazione successiva. Ogni punto vale **+20% del valore base**
-(`reputationStep = 0,2`, decisione del 04/10); i potenziamenti della scuola si
-applicano sopra.
+(`reputationStep = 0,2`, decisione del 04/10), tranne Scrittura che dal 14/10
+vale **+1 carattere a ogni input**; i potenziamenti della scuola si applicano
+sopra.
 
 | Potenziamento  | Valore base aumentato                                                                  |
 | -------------- | -------------------------------------------------------------------------------------- |
-| Email/Social   | caratteri per input, delle email e dei contenuti social (`getWritingPower`)             |
+| Scrittura      | +1 carattere a ogni input per punto, per il giocatore e per Redazione e Social (`getWritingPower`; dal 14/10, prima «Email/Social» +20%, salvataggio v116) |
 | Eventi         | contatti trovati a ogni evento (`getEventContactMultiplier`)                            |
 | Iscrizioni     | probabilità base di iscrizione dopo la prova, fino al massimo della rarità              |
 | Social e Gadget | entrate dei follower (`getMonthlySocialIncome`) e vendite dei gadget, anche incrociate (non quote, non rendita; dal 04/10 al posto di Quote mensili, salvataggio v94) |
@@ -705,8 +706,8 @@ Genetica.
 Formula attuale:
 
 ```text
-potenzaScrittura = (1 + bonusTastieraComoda + bonusFrasiRapide)
-  × (1 + 0,20 × punti Reputazione Email/Social)
+potenzaScrittura = 1 + bonusTastieraComoda + bonusFrasiRapide
+  + punti Reputazione Scrittura
 
 caratteriPerInput = potenzaScrittura
   × moltiplicatoreFlusso
@@ -730,8 +731,9 @@ Valori effettivi della prima curva:
 | Tastiera comoda e Frasi rapide al massimo |                   4 |
 | Come sopra, con Flusso al tetto ×5        |                  20 |
 
-La Reputazione (ramo Email/Social, +20% a punto) moltiplica ulteriormente la
-potenza, per il giocatore e per Redazione e Social.
+La Reputazione (ramo Scrittura, dal 14/10) aggiunge 1 carattere per punto alla
+potenza, per il giocatore e per Redazione e Social: con 5 punti e i due nodi al
+massimo si passa da 4 a 9 caratteri per input.
 
 #### Flusso e Frase perfetta
 
@@ -2239,8 +2241,8 @@ degli altri nodi non hanno effetto. A rami completi la somma è esattamente 5%
 (1,25% Frasi fatte + 0,75% ciascuno per Tastiera comoda, Frasi rapide e Campi
 intelligenti + 1,5% Revisione istantanea).
 
-I caratteri per input partono da 1 e sommano i bonus dei nodi; il totale è poi
-moltiplicato per la Reputazione Email/Social (+20% a punto). La velocità Redazione/Social si somma ai bonus
+I caratteri per input partono da 1 e sommano i bonus dei nodi e i punti della
+Reputazione Scrittura (+1 carattere a punto). La velocità Redazione/Social si somma ai bonus
 generici di automazione dell'Organizzazione.
 
 ### 10.2 Creatività
