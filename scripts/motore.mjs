@@ -3,6 +3,7 @@
  * Motore di test di LudoClicker (Andrea, 14/10/2026).
  *
  *   npm run motore -- --partite 50 --scuole 20
+ *   node scripts/motore.mjs --partite 50 --scuole 20   (da PowerShell, che toglie il --)
  *
  * Opzioni:
  *   --partite N   partite da giocare (50)
@@ -150,7 +151,13 @@ async function principale() {
     console.log(testa.replace(/^#!.*\n\/\*\*\n/, "").replace(/^ \* ?/gm, "").trimEnd());
     return;
   }
-  const o = opzioni(process.argv.slice(2));
+  const argv = process.argv.slice(2);
+  // ponytail: PowerShell (npm.ps1) toglie il "--" e npm si tiene i nomi delle opzioni: meglio fermarsi che partire coi predefiniti
+  if (argv.length && !argv[0].startsWith("--")) {
+    console.error(`Argomenti senza nome (${argv.join(" ")}): da PowerShell usa\n  node scripts/motore.mjs --partite 16 --scuole 10\noppure npm.cmd run motore -- ...  (aiuto: --help)`);
+    process.exit(1);
+  }
+  const o = opzioni(argv);
   try { setPriority(PRIORITA[o.priorita]); } catch { /* non permesso: si va avanti */ }
   // Soglia di sicurezza: sotto questa RAM libera il motore restituisce memoria al sistema.
   const sogliaMb = Math.max(MEMORIA_MINIMA_MB, (totalmem() / MB) * 0.03);
