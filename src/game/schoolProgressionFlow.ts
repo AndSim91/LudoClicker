@@ -1,3 +1,4 @@
+import { createAnnualLedger } from "./annualReport";
 import { addCareer, getSchoolGadgetsSold, recordCareer } from "./career";
 import { getSchoolYear } from "./calendar";
 import { describeAchievementKey, getNewAchievementKeys } from "../content/achievements";
@@ -210,8 +211,11 @@ export function foundSchool(
     // Missions start again from series 1; the baseline is the career statistics carried over.
     shortGoal: createShortGoalFromStatistics(careerStatistics, 0, now),
   };
+  // The new school's first pagella counts from today, not from the career totals
+  // carried in the statistics (14/10/2026: it showed the whole previous school).
+  const withLedger: GameState = { ...nextState, annual: { ...nextState.annual, ledger: createAnnualLedger(nextState, now) } };
   const announced = addMessage(
-    refreshWritingCampaignCopies(nextState),
+    refreshWritingCampaignCopies(withLedger),
     now,
     `${details.city.trim()} ha una scuola`,
     `${state.school.name} entra nel Network` +

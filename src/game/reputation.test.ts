@@ -85,6 +85,9 @@ it("spends points for good: permanent upgrades stay, rent points only lock this 
   expect(first.network.schools).toEqual([{ name: "Ordine delle Onde", city: "Genova", fame: 5_000 }]);
   expect(first.network.schoolCount).toBe(1);
   expect(first.school.fame).toBe(0);
+  // 14/10/2026: the first pagella of the new school starts from today's counters.
+  expect(first.annual?.ledger?.start.membersEnrolled).toBe(first.statistics.membersEnrolled);
+  expect(first.annual?.ledger?.start.eurosEarned).toBe(first.statistics.eurosEarned);
 
   // The next school starts again from 0% rent: 5 more points add 50% of its own value.
   const second = foundSchool(readySchool(first), details, 3_000, { upgrades: {}, rent: 5 });

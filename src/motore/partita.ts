@@ -109,6 +109,7 @@ export function giocaPartita({
   let scuola = 1;
   let visti = new Set<string>();
   let risultatiVisti = new Set<string>();
+  let reptileVisti = 0;
   let livelli = { ...state.upgrades } as Record<string, number>;
   let annoCorrente = getSchoolYear(state.school.currentMonth);
   let anno: AnnoScolastico = { iscrittiInizio: state.school.activeMembers, upgradeComprati: 0 };
@@ -162,6 +163,13 @@ export function giocaPartita({
     unaVolta("titolo", "champions", s.tournaments.championsVictoryCurrentSchool);
     unaVolta("titolo", "chronicles", Boolean(s.tournaments.chroniclesVictoryCurrentSchool));
     unaVolta("titolo", "reptile", s.tournaments.reptile.hall.some((entry) => entry.schoolName === s.school.name));
+    unaVolta("sblocco", "reptile", s.tournaments.reptile.unlocked);
+    unaVolta("reptile", "organizzato", Boolean(s.tournaments.reptile.activeEdition));
+    // Ogni edizione del Reptile finisce nell'albo: una riga «torneo reptile» per edizione.
+    for (const entry of s.tournaments.reptile.hall.slice(reptileVisti)) {
+      annota("torneo", "reptile", undefined, { vinto: entry.schoolName === s.school.name });
+    }
+    reptileVisti = s.tournaments.reptile.hall.length;
     unaVolta("velocita", String(getMaxGameSpeed(s.upgrades)), getMaxGameSpeed(s.upgrades) > 1);
     unaVolta("fondazione", "disponibile", canFoundSchool(s));
     unaVolta("upgrade-completi", "tutti", UPGRADE_VISIBILI.every((definition) =>
