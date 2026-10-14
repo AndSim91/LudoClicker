@@ -3,6 +3,7 @@ import { getAthleteTournamentStats, hasCompletedFormOne } from "./athleteStats";
 import { ARENA_DECISIVENESS, createChampionsOpenAthletePairs } from "./tournamentSimulation";
 import { getAvailableSwords } from "./equipment";
 import { GAME_CONFIG } from "./config";
+import { TOURNAMENT_DEFINITIONS } from "../content/tournaments";
 import { getSchoolYear } from "./calendar";
 import { getReptileBarQuality, getReptileBaseResa } from "./reptilePreparation";
 import { nextRandom } from "./random";
@@ -76,6 +77,19 @@ function toHomeAthlete(contact: Contact, statsOf: StatsOf): ReptileAthlete {
   };
 }
 
+/**
+ * 14/10/2026 (Andrea): with a base of 300 no external pair can be worth 700. Ordinary
+ * athletes stay within ±`REPTILE_FIELD_SPREAD` of the base; the Leggendari Segreti
+ * of the Champion's come at the Reptile scale (base 300 against the Champion's 400).
+ */
+const REPTILE_FIELD_SPREAD = 0.35;
+
+function toReptileScale(participant: TournamentParticipant, value: number): number {
+  const base = GAME_CONFIG.reptileStandard;
+  if (participant.secretLegendaryId) return value * base / TOURNAMENT_DEFINITIONS.champions.standard;
+  return clamp(value, base * (1 - REPTILE_FIELD_SPREAD), base * (1 + REPTILE_FIELD_SPREAD));
+}
+
 function toExternalAthlete(
   participant: TournamentParticipant,
   difficultyMultiplier: number,
@@ -86,8 +100,8 @@ function toExternalAthlete(
     firstName: participant.firstName,
     lastName: participant.lastName,
     rarity: participant.rarity,
-    arena: participant.arenaPreparation * difficultyMultiplier,
-    style: participant.stylePreparation * difficultyMultiplier,
+    arena: toReptileScale(participant, participant.arenaPreparation) * difficultyMultiplier,
+    style: toReptileScale(participant, participant.stylePreparation) * difficultyMultiplier,
   };
 }
 
@@ -189,15 +203,15 @@ function createHomeTeams(
       const statsB = statsOf(b);
       return (statsB.arena + statsB.style) - (statsA.arena + statsA.style);
     });
-  const half = Math.floor(selected.length / 2);
-  const strongest = perturbCloseRanks(selected.slice(0, half), cursor);
-  const weakest = perturbCloseRanks(selected.slice(half).reverse(), cursor);
-  return strongest.map((contact, index) => createTeam(
+  // 14/10/2026 (Andrea): our pairs at full strength like everybody else's, the two
+  // strongest together, then the next two, and so on (no more strongest + weakest).
+  const ranked = perturbCloseRanks(selected, cursor);
+  return Array.from({ length: Math.floor(ranked.length / 2) }, (_, index) => createTeam(
     `reptile-home-${index}-${cursor.seed >>> 0}`,
     state.school.name,
     state.school.city,
     true,
-    [toHomeAthlete(contact, statsOf), toHomeAthlete(weakest[index], statsOf)],
+    [toHomeAthlete(ranked[2 * index], statsOf), toHomeAthlete(ranked[2 * index + 1], statsOf)],
     cursor,
   ));
 }

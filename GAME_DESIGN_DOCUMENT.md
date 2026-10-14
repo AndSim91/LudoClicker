@@ -4674,6 +4674,14 @@ usura ciascuna. Niente più noleggio. Dalla resa escono tutti i risultati:
   formabili con iscritti che hanno la Forma 1; la resa sposta anche la scelta
   dalla sorte verso gli atleti migliori.
 
+Coppie (14/10/2026, Andrea: «le altre scuole mandano team al massimo della
+potenza, noi no»): le nostre coppie mettono insieme i due atleti più forti, poi i
+due successivi e così via (non più il più forte con il più debole). Le coppie
+esterne restano intorno alla base del Reptile (300): ogni atleta ordinario sta
+tra 0,65 e 1,35 volte la base, e i Leggendari Segreti della Champion's arrivano
+alla scala del Reptile (× 300 / 400). Superba e vittorie precedenti
+moltiplicano poi come prima.
+
 ### 20.4 La giornata degli imprevisti (minigioco)
 
 Il preside scende in palazzetto dalle 9 alle 19 e aiuta i collaboratori a
