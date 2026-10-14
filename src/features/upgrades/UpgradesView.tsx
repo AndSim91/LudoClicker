@@ -35,6 +35,7 @@ import {
   getUpgradeEffectTotal,
   isAgonistCourseUnlocked,
   isCourseXUnlocked,
+  isPermanentUpgrade,
   type UpgradeCategory,
   type UpgradeDefinition,
 } from "../../content/upgrades";
@@ -355,6 +356,8 @@ function UpgradeNode({
         ? "disponibile, saldo insufficiente"
         : "disponibile";
   const low = index % 2 === 1;
+  // Upgrade fisso (concept A, Andrea 14/10): a sealed lock on the icon, only once bought.
+  const permanent = isPermanentUpgrade(definition.id) && level > 0;
 
   if (isUpgradeHidden(state, definition)) {
     return (
@@ -380,12 +383,13 @@ function UpgradeNode({
         type="button"
         className={`upgrade-node ${status}${unaffordable ? " unaffordable" : ""}${selected ? " selected" : ""}`}
         onClick={(event) => onSelect(event.currentTarget)}
-        aria-label={`Apri dettagli ${definition.title}: livello ${level} di ${definition.maxLevel}, ${stateLabel}`}
+        aria-label={`Apri dettagli ${definition.title}: livello ${level} di ${definition.maxLevel}, ${stateLabel}${permanent ? ", fisso per sempre" : ""}`}
         aria-pressed={selected}
       >
         {/* Keyed on the spark, so a second quick purchase replays the pop and the ring. */}
         <span key={spark.id} className="upgrade-node-icon" aria-hidden="true">
           {status === "completed" ? <span className="upgrade-node-check">✓</span> : <Icon name={categoryIcons[definition.category]} />}
+          {permanent ? <span className="upgrade-node-permanent"><Icon name="lock" /></span> : null}
         </span>
         <strong><UpgradeTitle definition={definition} /></strong>
         {status === "completed" ? null : status === "locked" ? (
@@ -593,6 +597,12 @@ export function UpgradeDetailsDialog({
           </p>
         ) : (
           <>
+            {isPermanentUpgrade(definition.id) ? (
+              <p className="upgrade-dialog-permanent">
+                <Icon name="lock" />
+                <span><b>Upgrade fisso.</b> Una volta comprato resta per sempre, anche nelle prossime scuole.</span>
+              </p>
+            ) : null}
             <p id="upgrade-dialog-description"><KeywordText text={definition.description} /></p>
 
             <dl className="upgrade-dialog-stats">

@@ -4149,6 +4149,12 @@ Nel codice, per ogni scuola fondata:
   livelli mancanti si comprano nelle scuole successive. Network e Percorsi
   Segreti non hanno punti del ramo, quindi i prezzi degli altri nodi non
   cambiano. Vale da ora in poi: il passato non si ricostruisce;
+  nella pagina Upgrade un nodo fisso già comprato ha un piccolo sigillo col
+  lucchetto chiuso sul bordo del simbolo (oro in Onde, grigio in Outlook;
+  concept A), distinto dal lucchetto grigio dei requisiti e dal «???»; la sua
+  scheda dice «Upgrade fisso. Una volta comprato resta per sempre, anche nelle
+  prossime scuole.» (I2). Un nodo già comprato non torna «?» quando il livello
+  dopo è bloccato;
 - **obiettivi:** ogni ciclo richiede di nuovo un titolo all'Accademico (§ 17.2);
 - **complessità organizzativa:** il Network delle Onde (§ 10.13) apre un nodo
   alla 1ª, 2ª, 3ª, 5ª, 7ª, 10ª, 13ª, 16ª e 20ª scuola fondata;

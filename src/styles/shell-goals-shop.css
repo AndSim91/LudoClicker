@@ -684,6 +684,58 @@
   line-height: 1;
 }
 
+/* Upgrade fisso (concept A, 14/10): a small sealed lock on the rim of the icon,
+   distinct from the grey requirement lock and from the «???» of the secrets. */
+.upgrade-node-icon {
+  position: relative;
+}
+
+.upgrade-node-permanent {
+  position: absolute;
+  right: -6px;
+  bottom: -5px;
+  display: grid;
+  width: 17px;
+  height: 17px;
+  box-sizing: border-box;
+  place-items: center;
+  border: 1.5px solid var(--permanent-seal, #605e5c);
+  border-radius: 50%;
+  color: var(--permanent-seal, #605e5c);
+  background: var(--surface);
+  box-shadow: 0 0 0 2px var(--surface);
+}
+
+.upgrade-node-icon .upgrade-node-permanent svg {
+  width: 9px;
+  height: 9px;
+}
+
+.upgrade-dialog-permanent {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin: 0 0 10px;
+  padding: 7px 10px;
+  border: 1px solid var(--permanent-seal, #605e5c);
+  border-radius: var(--radius-md);
+  background: var(--permanent-seal-soft, #f3f2f1);
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+
+.upgrade-dialog-permanent svg {
+  width: 13px;
+  height: 13px;
+  flex: none;
+  margin-top: 2px;
+  color: var(--permanent-seal, #605e5c);
+}
+
+.upgrade-dialog-permanent b {
+  color: var(--permanent-seal, #605e5c);
+}
+
 /* A locked node says how it opens instead of its price. */
 .upgrade-node-lock {
   display: block;

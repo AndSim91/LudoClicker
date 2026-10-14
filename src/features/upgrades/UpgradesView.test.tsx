@@ -78,6 +78,26 @@ describe("UpgradesView", () => {
     expect(within(lane).queryByText("20 scuole fondate")).not.toBeInTheDocument();
   });
 
+  it("seals the permanent upgrades once bought and keeps a bought node in sight (14/10)", () => {
+    const initial = createInitialState(1_000);
+    const state = {
+      ...initial,
+      network: { ...initial.network, schoolCount: 4 },
+      upgrades: { ...initial.upgrades, "time-is-money": 2, "multi-site-coordination": 1 },
+    };
+    const { container } = render(<UpgradesView state={state} onBuyUpgrade={() => undefined} />);
+    // Level 3 waits for the fifth school: the node bought so far stays visible, sealed.
+    const speed = screen.getByRole("button", { name: /^Apri dettagli Il tempo è denaro: .*fisso per sempre$/ });
+    expect(speed.querySelector(".upgrade-node-permanent")).not.toBeNull();
+    // An ordinary upgrade never gets the seal.
+    const coordination = screen.getByRole("button", { name: /^Apri dettagli Coordinamento multi-sede/ });
+    expect(coordination.querySelector(".upgrade-node-permanent")).toBeNull();
+    expect(container.querySelectorAll(".upgrade-node-permanent")).toHaveLength(1);
+
+    fireEvent.click(speed);
+    expect(screen.getByRole("dialog")).toHaveTextContent("Upgrade fisso. Una volta comprato resta per sempre");
+  });
+
   it("renders eight public branches, the secret row and the merged Teaching row", () => {
     render(<UpgradesView state={withOpenTree()} onBuyUpgrade={() => undefined} />);
 

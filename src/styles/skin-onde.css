@@ -563,6 +563,12 @@
 
 /* ---- Upgrade: a glowing tree ---------------------------------------------- */
 
+/* Upgrade fisso: the seal is gold in Onde (grey in Outlook). */
+:root[data-theme="dark"] {
+  --permanent-seal: var(--onde-gold-bright);
+  --permanent-seal-soft: rgb(240 184 90 / 10%);
+}
+
 /* Completed: teal, the colour of mastery. */
 :root[data-theme="dark"] .upgrade-node.completed .upgrade-node-icon {
   border-color: var(--onde-wave);
