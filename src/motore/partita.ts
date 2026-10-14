@@ -10,7 +10,7 @@ import { getPrestigeReputationPreview } from "../game/reputation";
 import { getSchoolYear } from "../game/calendar";
 import { createInitialState } from "../game/initialState";
 import { canFoundSchool } from "../game/progression";
-import type { GameState, TournamentResult } from "../game/types";
+import type { GameState, TournamentParticipant, TournamentResult } from "../game/types";
 import {
   act,
   chiudiFinestra,
@@ -184,7 +184,14 @@ export function giocaPartita({
       risultatiVisti.add(result.id);
       const arena = migliorPosto(result, result.arenaRanking);
       const stile = migliorPosto(result, result.styleRanking);
-      annota("torneo", result.level, undefined, { stagione: result.season, arena, stile });
+      // Forza dei nostri: la miglior Arena e il miglior Stile schierati.
+      const nostri = result.participants.filter((p) => p.ownedContactId);
+      const top = (pick: (p: TournamentParticipant) => number) =>
+        nostri.length ? Math.round(Math.max(...nostri.map(pick))) : undefined;
+      annota("torneo", result.level, undefined, {
+        stagione: result.season, arena, stile,
+        nostraArena: top((p) => p.arenaPreparation), nostroStile: top((p) => p.stylePreparation),
+      });
     }
     for (const [id, level] of Object.entries(s.upgrades)) {
       const before = livelli[id] ?? 0;
