@@ -263,7 +263,8 @@ async function principale() {
       return;
     }
     obiettivo = Math.max(1, Math.min(o.thread, Math.round(o.core * (o.cpu / 100 - altri))));
-    motivo = obiettivo < o.thread ? "il PC è occupato: alcune partite aspettano" : "";
+    // Solo se ci sono davvero partite che aspettano: con 20 partite su 24 core il tetto a 22 non ferma nessuno.
+    motivo = obiettivo < Math.min(o.thread, inCorso.size + coda.length) ? "il PC è occupato: alcune partite aspettano" : "";
     // Troppe attive: in pausa le ultime avviate.
     for (const p of attive().reverse().slice(obiettivo)) metti(p, true);
     // Posto libero: prima si risvegliano quelle in pausa (con un margine di RAM), poi si avviano le nuove.
