@@ -857,7 +857,6 @@
 .gym-led-slot text { fill: #3f7590; font: 600 6.9px var(--font-display, sans-serif); letter-spacing: 0.2em; }
 .gym-camera path { fill: none; stroke: #2a6f8f; stroke-width: 1.4; }
 .gym-camera rect { fill: #021e33; stroke: #2a6f8f; stroke-width: 0.8; }
-.gym-haze { animation: gym-haze 7s ease-in-out infinite alternate; }
 /* Stadio delle Onde: the Lanterna turns, fireworks now and then. */
 .gym-lantern-beam { transform-origin: 50% 50%; animation: gym-lantern 6s linear infinite; }
 .gym-firework { opacity: 0; transform-origin: 50% 50%; animation: gym-burst 5.2s ease-out infinite; }
@@ -963,7 +962,6 @@
 
 @keyframes gym-bulb { from { transform: rotate(-2.5deg); } to { transform: rotate(2.5deg); } }
 @keyframes gym-sweep { from { transform: rotate(-14deg); } to { transform: rotate(14deg); } }
-@keyframes gym-haze { from { opacity: 0.55; } to { opacity: 1; } }
 @keyframes gym-lantern {
   0% { transform: scaleX(1); opacity: 1; }
   25% { transform: scaleX(0.05); opacity: 0.2; }

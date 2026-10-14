@@ -254,7 +254,7 @@ export function HallLights({ layout }: { layout: GymLayout }) {
   );
 }
 
-/** In front of the lights: the row behind the mat, the LED band, the mat and the Arena, standards and cameras. */
+/** In front of the lights: the row behind the mat, the LED band, the mat and the Arena, standards and (stadium) cameras. */
 export function HallFront({ layout }: { layout: GymLayout }) {
   const level = layout.hallLevel;
   const { mat, front } = layout;
@@ -295,13 +295,17 @@ export function HallFront({ layout }: { layout: GymLayout }) {
           <OrderBanner x={790} />
         </>
       ) : null}
-      {level === HALL_LEVEL.championship || level >= HALL_LEVEL.stadium ? <Camera x={-250} f={1} /> : null}
-      {level >= HALL_LEVEL.stadium ? <Camera x={890} f={-1} /> : null}
+      {level >= HALL_LEVEL.stadium ? (
+        <>
+          <Camera x={-250} f={1} />
+          <Camera x={890} f={-1} />
+        </>
+      ) : null}
     </>
   );
 }
 
-/** A blue haze rising slowly from the mat, under the athletes. */
+/** A still blue haze over the mat, under the athletes (14/10: it does not move). */
 export function HallHaze() {
   return (
     <GymLayer box={{ x: 20, y: 100, w: 600, h: 56 }} className="gym-haze">

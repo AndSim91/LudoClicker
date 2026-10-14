@@ -3181,7 +3181,7 @@ Un'unica pagina, in quest'ordine:
     finestra, porta, trofei né tabellone. Il pubblico è fermo, in controluce
     (sagome con un filo di luce sulla testa; la fila dietro il tappeto senza,
     perché si leggano prima gli atleti). Due fari dal fascio stretto spazzano
-    l'Arena, una pozza di luce sul tappeto e una nebbiolina azzurra che sale piano;
+    l'Arena, una pozza di luce sul tappeto e una nebbiolina azzurra ferma;
   - **Arena delle Onde** (1.000): due stendardi neri con il logo bianco
     dell'Ordine delle Onde ai lati del traliccio, una seconda rastrelliera
     speculare a sinistra e una fascia LED a tutta larghezza dietro il tappeto,
@@ -3191,9 +3191,9 @@ Un'unica pagina, in quest'ordine:
     l'incontro arbitrato al centro e i giudici accanto all'Arena; un anello di
     luci sul bordo dell'Arena, bandierine lungo il traliccio, un piano di
     gradinate in più con il pubblico che alza le spade accese (ferme, in tutti i
-    colori di spada del gioco) e una telecamera in fondo a sinistra;
+    colori di spada del gioco);
   - **Palasport** (5.000): una gradinata di fondo dietro l'Arena (anche lì con le
-    spade accese), quattro fari, nessuna telecamera; tutti gli stendardi, anche
+    spade accese) e quattro fari; tutti gli stendardi, anche
     quello della scuola, scendono piccoli sul muro in lontananza, appesi alla
     balaustra della gradinata di fondo sotto il pubblico;
   - **Stadio delle Onde** (10.000): all'aperto, di sera, cielo stellato e torri
