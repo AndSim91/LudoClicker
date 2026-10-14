@@ -34,12 +34,19 @@ describe("Torneo della Superba e Corso X", () => {
     expect(resolved.messages.some((message) => message.subject === "Percorso Segreto: ToccoDiGilo")).toBe(true);
   });
 
-  it("renames the Open and toughens the field once it is the Superba", () => {
+  it("renames the Open as the Superba; only victories toughen the field, up to the Chronicles (14/10/2026)", () => {
     const initial = createInitialState(1_000, "Tester");
     const superba = { ...initial, network: { ...initial.network, superbaTournament: true } };
     expect(getReptileTournamentName(initial)).toBe("Torneo Reptile");
     expect(getReptileTournamentName(superba)).toBe("Torneo della Superba");
-    expect(getReptileDifficultyMultiplier(superba) / getReptileDifficultyMultiplier(initial)).toBeCloseTo(1.25);
+    expect(getReptileDifficultyMultiplier(superba)).toBe(getReptileDifficultyMultiplier(initial));
+    const withVictories = (victories: number) => ({
+      ...initial,
+      tournaments: { ...initial.tournaments, reptile: { ...initial.tournaments.reptile, victories } },
+    });
+    expect(getReptileDifficultyMultiplier(withVictories(2))).toBeCloseTo(1.21);
+    // 300 × multiplier never above the Chronicles (1.000).
+    expect(getReptileDifficultyMultiplier(withVictories(40))).toBeCloseTo(1_000 / 300);
   });
 
   it("turns Reptiles already at fame level 1 into the Superba when loading older saves", () => {

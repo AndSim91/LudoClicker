@@ -247,17 +247,21 @@ describe("Torneo Reptile", () => {
     expect(processReptileCalendarTransition(reminded, STARTED_AT)).toBe(reminded);
   });
 
-  it("diventa per sempre il Torneo della Superba al livello 1 di fama", () => {
+  it("diventa per sempre il Torneo della Superba alla prima vittoria (14/10/2026)", () => {
     const july = fillAndReachJuly(createOrganizedState());
     const { result } = simulateReptileTournament(july, STARTED_AT)!;
-    const below = applyReptileResult(july, {
+    const homeTeam = result.teams.find((team) => team.home)!;
+    const lost = applyReptileResult(july, {
       ...result,
-      economy: { ...result.economy, fameAfter: 499 },
+      podiumTeamIds: [...result.podiumTeamIds.filter((id) => id !== homeTeam.id), homeTeam.id]
+        .slice(-4) as typeof result.podiumTeamIds,
+      economy: { ...result.economy, fameAfter: 3_000 },
     }, STARTED_AT);
-    expect(below.network.superbaTournament).not.toBe(true);
+    expect(lost.network.superbaTournament).not.toBe(true);
     const completed = applyReptileResult(july, {
       ...result,
-      economy: { ...result.economy, fameAfter: 500 },
+      podiumTeamIds: [homeTeam.id, ...result.podiumTeamIds.filter((id) => id !== homeTeam.id)]
+        .slice(0, 4) as typeof result.podiumTeamIds,
     }, STARTED_AT);
     expect(completed.network.superbaTournament).toBe(true);
     expect(completed.messages.some((message) => message.subject === "Nasce il Torneo della Superba!")).toBe(true);

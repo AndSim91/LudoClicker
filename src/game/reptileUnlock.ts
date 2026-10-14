@@ -18,7 +18,8 @@ export function isSuperbaTournament(state: Pick<GameState, "network">): boolean 
 export const SUPERBA_COPY = {
   kicker: "Il Torneo Reptile si evolve",
   title: "Nasce il Torneo della Superba!",
-  body: "Dalla prossima edizione avversari più forti e nuovi segreti da sbloccare.",
+  // 14/10/2026: the Superba no longer toughens the field. ponytail: provisional copy, Andrea rewrites it.
+  body: "Dalla prossima edizione un nuovo nome e nuovi segreti da sbloccare.",
 };
 
 export function getReptileTournamentName(state: Pick<GameState, "network">): string {

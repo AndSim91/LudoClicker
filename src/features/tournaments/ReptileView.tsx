@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Icon } from "../../components/common/Icon";
-import { TOURNAMENT_DEFINITIONS } from "../../content/tournaments";
 import { getGameMonthName, getSchoolYear } from "../../game/calendar";
 import { GAME_CONFIG } from "../../game/config";
 import { getAvailableSwords } from "../../game/equipment";
@@ -18,6 +17,7 @@ import {
   type ReptileBarOutlook,
 } from "../../game/reptilePreparation";
 import { getReptileWinner } from "../../game/reptileFlow";
+import { getReptileDifficultyMultiplier } from "../../game/reptileSimulation";
 import { getReptileTournamentName, isSuperbaTournament } from "../../game/reptileUnlock";
 import type {
   GameState,
@@ -70,8 +70,7 @@ function ReptileHero({ state }: { state: GameState }) {
   const tournamentName = getReptileTournamentName(state);
   const level = getReptileFameLevel(reptile.fameXp);
   const teamCount = reptile.activeEdition?.teamCount ?? getReptileTeamCount(reptile.fameXp);
-  const difficulty = TOURNAMENT_DEFINITIONS.champions.standard * 1.1 ** reptile.victories *
-    (superba ? GAME_CONFIG.superbaDifficultyMultiplier : 1);
+  const difficulty = GAME_CONFIG.reptileStandard * getReptileDifficultyMultiplier(state);
   const outlook = getReptileOutlook(state);
   const nextJuly = getNextReptileJuly(state.school.currentMonth, reptile.lastTournamentMonth);
   const tournamentMonth = reptile.activeEdition ? outlook?.tournamentMonth : nextJuly;

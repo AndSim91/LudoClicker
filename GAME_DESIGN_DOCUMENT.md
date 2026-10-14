@@ -4720,8 +4720,11 @@ Champion's Arena adattati alle coppie, incluse almeno due squadre Elite quando
 il campo lo consente. Ogni team esterno è specializzato: a caso, una delle due
 discipline riceve ×1,15 e l'altra ×0,85. Le apparizioni dei Leggendari Segreti
 seguono le regole dei tornei ordinari e ricevono un compagno generato della
-stessa scuola. La difficoltà parte dallo standard Champion's e viene
-moltiplicata cumulativamente per ×1,1 dopo ogni vittoria di un team di casa.
+stessa scuola. La difficoltà parte dallo standard del Reptile (300) e viene
+moltiplicata cumulativamente per ×1,1 dopo ogni vittoria di un team di casa,
+mai oltre il livello delle Chronicles (1.000): le Chronicles sono il tetto del
+Reptile e della Superba. Fama e Superba non la alzano: la Fama porta più
+squadre, più premi e un'organizzazione più impegnativa (Andrea, 14/10/2026).
 
 La fase svizzera usa `max(5, log2(team))` turni: 5 fino a 32 team, poi 6 / 7 /
 8 / 9. Il primo turno è casuale evitando la stessa scuola quando possibile; i
@@ -4785,8 +4788,8 @@ ufficio come il resto del gioco (`src/styles/reptile-outlook.css`, tutto sotto
 
 ### 20.7 Torneo della Superba
 
-Quando, alla fine di un'edizione, la fama del Reptile raggiunge il **livello 1**
-(500 XP, tabellone da 32 team), l'Open si trasforma **per sempre** nel
+Quando un team di casa vince per la prima volta il Reptile (dal 14/10/2026;
+prima bastava il livello 1 di fama), l'Open si trasforma **per sempre** nel
 **Torneo della Superba**. Parte la scena «Nasce il Torneo della Superba!»
 (§ 25.1), arriva il messaggio con lo stesso titolo e la trasformazione vale
 dall'edizione successiva. Non torna indietro se la fama
@@ -4795,7 +4798,7 @@ lì, una volta sbloccato l'Open con la vittoria nazionale in Arena e Stile, è g
 la Superba.
 
 La Superba segue tutte le regole del Reptile (barre, giornata degli imprevisti,
-fase svizzera, tabellone, premi e fama) con tre differenze:
+fase svizzera, tabellone, premi, fama e difficoltà) con due differenze:
 
 - nome «Torneo della Superba» nella scheda Tornei, nei messaggi e nel recap;
   nell'albo d'oro ogni edizione indica se era Reptile o Superba;
@@ -4806,8 +4809,6 @@ fase svizzera, tabellone, premi e fama) con tre differenze:
   `superba-logo.webp`), bordi neri a piombo e titoli con carattere classico
   (`.reptile-view.is-superba` in `tournaments.css`, che vale anche per la
   giornata degli imprevisti e il giorno del torneo);
-- avversari più forti: la difficoltà del Reptile (standard Champion's × 1,1 per
-  ogni vittoria precedente di Genova) viene moltiplicata per **1,25**;
 - se vince un team di Genova, si scopre il Percorso Segreto **Corso X** (10.9),
   acquistabile a 1 €.
 
@@ -4816,8 +4817,10 @@ Reptile al livello richiesto diventano subito Superba
 (`saveMigrations/reptileSuperba.ts`). Dalla versione 96 la soglia è il
 livello 1 (prima era il 2): i salvataggi già al livello 1 diventano Superba
 all'aggiornamento e vedono la scena al caricamento
-(`saveMigrations/superbaLevelOne.ts`). Costanti in `GAME_CONFIG`:
-`superbaReptileFameLevel` = 1, `superbaDifficultyMultiplier` = 1,25.
+(`saveMigrations/superbaLevelOne.ts`). Dal 14/10/2026 il Reptile diventa
+Superba alla **prima vittoria** di un team di casa, non più al livello 1 di Fama
+(i salvataggi già Superba restano tali), e la Superba non moltiplica più la
+difficoltà (tolto `superbaDifficultyMultiplier`).
 
 ---
 

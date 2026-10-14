@@ -208,7 +208,6 @@ export const GAME_CONFIG = {
   // Reptile: base Stile and Arena of the external pairs (×1,1 per earlier victory).
   // 14/10/2026: 300 (was 500, never won by the test engine); above the Nazionale (200).
   reptileStandard: 300,
-  superbaDifficultyMultiplier: 1.25,
 } as const;
 
 export function getTechnicalArenaDurationMs(level: number): number {

@@ -216,10 +216,16 @@ function createHomeTeams(
   ));
 }
 
-/** ×1,1 per earlier school victory, and a tougher field once it is the Superba. */
-export function getReptileDifficultyMultiplier(state: Pick<GameState, "tournaments" | "network">): number {
-  return 1.1 ** state.tournaments.reptile.victories *
-    (isSuperbaTournament(state) ? GAME_CONFIG.superbaDifficultyMultiplier : 1);
+/**
+ * Andrea, 14/10/2026: only our victories make the field stronger, +10% each; Fama and
+ * the Superba do not (Fama brings more teams and prizes, and a harder organisation).
+ * The Chronicles are the hard cap: never above their level.
+ */
+export function getReptileDifficultyMultiplier(state: Pick<GameState, "tournaments">): number {
+  return Math.min(
+    1.1 ** state.tournaments.reptile.victories,
+    TOURNAMENT_DEFINITIONS.chronicles.standard / GAME_CONFIG.reptileStandard,
+  );
 }
 
 function createExternalTeams(

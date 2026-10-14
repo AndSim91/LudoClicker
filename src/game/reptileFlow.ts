@@ -4,14 +4,12 @@ import { getContactBaseStats } from "./athleteStats";
 import { getCalendarMonth } from "./calendar";
 import { applyEquipmentWear } from "./equipment";
 import {
-  getReptileFameLevel,
   isJuly,
   isReptilePreparationComplete,
   processReptilePreparation,
 } from "./reptilePreparation";
 import { simulateReptileTournament } from "./reptileSimulation";
 import { discoverCourseXFromSuperbaVictory, getReptileTournamentName, SUPERBA_COPY } from "./reptileUnlock";
-import { GAME_CONFIG } from "./config";
 import { resolveSecretLegendaryDefeat } from "./tournamentFlow";
 import { addMessage } from "./stateUpdates";
 import type {
@@ -179,11 +177,9 @@ export function applyReptileResult(
     "tournaments",
   );
   if (result.superba && schoolWon) nextState = discoverCourseXFromSuperbaVictory(nextState, now);
-  // Enough Reptile fame turns the Open, for good, into the Torneo della Superba.
-  if (
-    !nextState.network.superbaTournament &&
-    getReptileFameLevel(result.economy.fameAfter) >= GAME_CONFIG.superbaReptileFameLevel
-  ) {
+  // The first victory turns the Open, for good, into the Torneo della Superba (14/10/2026;
+  // it was Reptile Fama level 1). The name changes, not the difficulty.
+  if (!nextState.network.superbaTournament && schoolWon) {
     nextState = addMessage(
       { ...nextState, network: { ...nextState.network, superbaTournament: true } },
       now,

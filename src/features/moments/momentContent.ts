@@ -229,7 +229,7 @@ export function describeGenericMoment(state: GameState, key: MomentKey): MomentC
   if (key === SOCIAL_MOMENT) return describeSocial(state.unlocks.social ? state.school.followers : state.school.fame);
   if (key === GADGET_MOMENT) return GADGET_CONTENT;
   if (key === SUPERBA_MOMENT) {
-    return { kind: "superba", ...SUPERBA_COPY, city: state.school.city, fameLabel: `Fama · livello ${GAME_CONFIG.superbaReptileFameLevel}` };
+    return { kind: "superba", ...SUPERBA_COPY, city: state.school.city, fameLabel: "Prima vittoria" };
   }
   if (key === LIGHT_INFLATION_MOMENT) {
     return {
