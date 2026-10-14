@@ -14,6 +14,7 @@
  *   --priorita    bassa (predefinita: in background) | media | normale
  *   --seme N      primo seme (1)
  *   --uscita dir  cartella dei risultati (motore-risultati/<data>)
+ *   --help, -h    mostra questo aiuto
  *
  * Gira in background e si adatta da solo, ogni 2 secondi:
  * - CPU: priorità bassa, quindi il sistema e gli altri programmi passano sempre
@@ -27,7 +28,7 @@
  * Una partita usa un solo core: JavaScript non divide una partita su più core.
  */
 import { execSync } from "node:child_process";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { availableParallelism, constants, cpus, freemem, setPriority, totalmem } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -143,6 +144,12 @@ function misuraCpu(core) {
 }
 
 async function principale() {
+  if (process.argv.includes("--help") || process.argv.includes("-h")) {
+    // ponytail: l'aiuto è il commento in testa al file, così resta sempre allineato
+    const testa = readFileSync(fileURLToPath(import.meta.url), "utf8").split("*/")[0];
+    console.log(testa.replace(/^#!.*\n\/\*\*\n/, "").replace(/^ \* ?/gm, "").trimEnd());
+    return;
+  }
   const o = opzioni(process.argv.slice(2));
   try { setPriority(PRIORITA[o.priorita]); } catch { /* non permesso: si va avanti */ }
   // Soglia di sicurezza: sotto questa RAM libera il motore restituisce memoria al sistema.
