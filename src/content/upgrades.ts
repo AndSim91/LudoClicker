@@ -338,8 +338,8 @@ export function isPermanentUpgrade(upgradeId: UpgradeId): boolean {
 }
 
 /** The levels of the permanent upgrades, to lay over a new school's fresh upgrades. */
-export function getPermanentUpgradeLevels(levels: UpgradeLevels): UpgradeLevels {
-  const kept: UpgradeLevels = {};
+export function getPermanentUpgradeLevels(levels: UpgradeLevels): Partial<UpgradeLevels> {
+  const kept: Partial<UpgradeLevels> = {};
   for (const id of PERMANENT_UPGRADE_IDS) {
     if ((levels[id] ?? 0) > 0) kept[id] = levels[id];
   }
