@@ -26,6 +26,13 @@ function withMasterEye(state: GameState): GameState {
   return { ...state, upgrades: { ...state.upgrades, "talent-eye": 1 } };
 }
 
+
+/** The mood written in each «Umore» cell (the dot and the tooltip excluded). */
+function getMoods(): string[] {
+  return [...document.querySelectorAll(".member-permanence")].map((label) =>
+    [...label.childNodes].filter((node) => node.nodeType === Node.TEXT_NODE).map((node) => node.textContent).join(""));
+}
+
 describe("PeopleView", () => {
   it("exposes the global automatic teaching toggle in the Instructor center", () => {
     const initial = createInitialState(1_000, "", false);
@@ -1533,7 +1540,7 @@ describe("PeopleView", () => {
     );
 
     const roster = screen.getByRole("region", { name: "Iscritti" });
-    const labels = ["Nome", "Rarità", "Percorso", "Arena", "Stile", "Ruolo", "Prossimo passo"];
+    const labels = ["Nome", "Rarità", "Percorso", "Arena", "Stile", "Umore", "Prossimo passo"];
     for (const label of labels) {
       expect(within(roster).getByRole("button", { name: `Ordina per ${label}` })).toBeVisible();
     }
@@ -2514,7 +2521,7 @@ describe("PeopleView", () => {
       />,
     );
 
-    expect(screen.getByText("Rischio di abbandono alto", { selector: ".member-status small" })).toBeVisible();
+    expect(getMoods()).toEqual(["Ostile"]);
     expect(
       screen.queryByRole("combobox", { name: `Formazione per ${displayName}` }),
     ).not.toBeInTheDocument();
@@ -2734,9 +2741,8 @@ describe("PeopleView", () => {
       />,
     );
 
-    expect(screen.getAllByText("Rischio di abbandono alto", { selector: ".member-status small" })).toHaveLength(1);
-    expect(screen.getAllByText("Rischio di abbandono medio", { selector: ".member-status small" })).toHaveLength(1);
-    expect(screen.getAllByText("Rischio di abbandono basso", { selector: ".member-status small" })).toHaveLength(1);
+    // 14/10/2026: a mood per member (C3 «Frase pulita»), no percentages on screen.
+    expect(getMoods().sort()).toEqual(["Indifferente", "Infelice", "Ostile"]);
     expect(screen.queryByText(/Rischio annuo se ignorato/)).not.toBeInTheDocument();
     expect(
       within(screen.getByRole("region", { name: "Iscritti" })).queryByText(/abbandono.*%/i),
@@ -2763,8 +2769,8 @@ describe("PeopleView", () => {
       />,
     );
 
-    expect(screen.getByText("Nuova iscrizione", { selector: ".member-status small" })).toBeVisible();
-    expect(screen.queryByText(/Rischio di abbandono/)).not.toBeInTheDocument();
+    expect(getMoods()).toEqual(["Entusiasta"]);
+    expect(document.querySelector(".member-permanence-tip")).toHaveTextContent("Nuova iscrizione");
   });
 
   it("shows no risk after a member completes form training this school year", () => {
@@ -2790,7 +2796,8 @@ describe("PeopleView", () => {
       />,
     );
 
-    expect(screen.getByText("Corso in palestra", { selector: ".member-status small" })).toBeVisible();
+    expect(getMoods()).toEqual(["Entusiasta"]);
+    expect(document.querySelector(".member-permanence-tip")).toHaveTextContent("Corso in palestra");
     expect(screen.queryByText(/Seguito quest'anno/)).not.toBeInTheDocument();
   });
 

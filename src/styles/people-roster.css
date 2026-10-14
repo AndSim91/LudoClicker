@@ -897,3 +897,66 @@
   color: var(--ink);
   font-weight: 600;
 }
+
+/* Permanenza C3 «Frase pulita» (14/10/2026): one dot and one mood, details in the tooltip.
+   Outlook colours here, Onde in skin-onde.css. The cell lets the tooltip out. */
+.people-row.member-row > .member-status {
+  overflow: visible;
+}
+
+.member-permanence {
+  --permanence-color: #0f6cbd;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  width: fit-content;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: default;
+}
+
+.member-permanence[data-level="1"] { --permanence-color: #107c41; }
+.member-permanence[data-level="2"] { --permanence-color: #5f8f1e; }
+.member-permanence[data-level="3"] { --permanence-color: #b38600; }
+.member-permanence[data-level="4"] { --permanence-color: #d47500; }
+.member-permanence[data-level="5"] { --permanence-color: #c4314b; }
+
+.member-permanence-dot {
+  width: 9px;
+  height: 9px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--permanence-color);
+}
+
+.member-permanence-tip {
+  position: absolute;
+  z-index: 40;
+  /* Above the mood: the table clips below its last row, never above the first. */
+  bottom: calc(100% + 6px);
+  left: 0;
+  display: none;
+  width: 220px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  color: var(--ink);
+  background: var(--surface);
+  box-shadow: 0 8px 20px rgb(0 0 0 / 18%);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.35;
+  white-space: normal;
+}
+
+.member-permanence:focus-visible .member-permanence-tip {
+  display: block;
+}
+
+@media (hover: hover) {
+  .member-permanence:hover .member-permanence-tip {
+    display: block;
+  }
+}

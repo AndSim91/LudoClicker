@@ -6,7 +6,7 @@ import { getCollaboratorAssignmentLabel } from "../../content/collaboratorRoles"
 import { FORM_DEFINITIONS } from "../../content/forms";
 import { getFormLogo } from "../../content/formLogos";
 import { getFormTrainingYear } from "../../game/calendar";
-import { COURSE_IMMUNITY_MEMBER_LIMIT, getAthleteImmunityStatus, getYearlyRiskReduction } from "../../game/athleteImmunity";
+import { COURSE_IMMUNITY_MEMBER_LIMIT, getAthleteImmunityStatus } from "../../game/athleteImmunity";
 import {
   areAllFormBranchesUnlocked,
   getAnnualFormTrainingLimit,
@@ -31,7 +31,8 @@ import { FormPathMap } from "./FormPathMap";
 import { MemberCard } from "./MemberCard";
 import { FormLogoStrip, PersonName } from "./PersonPresentation";
 import { TrainingControl } from "./TrainingControl";
-import { formatFormPath, getMemberDepartureRiskLabel } from "./peoplePresentation";
+import { formatFormPath, getMemberPermanence, type MemberPermanence } from "./peoplePresentation";
+import { MemberPermanenceLabel } from "./MemberPermanenceLabel";
 import {
   getContactPreparation,
   hasUnlockedOfficialStats,
@@ -104,7 +105,7 @@ const MEMBER_SORT_OPTIONS: { value: MemberSortKey; label: string }[] = [
   { value: "path", label: "Percorso" },
   { value: "arena", label: "Arena" },
   { value: "style", label: "Stile" },
-  { value: "status", label: "Ruolo" },
+  { value: "status", label: "Umore" },
   { value: "next-form", label: "Prossimo passo" },
 ];
 const MEMBER_FILTER_DEFAULTS = {
@@ -137,6 +138,7 @@ interface MemberPresentation {
   path: string;
   searchableText: string;
   status: string;
+  permanence?: MemberPermanence;
   nextForm: string;
   preparation?: ReturnType<typeof getContactPreparation>;
 }
@@ -145,25 +147,22 @@ function getDisplayedMemberStatus(
   contact: Contact,
   context: MemberSortContext,
   socialUnlocked: boolean,
-): string {
+): { status: string; permanence?: MemberPermanence } {
   const collaborator = context.collaboratorsByContactId.get(contact.id);
   if (collaborator) {
-    if (!collaborator.assignment) return "Collaboratore non assegnato";
+    if (!collaborator.assignment) return { status: "Collaboratore non assegnato" };
     const assignmentLabel = getCollaboratorAssignmentLabel(collaborator.assignment, socialUnlocked);
-    return `Collaboratore ${assignmentLabel}`;
+    return { status: `Collaboratore ${assignmentLabel}` };
   }
   const student = getMemberStudent(contact, context);
   const immunity = getAthleteImmunityStatus(
     context.immunityContext,
     contact,
     student,
-    context.collaboratorsByContactId.has(contact.id),
+    false,
   );
-  return immunity.message ?? getMemberDepartureRiskLabel(
-    student.forms,
-    contact.rarity,
-    getYearlyRiskReduction(immunity, context.departureRiskReduction),
-  );
+  const permanence = getMemberPermanence(student.forms, contact.rarity, immunity, context.departureRiskReduction);
+  return { status: permanence.label, permanence };
 }
 
 type MemberPresentationCache = WeakMap<Contact, MemberPresentation>;
@@ -186,7 +185,7 @@ function createMemberPresentationReader(
       path: formatFormPath(student.forms, context.courseXUnlocked),
       searchableText: `${contact.firstName} ${contact.lastName} ${contact.email}`
         .toLocaleLowerCase("it-IT"),
-      status: getDisplayedMemberStatus(contact, context, socialUnlocked),
+      ...getDisplayedMemberStatus(contact, context, socialUnlocked),
       nextForm: getMemberNextFormLabel(contact, context) ??
         "Nessuna Forma disponibile",
       preparation: hasVisibleStats
@@ -568,7 +567,7 @@ export function MemberList({
             </label>
           </div>
         </div>
-        <FilterGroup label="Ruolo" wide>
+        <FilterGroup label="Umore" wide>
           {withSelected(filterOptions.statuses, filters.statuses).map((value) => (
             <FilterChip key={value} pressed={filters.statuses.includes(value)} onToggle={() => toggleIn("statuses", value)}>
               {value}
@@ -589,7 +588,7 @@ export function MemberList({
         <SortableHeader label="Percorso" sortKey="path" sort={sort} onSort={handleSort} />
         <SortableHeader label="Arena" sortKey="arena" sort={sort} onSort={handleSort} />
         <SortableHeader label="Stile" sortKey="style" sort={sort} onSort={handleSort} />
-        <SortableHeader label="Ruolo" sortKey="status" sort={sort} onSort={handleSort} />
+        <SortableHeader label="Umore" sortKey="status" sort={sort} onSort={handleSort} />
         <SortableHeader
           label="Prossimo passo"
           sortKey="next-form"
@@ -668,6 +667,7 @@ export function MemberList({
               collaborator={collaborator}
               path={presentation.path}
               status={presentation.status}
+              permanence={presentation.permanence}
               preparation={preparation}
               hiddenStatsHint={getHiddenStatsHint(sortContext.statsTier)}
               favoriteButton={favoriteButton}
@@ -737,10 +737,12 @@ export function MemberList({
                 <span className="member-stat-locked" title={getHiddenStatsHint(sortContext.statsTier)}>???</span>
               )}
             </span>
-            <span className="member-status" data-label="Ruolo">
+            <span className="member-status" data-label="Umore">
               {/* Every row here is an active member: only other states are worth a word. */}
               {contact.status === "enrolled" ? null : <span>{CONTACT_STATUS_LABELS[contact.status]}</span>}
-              <small>{presentation.status}</small>
+              {presentation.permanence
+                ? <MemberPermanenceLabel permanence={presentation.permanence} />
+                : <small>{presentation.status}</small>}
             </span>
             <div className="member-training-cell" data-label="Prossimo passo">
               {training}

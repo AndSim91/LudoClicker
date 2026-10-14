@@ -111,7 +111,7 @@ export function getWritingPower(state: GameState) {
   return localPower * getReputationMultiplier(state, "writing");
 }
 
-function getHighestFormLevel(forms: FormId[]): number {
+export function getHighestFormLevel(forms: FormId[]): number {
   return forms.reduce((highest, formId) => {
     const match = /^form-(\d)/.exec(formId);
     return match ? Math.max(highest, Number(match[1])) : highest;

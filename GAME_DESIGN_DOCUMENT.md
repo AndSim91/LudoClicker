@@ -3043,8 +3043,18 @@ transizioni.
 
 La pagina Scuola (Fase 8) tiene scena, colori, icone ed emblemi; sono stati
 tolti i maiuscoletti e le scritte sotto i 12 px, lo «Iscritto» ripetuto su ogni
-riga degli iscritti (la colonna ora è **Ruolo**, l'ultima **Prossimo passo**) e le
+riga degli iscritti (la colonna ora è **Umore**, l'ultima **Prossimo passo**) e le
 frasi da gestionale dei settori. I pulsanti dei settori dicono «Gestisci».
+
+La colonna **Umore** (14/10/2026, concept C3 «Frase pulita» della Voce delle Onde)
+mostra per ogni iscritto un pallino colorato e uno stato d'animo calcolato sul
+rischio di abbandono di fine anno, già scontato da corso e Chat di Gruppo:
+**Entusiasta** (al sicuro quest'anno), **Affezionato** (sotto il 10%), **Felice**
+(10–30%), **Indifferente** (30–50%), **Infelice** (50–70%), **Ostile** (dal 70%).
+Al passaggio del mouse (o al focus) un fumetto dice il perché: il motivo della
+protezione, oppure Forma, rarità e protezioni attive (corso dell'anno, Arena
+Tecnica, Corso Agonisti, Chat di Gruppo). Nessuna percentuale a schermo. I
+Collaboratori mostrano il loro incarico.
 
 Dove si combatte si dice **arena** (in LudoSport è un cerchio di 7 metri di
 diametro), dove ci si allena **palestra** o **scuola**; mai «pedana».

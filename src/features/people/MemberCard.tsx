@@ -3,6 +3,8 @@ import { OfficialStatValue } from "../../components/common/OfficialStatValue";
 import type { Collaborator, Contact, FormId } from "../../game/types";
 import { getPresentedRarityLabel, getRarityClassName } from "../../shared/rarityPresentation";
 import { FormPathMap } from "./FormPathMap";
+import { MemberPermanenceLabel } from "./MemberPermanenceLabel";
+import type { MemberPermanence } from "./peoplePresentation";
 import { FormLogoStrip, PersonName } from "./PersonPresentation";
 
 /**
@@ -15,6 +17,7 @@ export function MemberCard({
   collaborator,
   path,
   status,
+  permanence,
   preparation,
   hiddenStatsHint,
   favoriteButton,
@@ -27,6 +30,7 @@ export function MemberCard({
   collaborator?: Collaborator;
   path: string;
   status: string;
+  permanence?: MemberPermanence;
   preparation?: { arena: number; style: number };
   hiddenStatsHint: string;
   favoriteButton: ReactNode;
@@ -83,7 +87,7 @@ export function MemberCard({
           <dd>{preparation ? <OfficialStatValue value={preparation.style} /> : <span title={hiddenStatsHint}>???</span>}</dd>
         </div>
       </dl>
-      <p className="member-card-status">{status}</p>
+      <p className="member-card-status">{permanence ? <MemberPermanenceLabel permanence={permanence} /> : status}</p>
       <div className="member-card-training">{training}</div>
     </article>
   );

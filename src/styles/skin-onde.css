@@ -1381,3 +1381,12 @@
 :root[data-theme="dark"] .appointment .day-renewal-stamp {
   background: rgb(23 52 73 / 60%);
 }
+
+/* Permanenza (14/10/2026): the mood dots on the Onde palette. */
+:root[data-theme="dark"] .member-permanence { --permanence-color: var(--onde-wave); }
+:root[data-theme="dark"] .member-permanence[data-level="1"] { --permanence-color: #5fd3a0; }
+:root[data-theme="dark"] .member-permanence[data-level="2"] { --permanence-color: #9fd36c; }
+:root[data-theme="dark"] .member-permanence[data-level="3"] { --permanence-color: var(--onde-gold-bright); }
+:root[data-theme="dark"] .member-permanence[data-level="4"] { --permanence-color: #ff9a4d; }
+:root[data-theme="dark"] .member-permanence[data-level="5"] { --permanence-color: #ff6b5e; }
+:root[data-theme="dark"] .member-permanence-tip { border-color: var(--onde-gold); background: var(--onde-abyss); }
