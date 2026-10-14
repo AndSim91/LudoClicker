@@ -2762,11 +2762,13 @@ Forma e gli allievi, su due file sfalsate da 4 rivolte verso di lui, la
 ripetono un attimo dopo. In scena ci sono gli allievi dei corsi in corso, fino
 a un tetto per livello della Palestra: 1, 2, 3, 4, 6 e 8 (al massimo 4 se la
 colonna è stretta). Armi e colori delle lame si estraggono di nuovo a ogni
-anno scolastico (13/10): ogni posto pesca l'arma in proporzione alle armi
-preferite degli iscritti (chi ne ha più d'una conta per ciascuna in parti
-uguali, chi non ne ha tiene la spada lunga) e il colore in proporzione alle
-rarità degli iscritti, archivio compreso; nello stesso anno ogni posto tiene il
-suo allievo e il primo, il più vicino all'Istruttore, ha sempre la spada lunga.
+anno scolastico (13/10, rivisto il 14/10): finché i posti bastano, in scena c'è
+almeno un allievo per ogni rarità presente tra gli iscritti (archivio compreso,
+prima le più rare) e per ogni arma usata (staffa, doppia, spada lunga); gli
+altri posti seguono le proporzioni degli iscritti (per le armi conta l'arma
+preferita, divisa in parti uguali se sono più d'una, e la spada lunga per chi
+non ne ha), in un ordine nuovo ogni anno. Il primo posto, il più vicino
+all'Istruttore, ha la spada lunga se qualcuno la usa.
 La staffa e le due spade corte hanno entrambe le lame dello stesso colore. La
 sequenza si allunga con le Forme insegnabili (Forma 1 guardia e fendente,
 Forma 2 anche la parata alta, Corso Y anche l'affondo); la staffa ha l'elsa

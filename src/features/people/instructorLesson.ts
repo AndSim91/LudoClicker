@@ -87,11 +87,42 @@ function pickWeighted<T extends string>(weights: Partial<Record<T, number>>, rol
   return entries.at(-1)?.[0] ?? fallback;
 }
 
+/** Rarest first: with few places, the rare ones are the ones worth showing. */
+const RARITIES_RAREST_FIRST: GymRarity[] = ["secret-legendary", "legendary", "ultra-rare", "rare", "common"];
+const WEAPONS_EXOTIC_FIRST: SceneWeapon[] = ["staff", "dual", "long"];
+
 /**
- * Weapons and blade colours of the students (Andrea, 13/10): drawn again at every
- * school year, each place with the members' share of weapons and of rarities, so the
- * lesson changes from year to year and mirrors the school. Within a year a place keeps
- * its student. The first place (closest to the instructor) keeps the long saber.
+ * Every kind present gets a place first, as far as the places go; the rest are drawn
+ * with the members' shares. Then the order is shuffled.
+ */
+function representAll<T extends string>(
+  kinds: readonly T[],
+  weights: Partial<Record<T, number>>,
+  count: number,
+  fallback: T,
+  seed: number,
+): T[] {
+  let next = seed;
+  const roll = () => {
+    const [value, after] = nextRandom(next);
+    next = after;
+    return value;
+  };
+  const picked = kinds.filter((kind) => (weights[kind] ?? 0) > 0).slice(0, count);
+  while (picked.length < count) picked.push(pickWeighted(weights, roll(), fallback));
+  for (let index = picked.length - 1; index > 0; index -= 1) {
+    const other = Math.floor(roll() * (index + 1));
+    [picked[index], picked[other]] = [picked[other], picked[index]];
+  }
+  return picked;
+}
+
+/**
+ * Weapons and blade colours of the students (Andrea, 13/10 and 14/10): drawn again at
+ * every school year. Every rarity and every weapon of the school is on the mat when the
+ * places allow it (the rarest first), the other places follow the members' shares, in
+ * a new order each year. The first place (closest to the instructor) keeps a long saber
+ * whenever someone holds one.
  */
 export function rollSceneStudents(
   count: number,
@@ -99,14 +130,12 @@ export function rollSceneStudents(
   rarityCounts: GymRarityCounts,
   weaponShares: SceneWeaponShares,
 ): { rarity: GymRarity; weapon: SceneWeapon }[] {
-  return Array.from({ length: count }, (_, index) => {
-    const [rarityRoll, seed] = nextRandom(schoolYear * 7_919 + index * 104_729 + 17);
-    const [weaponRoll] = nextRandom(seed);
-    return {
-      rarity: pickWeighted<GymRarity>(rarityCounts, rarityRoll, "common"),
-      weapon: index === 0 ? "long" : pickWeighted<SceneWeapon>(weaponShares, weaponRoll, "long"),
-    };
-  });
+  const seed = schoolYear * 7_919 + count * 104_729 + 17;
+  const rarities = representAll(RARITIES_RAREST_FIRST, rarityCounts, count, "common", seed);
+  const weapons = representAll(WEAPONS_EXOTIC_FIRST, weaponShares, count, "long", seed + 1);
+  const firstLong = weapons.indexOf("long");
+  if (firstLong > 0) [weapons[0], weapons[firstLong]] = [weapons[firstLong], weapons[0]];
+  return rarities.map((rarity, index) => ({ rarity, weapon: weapons[index] }));
 }
 
 const spread = (n: number, from: number, to: number) =>

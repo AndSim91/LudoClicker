@@ -36,22 +36,21 @@ describe("Lezione degli Istruttori", () => {
     ])).toEqual({ long: 11, staff: 1.5, dual: 0.5 });
   });
 
-  it("draws weapons and blades again every school year, as the members are (Andrea, 13/10)", () => {
-    const rarities = { common: 90, rare: 10 };
-    const shares = { long: 50, staff: 30, dual: 20 };
-    expect(rollSceneStudents(8, 3, rarities, shares)).toEqual(rollSceneStudents(8, 3, rarities, shares));
-    expect(rollSceneStudents(4, 3, rarities, shares)).toEqual(rollSceneStudents(8, 3, rarities, shares).slice(0, 4));
-    const years = Array.from({ length: 40 }, (_, year) => rollSceneStudents(8, year, rarities, shares));
-    expect(new Set(years.map((year) => JSON.stringify(year))).size).toBeGreaterThan(30);
-    expect(years.every((year) => year[0].weapon === "long")).toBe(true);
-    const places = years.flat().slice(0);
-    const exotic = places.filter((student) => student.weapon !== "long").length / places.length;
-    expect(exotic).toBeGreaterThan(0.3);
-    expect(exotic).toBeLessThan(0.6);
+  it("shows every rarity and weapon of the school, in a new order every year (Andrea, 14/10)", () => {
+    const rarities = { common: 900, rare: 80, "ultra-rare": 15, legendary: 3, "secret-legendary": 1 };
+    const shares = { long: 95, staff: 4, dual: 1 };
+    const year = rollSceneStudents(8, 3, rarities, shares);
+    expect(year).toEqual(rollSceneStudents(8, 3, rarities, shares));
+    expect(new Set(year.map((student) => student.rarity)).size).toBe(5);
+    expect(new Set(year.map((student) => student.weapon))).toEqual(new Set(["long", "staff", "dual"]));
+    expect(year[0].weapon).toBe("long");
+    const years = Array.from({ length: 30 }, (_, index) => JSON.stringify(rollSceneStudents(8, index, rarities, shares)));
+    expect(new Set(years).size).toBeGreaterThan(20);
+    // Fewer places than kinds: the rarest go first.
+    expect(rollSceneStudents(2, 1, rarities, shares).map((student) => student.rarity).sort())
+      .toEqual(["legendary", "secret-legendary"]);
     expect(rollSceneStudents(8, 5, {}, { long: 0, staff: 0, dual: 0 }))
       .toEqual(Array.from({ length: 8 }, () => ({ rarity: "common", weapon: "long" })));
-    expect(rollSceneStudents(8, 5, { legendary: 1 }, { long: 0, staff: 1, dual: 0 }).slice(1)
-      .every((student) => student.weapon === "staff" && student.rarity === "legendary")).toBe(true);
   });
 
   it("places two staggered rows facing the instructor and stops by everyone in the round", () => {
