@@ -64,9 +64,9 @@ export function creaReport(analisi: Analisi, meta: { creato: string; partite: nu
     }</tbody></table>`);
 
   const scuole = sezione("scuole", "Scuole fondate",
-    "Domande A6–A7: quando si arriva alla scuola n (tempo totale dall'inizio), quanto dura ogni scuola e quanti anni scolastici.",
-    `<table><thead><tr><th>Scuola</th><th>Arrivo</th><th>Durata</th><th>Anni scolastici</th></tr></thead><tbody>${
-      analisi.scuole.map((scuola) => `<tr><th>${scuola.numero}</th>${cellaTempo(scuola.arrivo)}${cellaTempo(scuola.durata)}${cellaNumero(scuola.anni)}</tr>`).join("")
+    "Domande A6–A7: quando si arriva alla scuola n (tempo totale dall'inizio), quanto dura ogni scuola e quanti anni scolastici. «Criterio» = quando scatta la regola di fondazione (crescita sotto il 5% e meno di 5 Upgrade nell'anno); poi il giocatore resta ancora da 0 a 24 mesi a caso.",
+    `<table><thead><tr><th>Scuola</th><th>Arrivo</th><th>Criterio</th><th>Mesi in più</th><th>Durata</th><th>Anni scolastici</th></tr></thead><tbody>${
+      analisi.scuole.map((scuola) => `<tr><th>${scuola.numero}</th>${cellaTempo(scuola.arrivo)}${cellaTempo(scuola.criterio)}${cellaNumero(scuola.mesiExtra)}${cellaTempo(scuola.durata)}${cellaNumero(scuola.anni)}</tr>`).join("")
     }</tbody></table>`);
 
   const segreti = sezione("segreti", "Leggendari Segreti",

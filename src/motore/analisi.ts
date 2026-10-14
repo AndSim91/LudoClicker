@@ -91,7 +91,17 @@ export function scuole(registri: RegistroPartita[]) {
       const years = registro.eventi.filter((evento) => evento.scuola === numero && evento.tipo === "anno").length;
       return inizioScuole(registro).has(numero) ? years : undefined;
     });
-    return { numero, arrivo: distribuzione(arrivo), durata: distribuzione(durata), anni: distribuzione(anni) };
+    const criterio = registri.map((registro) =>
+      registro.eventi.find((evento) => evento.scuola === numero && evento.tipo === "criterio-fondazione"));
+    return {
+      numero,
+      arrivo: distribuzione(arrivo),
+      durata: distribuzione(durata),
+      anni: distribuzione(anni),
+      criterio: distribuzione(criterio.map((evento, index) =>
+        evento ? evento.t - (inizioScuole(registri[index]).get(numero) ?? 0) : undefined)),
+      mesiExtra: distribuzione(criterio.map((evento) => evento?.valore)),
+    };
   });
 }
 

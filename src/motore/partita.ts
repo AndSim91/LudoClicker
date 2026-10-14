@@ -104,6 +104,17 @@ export function giocaPartita({ seed, maxScuole, maxOre, onAvanzamento }: Opzioni
   let livelliInizioAnno = totaleLivelli(state);
   let ultimaPagella: number | undefined;
   const segretiVisti = new Map<string, string>();
+  /** Mese in cui il giocatore fonderà, dopo i mesi in più estratti a caso. */
+  let fondaAlMese: number | undefined;
+  // Generatore deterministico (mulberry32) dal seme della partita.
+  let rngState = (seed * 2_654_435_761) >>> 0;
+  const casuale = () => {
+    rngState = (rngState + 0x6d2b79f5) >>> 0;
+    let t = rngState;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4_294_967_296;
+  };
 
   const annota = (tipo: string, chiave?: string, valore?: number, dati?: Record<string, unknown>) => {
     registro.eventi.push({
@@ -233,7 +244,25 @@ export function giocaPartita({ seed, maxScuole, maxOre, onAvanzamento }: Opzioni
           fama: state.school.fame,
           formeCompletate: state.statistics.formsCompleted,
         });
-        if (scuola < maxScuole && vuoleFondare(state, anno)) {
+        // Andrea (14/10): scattato il criterio, il giocatore resta ancora da 0 a 2 anni
+        // di gioco (a caso, dal seme della partita) prima di fondare.
+        if (fondaAlMese === undefined && vuoleFondare(state, anno)) {
+          const extra = Math.floor(casuale() * (REGOLE.mesiExtraMassimi + 1));
+          fondaAlMese = state.school.currentMonth + extra;
+          annota("criterio-fondazione", String(scuola), extra, { iscritti: state.school.activeMembers });
+        }
+        annoCorrente = getSchoolYear(state.school.currentMonth);
+        anno = { iscrittiInizio: state.school.activeMembers, upgradeComprati: 0 };
+        livelliInizioAnno = totaleLivelli(state);
+      }
+
+      if (fondaAlMese !== undefined && state.school.currentMonth >= fondaAlMese && canFoundSchool(state)) {
+        fondaAlMese = undefined;
+        if (scuola >= maxScuole) {
+          annota("fine", "scuola-completa");
+          break;
+        }
+        {
           const prima = state;
           const preview = getPrestigeReputationPreview(state);
           annota("fondazione", String(scuola + 1), preview.points, {
@@ -252,14 +281,11 @@ export function giocaPartita({ seed, maxScuole, maxOre, onAvanzamento }: Opzioni
             risultatiVisti = new Set();
             livelli = { ...state.upgrades } as Record<string, number>;
             ultimaPagella = undefined;
+            annoCorrente = getSchoolYear(state.school.currentMonth);
+            anno = { iscrittiInizio: state.school.activeMembers, upgradeComprati: 0 };
+            livelliInizioAnno = totaleLivelli(state);
           }
-        } else if (scuola >= maxScuole && vuoleFondare(state, anno)) {
-          annota("fine", "scuola-completa");
-          break;
         }
-        annoCorrente = getSchoolYear(state.school.currentMonth);
-        anno = { iscrittiInizio: state.school.activeMembers, upgradeComprati: 0 };
-        livelliInizioAnno = totaleLivelli(state);
       }
       if (onAvanzamento && effettivoMs >= prossimoAvviso) {
         prossimoAvviso = effettivoMs + 10 * 60_000;

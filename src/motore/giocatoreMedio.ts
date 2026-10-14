@@ -45,6 +45,8 @@ export const REGOLE = {
   sogliaCrescita: 0.05,
   /** ...e nell'anno ha potuto comprare meno di 5 Upgrade. */
   sogliaUpgrade: 5,
+  /** Scattato il criterio, resta ancora da 0 a 24 mesi (0–2 anni) a caso prima di fondare. */
+  mesiExtraMassimi: 24,
   /** ponytail: quante spade compra in Pianificazione, da tarare: una ogni 4 iscritti. */
   spadePerIscritto: 0.25,
   prioritaCollaboratori: ["instructor", "writing", "gadget", "events", "equipment"] as const,
