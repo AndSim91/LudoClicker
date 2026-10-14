@@ -39,7 +39,6 @@ export interface MemberSortContext {
   instructorBranchCapacity: number;
   unrestrictedFormBranches: boolean;
   immunityContext: AthleteImmunityContext;
-  foundedSchools: number;
   /** Chat di Gruppo. */
   departureRiskReduction?: number;
   courseXUnlocked: boolean;
@@ -124,7 +123,6 @@ function getDisplayedRisk(contact: Contact, context: MemberSortContext): number 
   return getMemberAnnualDepartureChance(
     student.forms,
     contact.rarity,
-    context.foundedSchools,
     getYearlyRiskReduction(immunity, context.departureRiskReduction),
   );
 }

@@ -309,8 +309,8 @@ sempre visibile nella barra superiore, va da Settembre ad Agosto; la formazione
 si ferma a Luglio e Agosto e gli eventuali abbandoni vengono verificati nel
 passaggio tra Giugno e Luglio. La probabilità annuale di abbandono dipende
 dalla Forma più alta raggiunta e dalla rarità (14/10/2026): per un Comune 90%
-senza Forme, poi 80%, 70%, 60%, 50%, 40%, 30% e 20% con la Forma 7 (+0,5% per
-ogni scuola fondata); Corso X e Corso Y valgono la Forma che li precede (F1 e
+senza Forme, poi 80%, 70%, 60%, 50%, 40%, 30% e 20% con la Forma 7 (le scuole
+fondate non aggiungono più rischio, 14/10/2026); Corso X e Corso Y valgono la Forma che li precede (F1 e
 F2). I Rari hanno 15 punti in meno, gli Ultra Rari 30 (dal Corso Y sono
 Collaboratori e non abbandonano); i Leggendari non abbandonano mai.
 Per il tutorial, una scuola con al massimo 9 iscritti non perde nessuno a fine

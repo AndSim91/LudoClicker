@@ -13,10 +13,9 @@ export function formatFormPath(forms: FormId[], courseXUnlocked = true): string 
 export function getMemberDepartureRiskLabel(
   forms: FormId[],
   rarity: PersonRarity,
-  foundedSchools: number,
   riskReduction = 0,
 ): string {
-  const annualDepartureChance = getMemberAnnualDepartureChance(forms, rarity, foundedSchools, riskReduction);
+  const annualDepartureChance = getMemberAnnualDepartureChance(forms, rarity, riskReduction);
   // 14/10/2026: same Forme per label as before for a Comune (F0–F2 alto, F3–F5 medio).
   if (annualDepartureChance >= 0.7) return "Rischio di abbandono alto";
   if (annualDepartureChance >= 0.4) return "Rischio di abbandono medio";

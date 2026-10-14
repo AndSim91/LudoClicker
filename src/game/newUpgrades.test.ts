@@ -41,7 +41,7 @@ describe("upgrade del 05/10", () => {
   });
 
   it("Chat di Gruppo: toglie una quota del rischio di non rinnovare", () => {
-    expect(getMemberAnnualDepartureChance([], "common", 0, 0.5)).toBe(0.45);
+    expect(getMemberAnnualDepartureChance([], "common", 0.5)).toBe(0.45);
   });
 
   it("Rhythm Gamer: moltiplica la probabilità della rarità successiva", () => {

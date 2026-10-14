@@ -118,18 +118,10 @@ function getHighestFormLevel(forms: FormId[]): number {
   }, 0);
 }
 
-function getDepartureChanceAtFormLevel(
-  level: number,
-  rarity: PersonRarity,
-  foundedSchools: number,
-): number {
+function getDepartureChanceAtFormLevel(level: number, rarity: PersonRarity): number {
   const table = GAME_CONFIG.annualDepartureChanceByForm;
-  const index = clamp(level, 0, table.length - 1);
-  // Forma 7 only: +0,5% per founded school, as before.
-  const schools = index === table.length - 1
-    ? Math.max(0, foundedSchools) * GAME_CONFIG.departureChancePerFoundedSchool
-    : 0;
-  return roundChance(clamp(table[index] - GAME_CONFIG.rarityDepartureDiscount[rarity] + schools, 0, 1));
+  // 14/10/2026: no more +0,5% per founded school at Forma 7.
+  return roundChance(clamp(table[clamp(level, 0, table.length - 1)] - GAME_CONFIG.rarityDepartureDiscount[rarity], 0, 1));
 }
 
 /** To the hundredth of a percent: 1,25% stays 1,25% (14/10/2026). */
@@ -144,13 +136,12 @@ function reduceDepartureChance(chance: number, riskReduction: number): number {
 export function getMemberAnnualDepartureChance(
   forms: FormId[],
   rarity: PersonRarity = "common",
-  foundedSchools = 0,
   /** Chat di Gruppo and the course of the year: share of the risk taken away. */
   riskReduction = 0,
 ): number {
   if (rarity === "legendary") return 0;
   return reduceDepartureChance(
-    getDepartureChanceAtFormLevel(getHighestFormLevel(forms), rarity, foundedSchools),
+    getDepartureChanceAtFormLevel(getHighestFormLevel(forms), rarity),
     riskReduction,
   );
 }
@@ -164,13 +155,12 @@ export function getMemberAnnualDepartureChance(
 export function getTeachingPriorityDepartureChance(
   forms: FormId[],
   formsBack: number,
-  foundedSchools = 0,
   riskReduction = 0,
 ): number {
   // Only Comuni can still be at level 7 here, so their Forma 7 chance applies.
   const level = getHighestFormLevel(forms) - formsBack;
   return reduceDepartureChance(
-    getDepartureChanceAtFormLevel(level, "common", foundedSchools),
+    getDepartureChanceAtFormLevel(level, "common"),
     riskReduction,
   );
 }

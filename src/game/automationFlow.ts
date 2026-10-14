@@ -885,7 +885,6 @@ export function processAutomaticTeaching(
       ? getTeachingPriorityDepartureChance(
         student.forms,
         rarityPriority,
-        state.network.schoolCount,
         departureRiskReduction,
       )
       : 0;

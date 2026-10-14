@@ -896,18 +896,13 @@ describe("game engine: funnel", () => {
     expect(getMemberAnnualDepartureChance([], "legendary")).toBe(0);
 
     const formSeven = ["form-1", "course-x", "form-2", "course-y", "form-3-staff", "form-4-staff", "form-5-staff", "form-6", "form-7"] as const;
-    expect(getMemberAnnualDepartureChance([...formSeven], "common", 0)).toBe(0.2);
-    expect(getMemberAnnualDepartureChance([...formSeven], "rare", 0)).toBe(0.05);
+    expect(getMemberAnnualDepartureChance([...formSeven], "common")).toBe(0.2);
+    expect(getMemberAnnualDepartureChance([...formSeven], "rare")).toBe(0.05);
+    // 14/10/2026: founded schools no longer add risk.
     // Raro Forma 7: course of the year → 2,5%, with Chat di Gruppo 5 too → 1,25%.
-    expect(getMemberAnnualDepartureChance([...formSeven], "rare", 0, 0.5)).toBe(0.025);
-    expect(getMemberAnnualDepartureChance([...formSeven], "rare", 0, 0.75)).toBe(0.0125);
-    expect(getMemberAnnualDepartureChance([...formSeven], "legendary", 0)).toBe(0);
-    expect(getMemberAnnualDepartureChance([...formSeven], "common", 1)).toBeCloseTo(0.205);
-    expect(getMemberAnnualDepartureChance([...formSeven], "rare", 1)).toBeCloseTo(0.055);
-    expect(getMemberAnnualDepartureChance([...formSeven], "legendary", 1)).toBe(0);
-    expect(getMemberAnnualDepartureChance([...formSeven], "common", 3)).toBeCloseTo(0.215);
-    expect(getMemberAnnualDepartureChance([...formSeven], "rare", 3)).toBeCloseTo(0.065);
-    expect(getMemberAnnualDepartureChance([...formSeven], "legendary", 3)).toBe(0);
+    expect(getMemberAnnualDepartureChance([...formSeven], "rare", 0.5)).toBe(0.025);
+    expect(getMemberAnnualDepartureChance([...formSeven], "rare", 0.75)).toBe(0.0125);
+    expect(getMemberAnnualDepartureChance([...formSeven], "legendary")).toBe(0);
   });
 
   it("protects Legendary members from every generic departure request", () => {

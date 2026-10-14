@@ -123,7 +123,6 @@ export const GAME_CONFIG = {
   rarityDepartureDiscount: { common: 0, rare: 0.15, "ultra-rare": 0.3, legendary: 1 },
   // Course of the year, from 500 Iscritti (below it saves): share of the risk taken away.
   courseDepartureReduction: { form: 0.5, arenaTecnica: 0.75, agonist: 0.9 },
-  departureChancePerFoundedSchool: 0.005,
   collaboratorWritingPerSecond: 5,
   socialEmailWritingShare: 0.95,
   socialContentShareWhileWriting: 0.05,

@@ -162,7 +162,6 @@ function getDisplayedMemberStatus(
   return immunity.message ?? getMemberDepartureRiskLabel(
     student.forms,
     contact.rarity,
-    context.foundedSchools,
     getYearlyRiskReduction(immunity, context.departureRiskReduction),
   );
 }
@@ -288,7 +287,6 @@ export function MemberList({
   const currentMonth = state.school.currentMonth;
   const annualTrainingLimit = getAnnualFormTrainingLimit(state.upgrades);
   const courseXUnlocked = isCourseXUnlocked(state.upgrades);
-  const foundedSchools = state.network.schoolCount;
   // Only the 500-Iscritti threshold matters here, so the list does not rebuild at every enrollment.
   const courseOnly = state.school.activeMembers >= COURSE_IMMUNITY_MEMBER_LIMIT;
   const agonistCourseGrantsStats = isAgonistCourseUnlocked(state.upgrades);
@@ -309,7 +307,6 @@ export function MemberList({
       ),
       unrestrictedFormBranches: areAllFormBranchesUnlocked(state.upgrades),
       immunityContext,
-      foundedSchools,
       departureRiskReduction: getDepartureRiskReduction(state.upgrades),
       courseXUnlocked,
       statsTier: getOfficialStatsVisibilityTier(state.upgrades),
@@ -320,7 +317,6 @@ export function MemberList({
       currentMonth,
       annualTrainingLimit,
       state.upgrades,
-      foundedSchools,
       courseXUnlocked,
       immunityContext,
     ],
@@ -330,7 +326,7 @@ export function MemberList({
   const presentationCache = useMemo<MemberPresentationCache>(
     () => new WeakMap(),
     // eslint-disable-next-line react-hooks/exhaustive-deps -- deps are the cache key
-    [currentMonth, annualTrainingLimit, state.upgrades, foundedSchools, courseXUnlocked, immunityContext, state.unlocks.social],
+    [currentMonth, annualTrainingLimit, state.upgrades, courseXUnlocked, immunityContext, state.unlocks.social],
   );
   const getMemberPresentation = useMemo(
     () => createMemberPresentationReader(sortContext, state.unlocks.social, presentationCache),
