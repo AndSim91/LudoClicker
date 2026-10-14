@@ -52,6 +52,8 @@ export interface OpzioniPartita {
   passoMinimoMs?: number;
   /** Ogni quanti minuti effettivi avvisare il chiamante (avanzamento). */
   onAvanzamento?: (registro: RegistroPartita, state: GameState) => void;
+  /** Chiamata a ogni passo: il lanciatore la usa per mettere in pausa la partita. */
+  alPasso?: () => void;
 }
 
 const SOGLIE_ISCRITTI = [10, 100, 1_000, 10_000, 100_000];
@@ -90,6 +92,7 @@ export function giocaPartita({
   maxOre,
   passoMinimoMs = STEP_GIOCO_MS,
   onAvanzamento,
+  alPasso,
 }: OpzioniPartita): RegistroPartita {
   const startedAt = START_MS + seed * 100_000;
   let state = createInitialState(startedAt, `Motore ${seed}`);
@@ -223,6 +226,7 @@ export function giocaPartita({
     state = act(state, { type: "TICK", now, minStepMs: passoMinimoMs });
     registro.msMotore += performance.now() - t0;
     registro.tick += 1;
+    alPasso?.();
     effettivoMs += STEP_GIOCO_MS / speed;
 
     // 3. Scrittura a mano: 8 input per secondo reale.
