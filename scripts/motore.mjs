@@ -14,6 +14,12 @@
  *   --ram N       % massima della RAM libera (99)
  *   --priorita    bassa (predefinita: in background) | media | normale
  *   --seme N      primo seme (1)
+ *   --reputation  confronto tra strategie di Reputazione (anche --reputazione):
+ *                 da solo, le partite si dividono in 8 gruppi: tutti i punti in
+ *                 Scrittura, Eventi, Iscrizioni, Social e Gadget, Formazione,
+ *                 Genetica, Rendita del Network, oppure alla pari tra i rami;
+ *                 con un ramo (es. --reputation scrittura) metà partite in quel
+ *                 ramo e metà alla pari. Report e riepilogo finale per strategia.
  *   --uscita dir  cartella dei risultati (motore-risultati/<data>)
  *   --help, -h    mostra questo aiuto
  *
@@ -51,6 +57,36 @@ const PRIORITA = {
 const MEMORIA_MINIMA_MB = 512;
 const TENTATIVI = 3;
 
+/** Strategie di Reputazione (Andrea, 15/10): nome sul comando → modo del giocatore e nome nel report. */
+const STRATEGIE = {
+  scrittura: { modo: "writing", nome: "Scrittura" },
+  eventi: { modo: "events", nome: "Eventi" },
+  iscrizioni: { modo: "enrollment", nome: "Iscrizioni" },
+  social: { modo: "socialGadgets", nome: "Social e Gadget" },
+  formazione: { modo: "training", nome: "Formazione" },
+  genetica: { modo: "genetics", nome: "Genetica" },
+  rendita: { modo: "rendita", nome: "Rendita del Network" },
+  pari: { modo: "pari", nome: "Alla pari" },
+};
+const ALIAS = { gadget: "social", socialgadget: "social", bilanciata: "pari", bilanciato: "pari" };
+const NOMI_STRATEGIE = Object.fromEntries(Object.values(STRATEGIE).map((s) => [s.modo, s.nome]));
+
+/** Senza --reputation: tutte alla pari. Da solo: le 8 strategie. Con un ramo: quel ramo e alla pari. */
+function strategieReputazione(argv) {
+  const index = argv.findIndex((arg) => ["--reputation", "--reputazione", "--reputationtest"].includes(arg));
+  if (index < 0) return ["pari"];
+  const valore = argv[index + 1] && !argv[index + 1].startsWith("--") ? argv[index + 1].toLowerCase() : undefined;
+  if (argv[index] === "--reputationtest" || !valore || valore === "test" || valore === "tutte") {
+    return Object.values(STRATEGIE).map((s) => s.modo);
+  }
+  const chiave = ALIAS[valore] ?? valore;
+  if (!STRATEGIE[chiave]) {
+    console.error(`Strategia di Reputazione sconosciuta: ${valore}. Possibili: ${Object.keys(STRATEGIE).join(", ")} (oppure niente, per provarle tutte).`);
+    process.exit(1);
+  }
+  return chiave === "pari" ? ["pari"] : [STRATEGIE[chiave].modo, "pari"];
+}
+
 function opzioni(argv) {
   const get = (name, fallback) => {
     const index = argv.indexOf(`--${name}`);
@@ -68,8 +104,7 @@ function opzioni(argv) {
     ram: Math.max(10, Math.min(99, Number(get("ram", 99)))),
     priorita: priorita in PRIORITA ? priorita : "bassa",
     seme: Number(get("seme", 1)),
-    // Come il giocatore medio spende la Reputazione: «pari» (tutti i rami alla pari) o «genetica» (prima 5 punti in Genetica).
-    reputazione: get("reputazione", "pari") === "genetica" ? "genetica" : "pari",
+    strategie: strategieReputazione(argv),
     uscita: resolve(ROOT, get("uscita", join("motore-risultati", stamp))),
     core,
   };
@@ -198,7 +233,15 @@ async function principale() {
   await impacchetta();
   const motore = await import(pathToFileURL(BUNDLE).href);
 
-  const coda = Array.from({ length: o.partite }, (_, index) => ({ seed: o.seme + index, tentativi: 0 }));
+  // Le strategie a turno: con 24 partite e 8 strategie, 3 partite ciascuna. Ogni
+  // strategia gioca gli stessi semi (1, 2, 3…): la prima scuola è identica per tutte
+  // e le differenze vengono solo da come si spende la Reputazione.
+  const coda = Array.from({ length: o.partite }, (_, index) => ({
+    id: index,
+    seed: o.seme + Math.floor(index / o.strategie.length),
+    tentativi: 0,
+    reputazione: o.strategie[index % o.strategie.length],
+  }));
   /** Partite in corso, in ordine di avvio. */
   const inCorso = new Map();
   const registri = [];
@@ -263,6 +306,8 @@ async function principale() {
     return fatte;
   };
 
+  // Con più strategie di Reputazione, il nome della strategia accanto al numero della partita.
+  const larghezzaNome = o.strategie.length > 1 ? 28 : 11;
   const pannello = () => {
     const lista = [...inCorso.values()];
     const fatte = avanzamento();
@@ -279,17 +324,17 @@ async function principale() {
       `  Avanzamento  ${barra(fatte, totali, 30, azzurro)}  ${forte(`${Math.round((fatte / totali) * 100)}%`)}   ${fatte} scuole su ${totali}`,
       `  Fine stimata ${fine}   finite ${verde(`${finite.size}/${o.partite}`)}`,
       "",
-      tenue(`  ${"PARTITA".padEnd(9)}${"SCUOLA".padEnd(o.scuole + 9)}${"GIOCO".padEnd(10)}${"ISCRITTI".padEnd(10)}STATO`),
+      tenue(`  ${"PARTITA".padEnd(larghezzaNome - 2)}${"SCUOLA".padEnd(o.scuole + 9)}${"GIOCO".padEnd(10)}${"ISCRITTI".padEnd(10)}STATO`),
     ];
     // Prima le partite in corso, poi (se c'è posto) le finite e quelle in coda.
     const spazio = Math.max(4, (process.stdout.rows ?? 40) - 16);
     const voci = [
-      ...lista.map((p) => ({ seed: p.seed, p })),
-      ...[...finite.keys()].map((seed) => ({ seed, finita: finite.get(seed) })),
-      ...coda.map((voce) => ({ seed: voce.seed, coda: true })),
+      ...lista.map((p) => ({ seed: p.seed, reputazione: p.reputazione, p })),
+      ...[...finite.values()].map((finita) => ({ seed: finita.seed, reputazione: finita.reputazione, finita })),
+      ...coda.map((voce) => ({ seed: voce.seed, reputazione: voce.reputazione, coda: true })),
     ];
     for (const voce of voci.slice(0, spazio)) {
-      const nome = `  #${voce.seed}`.padEnd(11);
+      const nome = (o.strategie.length > 1 ? `  #${voce.seed} ${NOMI_STRATEGIE[voce.reputazione]}` : `  #${voce.seed}`).padEnd(larghezzaNome);
       if (voce.p) {
         const p = voce.p;
         const stato = p.pausa ? viola("in pausa (PC occupato)") : p.stato.startsWith("pronta") ? oro(p.stato) : tenue(p.stato);
@@ -323,7 +368,7 @@ async function principale() {
     ultimaRiga = Date.now();
     const stima = stimaFine();
     console.log(`[${ora(new Date())}] ${Math.round((avanzamento() / (o.partite * o.scuole)) * 100)}% · finite ${finite.size}/${o.partite}` +
-      (stima === undefined ? "" : ` · fine tra circa ${Math.round(stima)} min`) + (motivo ? ` · ${motivo}` : ""));
+      (stima === undefined ? "" : ` · fine tra circa ${Math.max(1, Math.round(stima))} min`) + (motivo ? ` · ${motivo}` : ""));
   };
 
   const attive = () => [...inCorso.values()].filter((p) => !p.pausa);
@@ -346,7 +391,7 @@ async function principale() {
     const limiteMb = Math.min(16_384, Math.floor(quota));
     const pausa = new SharedArrayBuffer(4);
     const worker = new Worker(fileURLToPath(import.meta.url), {
-      workerData: { seed: voce.seed, scuole: o.scuole, ore: o.ore, pausa, reputazione: o.reputazione },
+      workerData: { seed: voce.seed, scuole: o.scuole, ore: o.ore, pausa, reputazione: voce.reputazione },
       resourceLimits: {
         maxOldGenerationSizeMb: Math.floor(limiteMb * 0.85),
         // Una generazione giovane più grande = meno pulizie della memoria.
@@ -354,7 +399,7 @@ async function principale() {
       },
     });
     const p = { ...voce, worker, segnale: new Int32Array(pausa), pausa: false, minuti: 0, scuola: 1, iscritti: 0, stato: "prima scuola", inizioScuola: Date.now(), usataMb: 0, limiteMb, finita: false, richiamata: false, memoriaFinita: false };
-    inCorso.set(voce.seed, p);
+    inCorso.set(voce.id, p);
     worker.on("message", (message) => {
       if (message.tipo === "memoria") p.usataMb = message.mb;
       else if (message.tipo === "avanzamento") {
@@ -367,20 +412,20 @@ async function principale() {
       } else {
         p.finita = true;
         durate.set(p.scuola, [...(durate.get(p.scuola) ?? []), (Date.now() - p.inizioScuola) / 60_000]);
-        finite.set(voce.seed, { minuti: message.registro.minutiTotali, iscritti: p.iscritti });
+        finite.set(voce.id, { minuti: message.registro.minutiTotali, iscritti: p.iscritti, seed: voce.seed, reputazione: voce.reputazione });
         registri.push(message.registro);
       }
     });
     worker.on("error", (error) => {
       if (error.code === "ERR_WORKER_OUT_OF_MEMORY") p.memoriaFinita = true;
-      else problemi.push(`partita ${voce.seed}: ${error.message}`);
+      else problemi.push(`partita ${voce.seed} (${NOMI_STRATEGIE[voce.reputazione]}): ${error.message}`);
     });
     worker.on("exit", (code) => {
-      inCorso.delete(voce.seed);
+      inCorso.delete(voce.id);
       if (!p.finita) {
-        if (p.richiamata) coda.unshift({ seed: voce.seed, tentativi: voce.tentativi });
-        else if (p.memoriaFinita && voce.tentativi + 1 < TENTATIVI) coda.unshift({ seed: voce.seed, tentativi: voce.tentativi + 1 });
-        else problemi.push(`partita ${voce.seed}: ${p.memoriaFinita ? `memoria esaurita (${limiteMb} MB)` : `thread uscito con codice ${code}`}`);
+        if (p.richiamata) coda.unshift({ ...voce });
+        else if (p.memoriaFinita && voce.tentativi + 1 < TENTATIVI) coda.unshift({ ...voce, tentativi: voce.tentativi + 1 });
+        else problemi.push(`partita ${voce.seed} (${NOMI_STRATEGIE[voce.reputazione]}): ${p.memoriaFinita ? `memoria esaurita (${limiteMb} MB)` : `thread uscito con codice ${code}`}`);
       }
       regola(false);
       stampa();
@@ -438,23 +483,43 @@ async function principale() {
     regola(false);
   });
 
-  registri.sort((left, right) => left.seed - right.seed);
+  registri.sort((left, right) => left.seed - right.seed || o.strategie.indexOf(left.strategia) - o.strategie.indexOf(right.strategia));
   const analisi = motore.analizza(registri);
   let commit = "";
   try { commit = execSync("git rev-parse --short HEAD", { cwd: ROOT }).toString().trim(); } catch { /* fuori da git */ }
-  const versione = `salvataggio v${motore.GAME_CONFIG.version}${commit ? ` · commit ${commit}` : ""} · Reputazione ${o.reputazione === "genetica" ? "prima in Genetica" : "alla pari"}`;
+  const versione = `salvataggio v${motore.GAME_CONFIG.version}${commit ? ` · commit ${commit}` : ""} · Reputazione: ${o.strategie.map((modo) => NOMI_STRATEGIE[modo]).join(", ")}`;
+  const confronto = o.strategie.length > 1 ? motore.confrontaStrategie(registri, o.scuole) : undefined;
   const secondi = (Date.now() - t0) / 1000;
   mkdirSync(o.uscita, { recursive: true });
-  writeFileSync(join(o.uscita, "dati.json"), JSON.stringify({ opzioni: o, versione, secondi, problemi, analisi, registri }));
+  writeFileSync(join(o.uscita, "dati.json"), JSON.stringify({ opzioni: o, versione, secondi, problemi, analisi, confronto, registri }));
   writeFileSync(join(o.uscita, "report.html"), motore.creaReport(analisi, {
     creato: new Date().toLocaleString("it-IT"),
     partite: registri.length,
     scuole: o.scuole,
     secondi,
     versione,
+    ...(confronto ? { confronto: { righe: confronto, nomi: NOMI_STRATEGIE } } : {}),
   }));
+  if (confronto) stampaConfronto(confronto, o.scuole);
   if (problemi.length) console.log(`Problemi:\n - ${problemi.join("\n - ")}`);
   console.log(`Fatto in ${Math.round(secondi / 60)} min. Report: ${join(o.uscita, "report.html")}`);
+}
+
+/** Il riepilogo finale per strategia di Reputazione: mediane, ordinate dalla più veloce. */
+function stampaConfronto(righe, obiettivo) {
+  const ore = (minuti) => minuti === undefined ? "—" : `${Math.floor(minuti / 60)} h ${String(Math.round(minuti % 60)).padStart(2, "0")}`;
+  const numero = (valore) => valore === undefined ? "—" : Math.round(valore).toLocaleString("it-IT");
+  const ordinate = [...righe].sort((a, b) => (a.fine.p50 ?? Infinity) - (b.fine.p50 ?? Infinity));
+  const pari = righe.find((riga) => riga.strategia === "pari")?.fine.p50;
+  console.log(`\nStrategie di Reputazione (mediane; fine = un anno dopo il muro della scuola ${obiettivo})`);
+  console.log(`  ${"Strategia".padEnd(22)}${"Partite".padEnd(9)}${"Fine".padEnd(10)}${"vs pari".padEnd(9)}${"Reputazione".padEnd(13)}${"Iscritti al muro".padEnd(18)}${"Nazionali".padEnd(11)}Upgrade`);
+  for (const riga of ordinate) {
+    const arrivate = riga.fine.raggiunte < riga.partite ? ` (${riga.fine.raggiunte}/${riga.partite})` : "";
+    const confronto = pari && riga.fine.p50 && riga.strategia !== "pari"
+      ? `${riga.fine.p50 <= pari ? "−" : "+"}${Math.round(Math.abs(riga.fine.p50 - pari) / pari * 100)}%`
+      : "";
+    console.log(`  ${(NOMI_STRATEGIE[riga.strategia] ?? riga.strategia).padEnd(22)}${String(riga.partite).padEnd(9)}${(ore(riga.fine.p50) + arrivate).padEnd(10)}${confronto.padEnd(9)}${numero(riga.reputazione.p50).padEnd(13)}${numero(riga.iscrittiAlMuro.p50).padEnd(18)}${numero(riga.nazionali.p50).padEnd(11)}${numero(riga.upgrade.p50)}`);
+  }
 }
 
 if (isMainThread) {

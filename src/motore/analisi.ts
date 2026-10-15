@@ -310,3 +310,35 @@ export function analizza(registri: RegistroPartita[]) {
 }
 
 export type Analisi = ReturnType<typeof analizza>;
+
+/**
+ * Confronto tra strategie di Reputazione (--reputation, Andrea 15/10): le stesse
+ * misure per ogni gruppo di partite, a parità di regole del giocatore.
+ */
+export function confrontaStrategie(registri: RegistroPartita[], obiettivo: number) {
+  const gruppi = new Map<string, RegistroPartita[]>();
+  for (const registro of registri) gruppi.set(registro.strategia, [...(gruppi.get(registro.strategia) ?? []), registro]);
+  return [...gruppi.entries()].map(([strategia, gruppo]) => {
+    const perScuola = scuole(gruppo);
+    const conta = (registro: RegistroPartita, tipo: string, chiave?: string) =>
+      registro.eventi.filter((evento) => evento.tipo === tipo && (chiave === undefined || evento.chiave === chiave)).length;
+    return {
+      strategia,
+      partite: gruppo.length,
+      // Fine della partita = un anno dopo il muro dell'ultima scuola.
+      fine: distribuzione(gruppo.map((registro) => registro.scuoleRaggiunte >= obiettivo ? registro.minutiTotali : undefined)),
+      arrivo: perScuola.map((scuola) => ({ numero: scuola.numero, arrivo: scuola.arrivo })),
+      reputazione: distribuzione(gruppo.map((registro) => registro.eventi
+        .filter((evento) => evento.tipo === "fondazione" && evento.chiave !== "disponibile")
+        .reduce((totale, evento) => totale + (evento.valore ?? 0), 0))),
+      iscrittiAlMuro: distribuzione(gruppo.map((registro) => {
+        const muri = registro.eventi.filter((evento) => evento.tipo === "criterio-fondazione");
+        return Number(muri[muri.length - 1]?.dati?.iscritti ?? NaN);
+      })),
+      nazionali: distribuzione(gruppo.map((registro) => conta(registro, "titolo", "nazionale"))),
+      upgrade: distribuzione(gruppo.map((registro) => conta(registro, "upgrade"))),
+    };
+  });
+}
+
+export type ConfrontoStrategie = ReturnType<typeof confrontaStrategie>;

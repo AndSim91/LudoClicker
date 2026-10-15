@@ -36,6 +36,8 @@ export interface Evento {
 
 export interface RegistroPartita {
   seed: number;
+  /** Come il giocatore spende la Reputazione (--reputation). */
+  strategia: string;
   minutiTotali: number;
   scuoleRaggiunte: number;
   eventi: Evento[];
@@ -106,7 +108,7 @@ export function giocaPartita({
   let inputAccumulati = 0;
   let prossimoAvviso = 0;
   const registro: RegistroPartita = {
-    seed, minutiTotali: 0, scuoleRaggiunte: 1, eventi: [], errori: [], msMotore: 0, tick: 0,
+    seed, strategia: reputazione, minutiTotali: 0, scuoleRaggiunte: 1, eventi: [], errori: [], msMotore: 0, tick: 0,
   };
 
   // Ciò che il registro ha già visto, per annotare solo le novità.

@@ -1,5 +1,5 @@
 /** La pagina HTML del motore: si apre nel browser, nessuna dipendenza esterna. */
-import type { Analisi, Distribuzione } from "./analisi";
+import type { Analisi, ConfrontoStrategie, Distribuzione } from "./analisi";
 import { MATERIE, NOMI_MATERIE, SCUOLE_MOSTRATE, VOTI } from "./analisi";
 
 const LIVELLI: Record<string, string> = {
@@ -52,11 +52,37 @@ function barraVoti(conteggio: Record<string, number>): string {
   return `<svg class="barra" viewBox="0 0 100 14" preserveAspectRatio="none" role="img" aria-label="Voti">${pezzi}</svg>`;
 }
 
+function sezioneStrategie(righe: ConfrontoStrategie, nomi: Record<string, string>, obiettivo: number): string {
+  const numeri = [...new Set(righe.flatMap((riga) => riga.arrivo.map((a) => a.numero)))].filter((n) => n > 1).sort((a, b) => a - b);
+  const nome = (strategia: string) => esc(nomi[strategia] ?? strategia);
+  const riepilogo = `<table><thead><tr><th>Strategia</th><th>Partite</th><th>Fine (scuola ${obiettivo})</th><th>Reputazione guadagnata</th><th>Iscritti al muro, ultima scuola</th><th>Nazionali vinti</th><th>Livelli di Upgrade comprati</th></tr></thead><tbody>${
+    righe.map((riga) => `<tr><th>${nome(riga.strategia)}</th><td>${riga.partite}</td>${cellaTempo(riga.fine)}${cellaNumero(riga.reputazione)}${cellaNumero(riga.iscrittiAlMuro)}${cellaNumero(riga.nazionali)}${cellaNumero(riga.upgrade)}</tr>`).join("")
+  }</tbody></table>`;
+  const arrivi = `<h3>Arrivo a ogni scuola</h3><table><thead><tr><th>Strategia</th>${numeri.map((n) => `<th>Scuola ${n}</th>`).join("")}</tr></thead><tbody>${
+    righe.map((riga) => `<tr><th>${nome(riga.strategia)}</th>${numeri.map((n) => {
+      const arrivo = riga.arrivo.find((a) => a.numero === n)?.arrivo;
+      return arrivo ? cellaTempo(arrivo) : `<td class="vuota">—</td>`;
+    }).join("")}</tr>`).join("")
+  }</tbody></table>`;
+  return sezione("strategie", "Strategie di Reputazione",
+    "Le stesse regole del giocatore medio, cambia solo come spende la Reputazione a ogni fondazione: tutti i punti in un ramo (oltre il tetto di 50, alla pari), tutti nella Rendita del Network, oppure alla pari tra i rami. Tempi in tempo di gioco effettivo dall'inizio della partita; in grassetto la mediana, sotto il 10% più veloce e il 10% più lento.",
+    riepilogo + arrivi);
+}
+
 function sezione(id: string, titolo: string, domanda: string, corpo: string): string {
   return `<section id="${id}"><h2>${esc(titolo)}</h2><p class="domanda">${domanda}</p>${corpo}</section>`;
 }
 
-export function creaReport(analisi: Analisi, meta: { creato: string; partite: number; scuole: number; secondi: number; versione: string }): string {
+export function creaReport(analisi: Analisi, meta: {
+  creato: string;
+  partite: number;
+  scuole: number;
+  secondi: number;
+  versione: string;
+  /** --reputation: le stesse misure per ogni strategia, con il nome da mostrare. */
+  confronto?: { righe: ConfrontoStrategie; nomi: Record<string, string> };
+}): string {
+  const confronto = meta.confronto && meta.confronto.righe.length > 1 ? sezioneStrategie(meta.confronto.righe, meta.confronto.nomi, meta.scuole) : "";
   const tappe = sezione("tappe", "Tappe della storia, scuola per scuola",
     "Domande A1–A8, B10, D22: quanto tempo effettivo dall'inizio di ogni scuola. In grassetto la mediana, sotto il 10% più veloce e il 10% più lento; «3/50» = partite che ci sono arrivate.",
     `<table><thead><tr><th>Tappa</th>${SCUOLE_MOSTRATE.map((n) => `<th>Scuola ${n}</th>`).join("")}</tr></thead><tbody>${
@@ -128,7 +154,7 @@ export function creaReport(analisi: Analisi, meta: { creato: string; partite: nu
       ? `<h3>Problemi (${s.errori.length})</h3><ul>${s.errori.slice(0, 50).map((e) => `<li>${esc(e)}</li>`).join("")}</ul>`
       : `<p>Nessun problema trovato.</p>`}`);
 
-  const indice = [["tappe", "Tappe"], ["scuole", "Scuole"], ["segreti", "Leggendari Segreti"], ["leggendari", "Leggendari"], ["upgrade", "Upgrade"], ["pagelle", "Pagelle"], ["reputazione", "Reputazione"], ["tornei", "Tornei"], ["salute", "Salute"]]
+  const indice = [...(confronto ? [["strategie", "Strategie di Reputazione"]] : []), ["tappe", "Tappe"], ["scuole", "Scuole"], ["segreti", "Leggendari Segreti"], ["leggendari", "Leggendari"], ["upgrade", "Upgrade"], ["pagelle", "Pagelle"], ["reputazione", "Reputazione"], ["tornei", "Tornei"], ["salute", "Salute"]]
     .map(([id, nome]) => `<a href="#${id}">${nome}</a>`).join("");
 
   return `<!doctype html>
@@ -156,6 +182,6 @@ td strong{display:block}td small{display:block;color:var(--muted);font-size:12px
 <p class="meta">${meta.partite} partite del giocatore medio fino alla scuola ${meta.scuole} · versione del gioco ${esc(meta.versione)} · ${esc(meta.creato)} · calcolo ${tempo(meta.secondi / 60)}</p>
 <p class="meta">Tempi in tempo di gioco effettivo (il gioco avanza solo mentre è aperto). Regole del giocatore medio: Project, <code>claude/motore-giocatore-medio.md</code>.</p></header>
 <nav>${indice}</nav>
-<main>${tappe}${scuole}${segreti}${leggendari}${upgrade}${pagelle}${reputazione}${tornei}${salute}</main>
+<main>${confronto}${tappe}${scuole}${segreti}${leggendari}${upgrade}${pagelle}${reputazione}${tornei}${salute}</main>
 </body></html>`;
 }

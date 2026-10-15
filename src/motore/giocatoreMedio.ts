@@ -288,17 +288,20 @@ export function decidi(state: GameState, now: number): GameState {
 }
 
 /** Reputazione in parti uguali: un punto alla volta al ramo più basso, entro il tetto. */
-export type ModoReputazione = "pari" | "genetica";
-
-/** Esperimento del 14/10/2026: con «genetica» i primi 5 punti vanno in Genetica, poi alla pari. */
-const GENETICA_PRIMA = 5;
+/**
+ * Come spende la Reputazione alla fondazione (Andrea, 15/10): «pari» = un punto alla
+ * volta al ramo più basso; un ramo = tutti i punti lì (oltre il tetto di 50, alla pari);
+ * «rendita» = tutti i punti nella Rendita del Network.
+ */
+export type ModoReputazione = "pari" | "rendita" | (typeof REPUTATION_UPGRADE_IDS)[number];
 
 export function spesaReputazione(state: GameState, modo: ModoReputazione = "pari"): ReputationSpending {
   let available = state.network.reputation + getPrestigeReputationPreview(state).points;
+  if (modo === "rendita") return { upgrades: {}, rent: available };
   const upgrades: Partial<Record<(typeof REPUTATION_UPGRADE_IDS)[number], number>> = {};
   const level = (id: (typeof REPUTATION_UPGRADE_IDS)[number]) => getReputationLevel(state, id) + (upgrades[id] ?? 0);
   while (available > 0) {
-    const target = modo === "genetica" && level("genetics") < GENETICA_PRIMA ? "genetics" : REPUTATION_UPGRADE_IDS
+    const target = modo !== "pari" && level(modo) < GAME_CONFIG.reputationUpgradeMaxLevel ? modo : REPUTATION_UPGRADE_IDS
       .filter((id) => level(id) < GAME_CONFIG.reputationUpgradeMaxLevel)
       .sort((left, right) => level(left) - level(right))[0];
     if (!target) break;
