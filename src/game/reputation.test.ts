@@ -176,7 +176,7 @@ it("keeps the Sede madre and the latest schools on the map", () => {
   expect(schools.at(-1)?.name).toBe("60");
 });
 
-it("raises the base values by 20% a point, probabilities up to their maximum", () => {
+it("raises the base values by 20% a point (Formazione and Genetica 10%), probabilities up to their maximum", () => {
   const initial = createInitialState(1_000, "Tester");
   const boosted = (levels: GameState["network"]["reputationUpgrades"]): GameState => ({
     ...initial,
@@ -193,20 +193,20 @@ it("raises the base values by 20% a point, probabilities up to their maximum", (
   expect(getEmailBookingChance(levelled, "common")).toBeCloseTo(getEmailBookingChance(initial, "common"));
   expect(getEnrollmentChance(boosted({ enrollment: 50 }), "common")).toBeCloseTo(1);
 
-  // Formazione: every course, staff included, three times as fast at 10 points.
+  // Formazione (+10% a point from 15/10): every course, staff included, twice as fast at 10 points.
   const course = { formId: "form-1" as const, startedAt: 0, completesAt: 0 };
   const instructorCourse = { ...course, trainingTrack: "instructor" as const };
   for (const training of [course, instructorCourse]) {
     expect(getTrainingDurationMultiplier(levelled, "x", training)).toBeCloseTo(
-      getTrainingDurationMultiplier(initial, "x", training) / 3,
+      getTrainingDurationMultiplier(initial, "x", training) / 2,
     );
   }
 
   // Genetica: new athletes are born with higher base values.
   const plain = rollAthleteBaseStats(7, "common");
   const gifted = rollAthleteBaseStats(7, "common", undefined, getReputationMultiplier(levelled, "genetics"));
-  expect(gifted.arena).toBe(Math.round(plain.arena * 1.4));
-  expect(gifted.style).toBe(Math.round(plain.style * 1.4));
+  expect(gifted.arena).toBe(Math.round(plain.arena * 1.2));
+  expect(gifted.style).toBe(Math.round(plain.style * 1.2));
 
   const withMembers = addAdminMembers(initial, 50);
   const withFollowers = {
@@ -325,5 +325,5 @@ it("adds 0,1 per Reputation point earned before Genetica, and Formazione raises 
 
   const athlete = { ...initial.contacts[0], arenaBase: 100, styleBase: 100, forms: ["form-1" as const] };
   expect(getAthleteTournamentStats(athlete, athlete.forms, false, undefined, getFormBonusMultiplier(state)).arena)
-    .toBeCloseTo(112);
+    .toBeCloseTo(111);
 });

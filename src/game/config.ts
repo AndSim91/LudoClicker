@@ -152,6 +152,8 @@ export const GAME_CONFIG = {
   prestigeAcademyTitles: 1,
   // Reputazione di rete (src/game/reputation.ts): +20% of the base value per point.
   reputationStep: 0.2,
+  // 15/10 (Andrea): Formazione and Genetica +10% per point, the others stay at reputationStep.
+  reputationStepByUpgrade: { training: 0.1, genetics: 0.1 } as Partial<Record<string, number>>,
   // The Accademico title that unlocks the prestige (13/10: 2 points like the tournaments, was 1).
   reputationAcademyTitlePoints: 2,
   // A national title (Arena or Style) of the school left behind.

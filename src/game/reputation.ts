@@ -44,11 +44,16 @@ export interface ReputationSpending {
 
 export const NO_REPUTATION_SPENDING: ReputationSpending = { upgrades: {}, rent: 0 };
 
+/** Value of one point: +20%, Formazione and Genetica +10% (15/10). */
+export function getReputationStep(id: ReputationUpgradeId): number {
+  return GAME_CONFIG.reputationStepByUpgrade[id] ?? GAME_CONFIG.reputationStep;
+}
+
 /** What `level` points give, as the Network page and the foundation show it. */
 export function formatReputationEffect(id: ReputationUpgradeId, level: number): string {
   return id === "writing"
     ? `+${level} ${level === 1 ? "carattere" : "caratteri"}`
-    : `+${Math.round(level * GAME_CONFIG.reputationStep * 100)}%`;
+    : `+${Math.round(level * getReputationStep(id) * 100)}%`;
 }
 
 export function getReputationLevel(
@@ -62,7 +67,7 @@ export function getReputationMultiplier(
   state: Pick<GameState, "network">,
   id: ReputationUpgradeId,
 ): number {
-  return 1 + getReputationLevel(state, id) * GAME_CONFIG.reputationStep;
+  return 1 + getReputationLevel(state, id) * getReputationStep(id);
 }
 
 /** Base Arena and Stile of new athletes: Genetica (Reputation) and Arena del Network. */

@@ -40,7 +40,7 @@ it("founds a new school from one page: name and city, old points white and fixed
   // Only the 2 points of the Accademico: each + turns gold, then the others stop.
   fireEvent.click(screen.getByRole("button", { name: "Aggiungi un punto a Genetica" }));
   expect(screen.getByLabelText("Genetica: 4")).toHaveTextContent("3+1");
-  expect(screen.getByText("+80%", { selector: ".foundation-now" })).toBeInTheDocument();
+  expect(screen.getByText("+40%", { selector: ".foundation-now" })).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "Aggiungi un punto a Scrittura" }));
   expect(screen.getByRole("button", { name: "Aggiungi un punto a Genetica" })).toBeDisabled();
   fireEvent.click(screen.getByRole("button", { name: "Togli un punto da Genetica" }));

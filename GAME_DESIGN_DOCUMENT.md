@@ -636,7 +636,8 @@ punti, Fama 10.000 ne dà 11 e Fama 30.000 ne dà 18
 scuola» della pagina Network (§ 17.3); la spesa è definitiva e i punti non spesi
 restano per la fondazione successiva. Ogni punto vale **+20% del valore base**
 (`reputationStep = 0,2`, decisione del 04/10), tranne Scrittura che dal 14/10
-vale **+1 carattere a ogni input**; i potenziamenti della scuola si applicano
+vale **+1 carattere a ogni input** e Formazione e Genetica che dal 15/10 valgono
+**+10%** (`reputationStepByUpgrade`); i potenziamenti della scuola si applicano
 sopra.
 
 | Potenziamento  | Valore base aumentato                                                                  |
@@ -645,7 +646,7 @@ sopra.
 | Eventi         | contatti trovati a ogni evento (`getEventContactMultiplier`)                            |
 | Iscrizioni     | probabilità base di iscrizione dopo la prova, fino al massimo della rarità              |
 | Social e Gadget | entrate dei follower (`getMonthlySocialIncome`) e vendite dei gadget, anche incrociate (non quote, non rendita; dal 04/10 al posto di Quote mensili, salvataggio v94) |
-| Formazione     | velocità di tutti i corsi: atleti, agonisti, Istruttori e Tecnici; dal 14/10 anche +20% a punto su quanto Forme e titoli di insegnamento aggiungono ad Arena e Stile (Forma 1 con un punto: +12% invece di +10%, `getFormBonusMultiplier`) |
+| Formazione     | velocità di tutti i corsi: atleti, agonisti, Istruttori e Tecnici; dal 14/10 anche su quanto Forme e titoli di insegnamento aggiungono ad Arena e Stile (`getFormBonusMultiplier`); dal 15/10 +10% a punto per entrambi (Forma 1 con un punto: +11% invece di +10%) |
 | Genetica       | valori di base di Arena e Stile dei nuovi atleti (non dei Leggendari) e miglioramenti della Preparazione atletica |
 | Rendita        | si consuma: vedi sotto                                                                  |
 
@@ -657,8 +658,8 @@ la spesa: i cinque contatti iniziali di una scuola nascono senza.
 **Reputazione guadagnata (test del 14/10):** ogni punto di Reputazione
 guadagnato in carriera aggiunge +0,1 ad Arena e Stile tirati dei nuovi atleti,
 prima della Genetica (`athleteBaseStatsPerReputation`, `getAthleteBaseBonus`).
-Esempio: 10 punti guadagnati, tiro 100, Genetica 2 punti: (100 + 1) × 1,4 =
-141,4. Come la Genetica, non vale per i Leggendari né per i cinque contatti
+Esempio: 10 punti guadagnati, tiro 100, Genetica 2 punti: (100 + 1) × 1,2 =
+121,2 (con la Genetica a +10% a punto dal 15/10). Come la Genetica, non vale per i Leggendari né per i cinque contatti
 iniziali. La **rendita
 del Network** si consuma: ogni punto blocca il 10% (`networkRentPointShare`) del
 valore di rendita della scuola che si sta lasciando, `iscritti × 40 € × 10%`
