@@ -132,6 +132,8 @@ export const GADGET_DEFINITIONS: Record<GadgetProductId, GadgetDefinition> = {
 };
 
 export const GADGET_PROJECT_UNLOCK_SALES = 100;
+/** In a later school, every 25 sales of a family bring back its next rarity already reached (15/10/2026). */
+export const GADGET_RARITY_RETURN_SALES = 25;
 export const GADGET_REVISION_WORK_RATE = 1 / 3;
 export const GADGET_BASE_ATTEMPTS_PER_MONTH_PER_PRODUCTIVITY = 2;
 export const GADGET_EXTRA_SALES_SPEED_MULTIPLIER = 0.3;

@@ -128,6 +128,14 @@ export function isValidGadgetState(value: unknown): value is GadgetState {
     !Number.isSafeInteger(state.eventStall?.month) ||
     !isFiniteNonNegative(state.eventStall?.attempts)
   )) return false;
+  if (state.returns !== undefined && (
+    !Array.isArray(state.returns) ||
+    !state.returns.every((record) =>
+      isProductId(record?.productId) &&
+      isGadgetRarity(record.rarity) &&
+      typeof record.at === "number" && Number.isFinite(record.at)
+    )
+  )) return false;
   if (!Array.isArray(state.activeWorks) || !state.activeWorks.every(isValidGadgetWork)) return false;
   if (state.minigame && !isValidGadgetMinigame(state.minigame)) return false;
   if (state.minigameQueue !== undefined && (
@@ -135,6 +143,18 @@ export function isValidGadgetState(value: unknown): value is GadgetState {
     !state.minigameQueue.every((queued) => isValidGadgetMinigame(queued) && queued.status === "ready")
   )) return false;
   return true;
+}
+
+export function isValidGadgetBest(value: unknown): boolean {
+  if (value === undefined) return true;
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  return Object.entries(value).every(([productId, rarities]) =>
+    isProductId(productId) && !!rarities && typeof rarities === "object" &&
+    Object.entries(rarities).every(([rarity, quality]) =>
+      isGadgetRarity(rarity) && Number.isSafeInteger(quality) &&
+      (quality as number) >= 0 && (quality as number) <= 100
+    ),
+  );
 }
 
 export function isValidGadgetMastery(value: unknown): boolean {

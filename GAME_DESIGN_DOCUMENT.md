@@ -4386,6 +4386,21 @@ Il catalogo base segue questo ordine:
 L'Elsa personalizzata è un prodotto solo premium: appartiene al catalogo Gadget
 ma non introduce effetti di gioco sulle armi o sull'equipaggiamento.
 
+**Gadget di carriera** (Andrea, 15/10/2026; `gadgetReturns.ts`). Per ogni
+prodotto × rarità messo in vendita si salva tra le scuole la **qualità massima**
+raggiunta (`network.gadgetBest`; sui salvataggi vecchi la Maestria vale 100).
+In ogni scuola dopo, ciò che era già stato in vendita torna da solo con le
+vendite, già accettato, alla qualità salvata e senza progetto né collaudo: il
+Portachiavi Comune dal primo giorno, poi a **25** vendite della famiglia
+(tutte le rarità sommate) il Raro, a **50** l'Ultra Raro, a **75** il
+Leggendario e a **100** il prodotto successivo in Comune. Ogni pezzo torna solo
+se era già stato raggiunto; altrimenti vale il giro normale (progetto da
+comprare e collaudo, rarità dalle revisioni), che resta sempre disponibile.
+Un prodotto il cui progetto è già stato comprato segue il giro normale. Ogni
+ritorno lascia una card «<Prodotto> <Rarità> torna in vetrina» in La mia
+giornata (solo lì, nessun avviso a giornata chiusa, nessun messaggio in
+Posta).
+
 Ogni progetto successivo si sblocca automaticamente dopo 100 vendite della
 famiglia precedente, sommando le unità di tutte le sue rarità. Lo sblocco non
 ha un costo aggiuntivo, ma
@@ -4622,8 +4637,9 @@ Quando una rarità di un prodotto arriva al 100% (con una prova, oppure
 d'ufficio perché si è sbloccata la rarità successiva) quella coppia
 prodotto × rarità ottiene la **Maestria** (`network.gadgetMastery`,
 `syncGadgetMastery` in `gadgetRarity.ts`). Vale solo per quel prodotto e quella
-rarità e resta per tutta la partita, anche nelle scuole fondate dopo (passa
-solo la Maestria: progetti, prototipi e rarità ripartono da zero).
+rarità e resta per tutta la partita, anche nelle scuole fondate dopo (progetti,
+prototipi e rarità ripartono da zero e tornano con le vendite, vedi «Gadget di
+carriera» in 19.1).
 
 Con la Maestria la prova si salta: sviluppo e revisione si pagano e si
 aspettano come sempre, poi il risultato è 100 senza giocare e senza finestra

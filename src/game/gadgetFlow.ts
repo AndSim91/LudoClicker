@@ -36,6 +36,7 @@ import {
   getHighestUnlockedGadgetRarity,
 } from "./gadgetRarity";
 import { recordGadgetMonthlyRevenue } from "./gadgetRevenue";
+import { restoreCareerGadgets } from "./gadgetReturns";
 import { roundCurrency } from "./economy";
 import { GAME_CONFIG } from "./config";
 import { nextRandom } from "./random";
@@ -800,7 +801,8 @@ function bookGadgetSales(
       state.school.currentMonth,
     ),
   };
-  return unlockProductsFromSales(soldState, now);
+  // What came back from an earlier school is already unlocked: no «Nuovo progetto» for it.
+  return unlockProductsFromSales(restoreCareerGadgets(soldState, now), now);
 }
 
 /**

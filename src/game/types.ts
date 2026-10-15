@@ -1045,6 +1045,14 @@ export interface GadgetState {
   monthlyRevenue: GadgetMonthlyRevenueState;
   /** Banchetto agli eventi: sale attempts already used in `month` (cap of the month). */
   eventStall?: { month: number; attempts: number };
+  /** Products and rarities back on sale from an earlier school: one card each in La mia giornata. */
+  returns?: GadgetReturn[];
+}
+
+export interface GadgetReturn {
+  productId: GadgetProductId;
+  rarity: GadgetRarity;
+  at: number;
 }
 
 export interface GameState {
@@ -1096,6 +1104,11 @@ export interface GameState {
     superbaTournament?: boolean;
     /** Maestria dei gadget: product×rarity reached at 100%, collaudo skipped for good (gadgetRarity.ts). */
     gadgetMastery?: Partial<Record<GadgetProductId, GadgetRarity[]>>;
+    /**
+     * Best quality ever reached by a product×rarity on sale, in every school: in later
+     * schools it comes back with the sales at this quality (gadgetReturns.ts, 15/10/2026).
+     */
+    gadgetBest?: Partial<Record<GadgetProductId, Partial<Record<GadgetRarity, number>>>>;
   };
   contacts: Contact[];
   availableContactPool?: AvailableContactPoolEntry[];

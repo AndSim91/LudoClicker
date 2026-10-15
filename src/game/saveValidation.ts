@@ -11,7 +11,7 @@ import {
 } from "./legendaryAvailability";
 import type { CollaboratorMasteryRole, GameState, ReptileSector } from "./types";
 import { LIGHT_INFLATION_EVENT_VISIBILITY_MS } from "./lightInflation";
-import { isValidGadgetMastery, isValidGadgetState } from "./gadgetState";
+import { isValidGadgetBest, isValidGadgetMastery, isValidGadgetState } from "./gadgetState";
 import { REPUTATION_UPGRADE_IDS } from "./reputation";
 
 const CONTACT_SOURCES: GameState["contacts"][number]["source"][] = [
@@ -640,5 +640,6 @@ export function isValidGameState(value: unknown): value is GameState {
     && hasValidReptileProgress(state)
     && typeof state.network?.secretLegendaries === "object"
     && isValidGadgetMastery(state.network?.gadgetMastery)
+    && isValidGadgetBest(state.network?.gadgetBest)
   );
 }

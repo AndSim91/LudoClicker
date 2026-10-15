@@ -1,5 +1,7 @@
 import { NARRATIVE_EVENTS } from "../../content/narrativeEvents";
 import { TOURNAMENT_DEFINITIONS } from "../../content/tournaments";
+import { GADGET_DEFINITIONS } from "../../content/gadgets";
+import { GADGET_RARITIES } from "../../content/gadgetRarities";
 import { GAME_CONFIG } from "../../game/config";
 import { isGameAreaUnlocked } from "../../game/progression";
 import {
@@ -469,6 +471,22 @@ export function selectDayNotifications(
   }
 
   notifications.push(...selectRenewalNotifications(renewals));
+
+  // Gadget di carriera (15/10/2026): only here, never an avviso with the giornata closed.
+  for (const record of state.gadgets.returns ?? []) {
+    const expiresAt = record.at + DAY_NOTIFICATION_VISIBILITY_MS;
+    if (record.at > gameNow || gameNow >= expiresAt) continue;
+    const { quality } = state.gadgets.products[record.productId].rarities[record.rarity];
+    notifications.push({
+      id: `gadget-return-${record.productId}-${record.rarity}-${record.at}`,
+      kind: "important-event",
+      phase: "positive",
+      title: `${GADGET_DEFINITIONS[record.productId].name} ${GADGET_RARITIES[record.rarity].label} torna in vetrina`,
+      detail: `Era già nel cassetto: niente progetto né collaudo, in vendita al ${quality}%.`,
+      timestamp: record.at,
+      expiresAt,
+    });
+  }
 
   return orderDayNotifications(groupCrowdedNotifications(notifications));
 }

@@ -20,6 +20,7 @@ import { scaleCurrencyGain } from "./economy";
 import { getWritingPower } from "./formulas";
 import { createInitialState } from "./initialState";
 import { openGadgetSector } from "./gadgetFlow";
+import { restoreCareerGadgets, syncGadgetBest } from "./gadgetReturns";
 import { FOUNDATION_MOMENT } from "./moments";
 import { canFoundSchool } from "./progression";
 import { nextRandom } from "./random";
@@ -160,6 +161,8 @@ export function foundSchool(
     maxRentPoints: spending.rent,
     earliestFoundationYear: getSchoolYear(state.school.currentMonth),
   }).statistics;
+  // The last step may not have recorded today's qualities yet.
+  const gadgetBest = syncGadgetBest(state).network.gadgetBest;
   const nextState: GameState = {
     ...fresh,
     createdAt: state.createdAt,
@@ -191,6 +194,7 @@ export function foundSchool(
       secretLegendaries: state.network.secretLegendaries,
       ...(state.network.superbaTournament ? { superbaTournament: true } : {}),
       ...(state.network.gadgetMastery ? { gadgetMastery: state.network.gadgetMastery } : {}),
+      ...(gadgetBest ? { gadgetBest } : {}),
     },
     tournaments: {
       ...fresh.tournaments,
@@ -219,7 +223,10 @@ export function foundSchool(
     ...nextState,
     unlocks: { ...nextState.unlocks, social: state.unlocks.social },
   };
-  const opened = state.unlocks.gadget ? openGadgetSector(withCareerUnlocks) : withCareerUnlocks;
+  // Gadget di carriera (15/10/2026): the Portachiavi Comune is on sale from day one if it was before.
+  const opened = state.unlocks.gadget
+    ? restoreCareerGadgets(openGadgetSector(withCareerUnlocks), now)
+    : withCareerUnlocks;
   // The new school's first pagella counts from today, not from the career totals
   // carried in the statistics (14/10/2026: it showed the whole previous school).
   const withLedger: GameState = { ...opened, annual: { ...opened.annual, ledger: createAnnualLedger(opened, now) } };
