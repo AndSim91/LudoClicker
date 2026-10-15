@@ -189,7 +189,9 @@ describe("upgrade catalog", () => {
     const gadget = definitionsFor("gadget")[0];
     const teaching = definitionsFor("instructors")[0];
     const writing = definitionsFor("speed")[0];
-    expect(getUpgradeCost(gadget, 0)).toBe(625);
+    // Gadget has its own curve from 15/10: full catalogue price, +10% a punto.
+    expect(getUpgradeCost(gadget, 0)).toBe(2_500);
+    expect(getUpgradeCost(gadget, 0, { ...createInitialUpgradeLevels(), "gadget-design-tools": 2 })).toBe(3_025);
     expect(getUpgradeCost(teaching, 0)).toBe(250);
     expect(getUpgradeCost(writing, 0)).toBe(13);
   });

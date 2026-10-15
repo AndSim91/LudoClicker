@@ -1,7 +1,7 @@
 import { getFundsGainMultiplier, getNetworkSponsorIncome, getUpgradeEffectTotal } from "../content/upgrades";
 import { GAME_CONFIG } from "./config";
 import { roundCurrency } from "./economy";
-import { getMonthlyNetworkRent } from "./reputation";
+import { getBusinessMultiplier, getMonthlyNetworkRent } from "./reputation";
 import { getMonthlySocialIncome } from "./social";
 import type { GameState, IncomeSource, Statistics } from "./types";
 
@@ -31,7 +31,9 @@ const DEPOSIT_INTEREST_FUNDS_CAP = 250_000;
 export function getMonthlyDepositInterest(state: GameState): number {
   const rate = getUpgradeEffectTotal(state.upgrades, "depositInterestRate");
   if (rate <= 0) return 0;
-  return roundCurrency(Math.min(Math.max(0, state.school.euros), DEPOSIT_INTEREST_FUNDS_CAP) * rate);
+  return roundCurrency(
+    Math.min(Math.max(0, state.school.euros), DEPOSIT_INTEREST_FUNDS_CAP) * rate * getBusinessMultiplier(state),
+  );
 }
 
 /** Adds euros earned to the per-source counters of the Report annuale. */
@@ -46,21 +48,25 @@ export function recordIncomeBySource(
   return { ...statistics, incomeBySource };
 }
 
+/** Network rents and sponsors: fixed amounts, only Business Strategy raises them (15/10). */
+export function getMonthlyNetworkIncome(state: GameState): number {
+  return (getMonthlyNetworkRent(state) + getNetworkSponsorIncome(state.upgrades, state.network.schoolCount)) *
+    getBusinessMultiplier(state);
+}
+
 /** The monthly income split by source; deposit interest counts as «other». */
 export function getMonthlyIncomeBySource(state: GameState): Partial<Record<IncomeSource, number>> {
   const bonus = getFundsGainMultiplier(state.upgrades);
   return {
     fees: getMonthlyMembershipIncome(state) * bonus,
-    network: (getMonthlyNetworkRent(state) +
-      getNetworkSponsorIncome(state.upgrades, state.network.schoolCount)) * bonus,
+    network: getMonthlyNetworkIncome(state) * bonus,
     social: getMonthlySocialIncome(state) * bonus,
   };
 }
 
 export function getMonthlyOperationalIncome(state: GameState): number {
-  // Rents of the schools in the network are fixed: only «Il tempo è denaro» 5 touches them (+10% on everything).
-  return (getMonthlyMembershipIncome(state) + getMonthlyNetworkRent(state) +
-    getMonthlySocialIncome(state) + getMonthlyDepositInterest(state) +
-    getNetworkSponsorIncome(state.upgrades, state.network.schoolCount)) *
+  // «Il tempo è denaro» 5 adds 10% to everything; Business Strategy is inside the parts.
+  return (getMonthlyMembershipIncome(state) + getMonthlyNetworkIncome(state) +
+    getMonthlySocialIncome(state) + getMonthlyDepositInterest(state)) *
     getFundsGainMultiplier(state.upgrades);
 }

@@ -372,12 +372,12 @@ describe("Gadget flow", () => {
     expect(getEstimatedMonthlyGadgetIncome(selling)).toBe(60);
   });
 
-  it("multiplies gadget sales by the Social e Gadget Reputation branch", () => {
+  it("multiplies gadget sales by the Business Strategy Reputation branch", () => {
     const initial = unlockedState();
     const product = initial.gadgets.products.wristband;
     const selling: GameState = {
       ...initial,
-      network: { ...initial.network, reputationUpgrades: { socialGadgets: 5 } },
+      network: { ...initial.network, reputationUpgrades: { socialGadgets: 4 } },
       gadgets: {
         ...initial.gadgets,
         products: {
@@ -393,7 +393,7 @@ describe("Gadget flow", () => {
 
     const sold = processGadgets(selling, GAME_CONFIG.gameMonthMs, 61_000);
 
-    // +20% a punto: 5 punti = ×2 sui 60 € della stessa vendita.
+    // +25% a punto (15/10): 4 punti = ×2 sui 60 € della stessa vendita.
     expect(commonRarity(sold, "wristband").totalProfit).toBe(120);
     expect(sold.school.euros).toBe(selling.school.euros + 120);
   });

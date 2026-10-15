@@ -2,7 +2,7 @@ import { getNetworkSponsorIncome } from "../../content/upgrades";
 import { useId } from "react";
 import { getEstimatedMonthlyGadgetIncome } from "../../game/gadgetIncomeEstimate";
 import { getMonthlyDepositInterest, getMonthlyMembershipIncome } from "../../game/membershipEconomy";
-import { getMonthlyNetworkRent } from "../../game/reputation";
+import { getBusinessMultiplier, getMonthlyNetworkRent } from "../../game/reputation";
 import { getMonthlySocialIncome } from "../../game/social";
 import { useGameSelector } from "../../game/GameStateContext";
 import type { GameState } from "../../game/types";
@@ -25,9 +25,9 @@ function selectMonthlyIncomePresentation(state: GameState): MonthlyIncomePresent
     socialIncome: getMonthlySocialIncome(state),
     gadgetIncome: getEstimatedMonthlyGadgetIncome(state),
     gadgetUnlocked: state.unlocks.gadget,
-    networkRent: getMonthlyNetworkRent(state),
+    networkRent: getMonthlyNetworkRent(state) * getBusinessMultiplier(state),
     depositInterest: getMonthlyDepositInterest(state),
-    networkSponsor: getNetworkSponsorIncome(state.upgrades, state.network.schoolCount),
+    networkSponsor: getNetworkSponsorIncome(state.upgrades, state.network.schoolCount) * getBusinessMultiplier(state),
   };
 }
 

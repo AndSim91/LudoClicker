@@ -44,6 +44,8 @@ export interface RegistroPartita {
   errori: string[];
   msMotore: number;
   tick: number;
+  /** Finestre chiuse per tipo: ognuna costa REGOLE.reazioneMs a gioco fermo. */
+  finestre?: Record<string, number>;
 }
 
 export interface OpzioniPartita {
@@ -108,7 +110,7 @@ export function giocaPartita({
   let inputAccumulati = 0;
   let prossimoAvviso = 0;
   const registro: RegistroPartita = {
-    seed, strategia: reputazione, minutiTotali: 0, scuoleRaggiunte: 1, eventi: [], errori: [], msMotore: 0, tick: 0,
+    seed, strategia: reputazione, minutiTotali: 0, scuoleRaggiunte: 1, eventi: [], errori: [], msMotore: 0, tick: 0, finestre: {},
   };
 
   // Ciò che il registro ha già visto, per annotare solo le novità.
@@ -222,6 +224,7 @@ export function giocaPartita({
     const finestra = finestraAperta(state);
     if (finestra) {
       effettivoMs += REGOLE.reazioneMs;
+      registro.finestre![finestra] = (registro.finestre![finestra] ?? 0) + 1;
       const rng = () => ((registro.tick * 2_654_435_761 + seed) % 1_000) / 1_000;
       const closed = chiudiFinestra(state, now, rng);
       if (closed === state) {

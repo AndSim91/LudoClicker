@@ -243,6 +243,16 @@ function spadeEManutenzione(state: GameState, now: number): GameState {
   if (waiting && isOfficialSwordSupplierVisible(next) && next.school.euros >= GAME_CONFIG.officialSwordCost) {
     next = act(next, { type: "BUY_OFFICIAL_SWORD", now });
   }
+  // Andrea (15/10): quasi sempre abbastanza spade per le prove. Prima di «Compra tutto» il
+  // giocatore copre le prove già fissate che non hanno ancora una spada; se i Fondi non
+  // bastano ne compra quante può.
+  if (isOfficialSwordSupplierVisible(next)) {
+    const daIniziare = next.scheduledTrials.filter((trial) => trial.status === "scheduled" && trial.startsAt > now).length;
+    for (let mancanti = daIniziare - next.equipment.availableSwords; mancanti > 0; mancanti = Math.floor(mancanti / 2)) {
+      const bought = act(next, { type: "BUY_OFFICIAL_SWORD", now, amount: mancanti });
+      if (bought !== next) { next = bought; break; }
+    }
+  }
   if (next.equipment.damagedSwords > 0 || next.equipment.wear > 0) {
     next = act(next, { type: "MAINTAIN_EQUIPMENT", now });
   }
@@ -283,6 +293,10 @@ export function decidi(state: GameState, now: number): GameState {
   // Il giocatore medio mette da parte finché non lo organizza (14/10/2026).
   const reptile = next.tournaments.reptile;
   if (reptile.unlocked && !reptile.activeEdition && next.school.euros < GAME_CONFIG.reptileVenueCost) return next;
+  // «Compra tutto» salta i Percorsi Segreti: il giocatore compra a mano quelli scoperti (Corso X, 1 €).
+  for (const id of next.secretUpgradeDiscoveries) {
+    if ((next.upgrades[id] ?? 0) === 0) next = act(next, { type: "BUY_UPGRADE", upgradeId: id, now });
+  }
   next = act(next, { type: "BUY_ALL_UPGRADES", now });
   return next;
 }

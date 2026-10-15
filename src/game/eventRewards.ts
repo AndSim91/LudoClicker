@@ -41,11 +41,25 @@ export function getEventCollaboratorBonus(state: GameState): number {
   return getEventCollaboratorMultiplier(state) - 1;
 }
 
+/**
+ * Contacts already found and still waiting for an email: the pooled counters and the
+ * available cards. They are no longer «market» for the next event (15/10/2026: with the
+ * Eventi Reputation the waiting list grew to ~8.000, then pushed the school far past the
+ * market and events found nobody for years).
+ */
+export function getWaitingContacts(state: Pick<GameState, "contacts" | "availableContactPool">): number {
+  const pooled = (state.availableContactPool ?? []).reduce((total, entry) => total + entry.count, 0);
+  let available = 0;
+  for (const contact of state.contacts) if (contact.status === "available") available += 1;
+  return pooled + available;
+}
+
 export function getEventMarketAvailability(state: GameState): number {
   const schoolScale = GAME_CONFIG.eventContactSchoolGrowth ** Math.max(0, state.network.schoolCount);
   const depletedMembers = Math.max(
     0,
-    state.school.activeMembers - GAME_CONFIG.eventContactProtectedActiveMembers * schoolScale,
+    state.school.activeMembers + getWaitingContacts(state) -
+      GAME_CONFIG.eventContactProtectedActiveMembers * schoolScale,
   );
   return 0.5 ** (depletedMembers / (GAME_CONFIG.eventContactHalvingMembers * schoolScale));
 }

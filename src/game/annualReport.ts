@@ -206,6 +206,21 @@ function scoreToGrade(value: number, thresholds: readonly [number, number, numbe
   return GRADES[index < 0 ? 4 : index];
 }
 
+function scaleThresholds(
+  thresholds: readonly [number, number, number, number],
+  factor: number,
+): [number, number, number, number] {
+  return thresholds.map((threshold) => threshold * factor) as [number, number, number, number];
+}
+
+/** Iscrizioni: share of the full bar by school year (0 = January–August of the opening). */
+export function getEnrollmentYearFactor(schoolYear: number): number {
+  return Math.min(1, 2 ** (schoolYear - 3));
+}
+
+/** Best the won Scolastico can score once a bigger tournament was played: a C. */
+const SCHOOL_TOURNAMENT_CAP = 0.45;
+
 function lowerGrade(grade: AnnualGrade): AnnualGrade {
   return GRADES[Math.min(4, GRADES.indexOf(grade) + 1)];
 }
@@ -319,8 +334,9 @@ export function gradeAnnualYear(
 ): Partial<Record<AnnualSubject, AnnualGrade>> {
   const base = data.start.activeMembers + data.enrolled;
   const grades: Partial<Record<AnnualSubject, AnnualGrade>> = {
-    // 14/10/2026: the arrivals alone, not compared with the size of the school.
-    enrollment: scoreToGrade(data.enrolled, [300, 150, 75, 30]),
+    // 14/10/2026: the arrivals alone, not compared with the size of the school. 15/10: the
+    // bar is lower in the first years (×1/8, 1/4, 1/2, then full), when nobody gets 300.
+    enrollment: scoreToGrade(data.enrolled, scaleThresholds([300, 150, 75, 30], getEnrollmentYearFactor(data.schoolYear))),
     loyalty: scoreToGrade(1 - data.departed / Math.max(1, base), [0.9, 0.8, 0.7, 0.55]),
   };
   if (state.unlocks.forms) {
@@ -330,9 +346,13 @@ export function gradeAnnualYear(
   if (played.length > 0) {
     // 14/10/2026: the best result of the year, the Scolastico (always won) left out
     // once another tournament was played.
-    const beyondSchool = played.filter((entry) => entry.result.level !== "school");
-    const counted = beyondSchool.length > 0 ? beyondSchool : played;
-    const score = Math.max(...counted.map((entry) => placeScore(entry.place, entry.result.level)));
+    // 15/10/2026: a lost Accademico no longer hides the won Scolastico, which then counts
+    // at most C: the year is judged on what the school could really play.
+    const beyondSchool = played.some((entry) => entry.result.level !== "school");
+    const score = Math.max(...played.map((entry) => {
+      const value = placeScore(entry.place, entry.result.level);
+      return beyondSchool && entry.result.level === "school" ? Math.min(value, SCHOOL_TOURNAMENT_CAP) : value;
+    }));
     grades.tournaments = scoreToGrade(score, [0.8, 0.6, 0.45, 0.3]);
   }
   const cancelledShare = data.cancelled / Math.max(1, data.trials + data.cancelled);
@@ -348,7 +368,8 @@ export function gradeAnnualYear(
   const growth = previousAverage > 0
     ? average / previousAverage - 1
     : averageEarned(data.months.slice(-2)) / Math.max(1, averageEarned(data.months.slice(0, 2))) - 1;
-  let finances = scoreToGrade(growth, [0.3, 0.1, -0.05, -0.2]);
+  // 15/10/2026: holding last year's income is a B, not a C (a grown school stops growing).
+  let finances = scoreToGrade(growth, [0.2, -0.02, -0.1, -0.25]);
   if (isDebtBlocked(state)) finances = lowerGrade(finances);
   grades.finances = finances;
   return grades;

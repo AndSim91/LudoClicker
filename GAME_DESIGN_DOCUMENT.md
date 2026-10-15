@@ -641,16 +641,16 @@ compare solo quando sono sbloccate.
 scuola» della pagina Network (§ 17.3); la spesa è definitiva e i punti non spesi
 restano per la fondazione successiva. Ogni punto vale **+20% del valore base**
 (`reputationStep = 0,2`, decisione del 04/10), tranne Scrittura che dal 14/10
-vale **+1 carattere a ogni input** e Formazione e Genetica che dal 15/10 valgono
-**+10%** (`reputationStepByUpgrade`); i potenziamenti della scuola si applicano
-sopra.
+vale **+1 carattere a ogni input**, Formazione e Genetica che dal 15/10 valgono
+**+10%** e Business Strategy che dal 15/10 vale **+25%** (`reputationStepByUpgrade`);
+i potenziamenti della scuola si applicano sopra.
 
 | Potenziamento  | Valore base aumentato                                                                  |
 | -------------- | -------------------------------------------------------------------------------------- |
 | Scrittura      | +1 carattere a ogni input per punto, per il giocatore e per Redazione e Social (`getWritingPower`; dal 14/10, prima «Email/Social» +20%, salvataggio v116) |
 | Eventi         | contatti trovati a ogni evento (`getEventContactMultiplier`)                            |
 | Iscrizioni     | probabilità base di iscrizione dopo la prova, fino al massimo della rarità              |
-| Social e Gadget | entrate dei follower (`getMonthlySocialIncome`) e vendite dei gadget, anche incrociate (non quote, non rendita; dal 04/10 al posto di Quote mensili, salvataggio v94) |
+| Business Strategy | dal 15/10 (prima «Social e Gadget», id `socialGadgets`): tutte le entrate tranne le quote degli iscritti, +25% a punto (`getBusinessMultiplier`) — follower, gadget (anche al Reptile), Rendita e Sponsor del Network, interessi del Conto deposito, premi dei tornei e dei Leggendari Segreti, Missioni delle Onde, contributi di Eventi e Imprevisti. Il bonus di iscrizione dopo la prova resta fuori |
 | Formazione     | velocità di tutti i corsi: atleti, agonisti, Istruttori e Tecnici; dal 14/10 anche su quanto Forme e titoli di insegnamento aggiungono ad Arena e Stile (`getFormBonusMultiplier`); dal 15/10 +10% a punto per entrambi (Forma 1 con un punto: +11% invece di +10%) |
 | Genetica       | valori di base di Arena e Stile dei nuovi atleti (non dei Leggendari) e miglioramenti della Preparazione atletica |
 | Rendita        | si consuma: vedi sotto                                                                  |
@@ -661,7 +661,7 @@ I sei potenziamenti permanenti arrivano a 50 punti ciascuno (+1000%,
 la spesa: i cinque contatti iniziali di una scuola nascono senza.
 
 **Reputazione guadagnata (test del 14/10):** ogni punto di Reputazione
-guadagnato in carriera aggiunge +0,1 ad Arena e Stile tirati dei nuovi atleti,
+guadagnato in carriera aggiunge +0,2 (dal 15/10, prima +0,1) ad Arena e Stile tirati dei nuovi atleti,
 prima della Genetica (`athleteBaseStatsPerReputation`, `getAthleteBaseBonus`).
 Esempio: 10 punti guadagnati, tiro 100, Genetica 2 punti: (100 + 1) × 1,2 =
 121,2 (con la Genetica a +10% a punto dal 15/10). Come la Genetica, non vale per i Leggendari né per i cinque contatti
@@ -2226,7 +2226,10 @@ evento», «probabilità che chi fa la prova si iscriva»), non quelle del codic
 **un quarto** e salgono del **25% per ogni livello già comprato nello stesso
 ramo** (20% fino al 06/10): prezzo = catalogo × 0,25 × 1,25^(punti del ramo), arrotondato all'euro
 (`UPGRADE_PRICING` e `getUpgradeCost` in `src/content/upgrades.ts`). Gli altri
-rami non cambiano. In una nuova scuola gli Upgrade ripartono da zero e con
+rami non cambiano. Dal 15/10 il ramo Gadget, che si apre tardi (col Nazionale), ha
+una curva sua: prezzo = catalogo × 1 × 1,10^(punti del ramo), cioè parte da prezzi
+più alti ma sale molto meno, così può mettersi in pari con gli altri rami
+(`UPGRADE_PRICING_BY_CATEGORY`). In una nuova scuola gli Upgrade ripartono da zero e con
 loro i prezzi (tranne gli upgrade fissi: Corso X e «Il tempo è denaro», vedi
 § 17.6): è il motivo per fondare, e le cime dei rami si raggiungono
 scuola dopo scuola con la Reputazione. Network delle Onde e Percorsi Segreti
@@ -3427,19 +3430,22 @@ la conferma del piano (13/10). Nuove statistiche: `trialsCancelled`, `incomeBySo
 **Pagella.** Voti A–E, niente media né «Ammesso», confronto con l'anno prima e
 frecce dal secondo anno. Soglie provvisorie, da tarare giocando:
 - Iscrizioni: arrivati nell'anno, senza confronto con la dimensione della scuola
-  (14/10/2026): ≥ 300 A · 150 B · 75 C · 30 D.
+  (14/10/2026): ≥ 300 A · 150 B · 75 C · 30 D. Dal 15/10 l'asticella è più bassa nei
+  primi anni della scuola: ×1/8 nell'anno 0 (gennaio–agosto dell'apertura), ×1/4
+  nell'anno 1, ×1/2 nell'anno 2, intera dall'anno 3 (`getEnrollmentYearFactor`).
 - Fidelizzazione: 1 − andati via ÷ (iscritti a inizio anno + arrivati) ≥ 0,9 · 0,8 · 0,7 · 0,55.
 - Didattica (solo con le Forme aperte): Forme insegnate ÷ iscritti ≥ 1 · 0,6 · 0,35 · 0,15.
 - Risultati Agonistici (solo con almeno un torneo disputato): miglior piazzamento
   pesato sul livello (1° 0,85, 2° 0,7, 3–4° 0,55, 5–8° 0,4, 9–16° 0,25, poi 0,1;
   +0,05 per livello sopra lo Scolastico) ≥ 0,8 · 0,6 · 0,45 · 0,3. Conta il
-  miglior risultato dell'anno escluso lo Scolastico, appena c'è un altro torneo
-  (14/10/2026): lo Scolastico, sempre vinto, non alza più il voto.
+  miglior risultato dell'anno; appena c'è un altro torneo lo Scolastico vale al
+  massimo C (15/10/2026: prima era escluso, e un Accademico perso dava E anche con
+  lo Scolastico vinto).
 - Amministrazione: prove annullate ÷ prove ≤ 2% A · 5% B · 10% C · 20% D; un voto
   in meno se più di un quarto delle spade è rotto.
 - Finanze: entrate medie al mese contro l'anno prima (il primo anno: ultimi due
-  mesi contro i primi due) ≥ +30% · +10% · −5% · −20%; un voto in meno con il
-  debito scaduto.
+  mesi contro i primi due) ≥ +20% · −2% · −10% · −25% (15/10/2026: tenere le
+  entrate dell'anno prima vale B, non più C); un voto in meno con il debito scaduto.
 
 **Highlight annuale** (H1 «Trofeo»). Scala: 1 tappe della storia, 2 titoli,
 3 Leggendari, 4 prime volte, 5 record di iscritti, 6 il numero dell'anno (la

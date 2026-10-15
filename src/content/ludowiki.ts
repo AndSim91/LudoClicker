@@ -7,7 +7,7 @@ import {
   getSecretLegendaryProfile,
   type SecretLegendaryId,
 } from "./secretLegendaries";
-import { UPGRADE_PRICING } from "./upgrades";
+import { UPGRADE_PRICING, UPGRADE_PRICING_BY_CATEGORY } from "./upgrades";
 import { SPECIAL_COLLABORATORS } from "./specialCollaborators";
 import { TOURNAMENT_DEFINITIONS } from "./tournaments";
 import { GAME_CONFIG } from "../game/config";
@@ -350,7 +350,7 @@ export const LUDOWIKI_CHAPTERS: readonly LudoWikiChapter[] = [
     numbers: [
       { label: "Rami pubblici", value: "8", detail: "Scrittura, Creatività, Carisma, Accoglienza, Attrezzatura, Gadget, Insegnamento e Organizzazione" },
       { label: "Punti", value: "1 a livello", detail: "contano nel ramo del nodo comprato" },
-      { label: "Prezzo", value: `+${Math.round(UPGRADE_PRICING.branchGrowth * 100)}% a punto`, detail: "per ogni livello già comprato nello stesso ramo" },
+      { label: "Prezzo", value: `+${Math.round(UPGRADE_PRICING.branchGrowth * 100)}% a punto`, detail: `per ogni livello già comprato nello stesso ramo; Gadget +${Math.round(UPGRADE_PRICING_BY_CATEGORY.gadget!.branchGrowth * 100)}%, con prezzi di partenza più alti` },
       { label: "Sblocco iniziale", value: "1 iscritto", detail: "insieme alla pagina della scuola" },
     ],
     rules: [
@@ -509,12 +509,12 @@ export const LUDOWIKI_CHAPTERS: readonly LudoWikiChapter[] = [
     numbers: [
       { label: "Titoli all'Accademico", value: `${GAME_CONFIG.prestigeAcademyTitles}`, detail: "in Arena o in Stile, con la scuola corrente" },
       { label: "Reputazione", value: "2 + √(Fama/115)", detail: "2 per l'Accademico, +2 per Nazionale, Champion's Arena, Reptile o Superba e Chronicles vinti" },
-      { label: "Potenziamenti", value: `+${Math.round(GAME_CONFIG.reputationStep * 100)}% a punto`, detail: `fino a ${GAME_CONFIG.reputationUpgradeMaxLevel} punti ciascuno, mai azzerati` },
+      { label: "Potenziamenti", value: `+${Math.round(GAME_CONFIG.reputationStep * 100)}% a punto`, detail: `Formazione e Genetica +10%, Business Strategy +25%, Scrittura +1 carattere; fino a ${GAME_CONFIG.reputationUpgradeMaxLevel} punti ciascuno, mai azzerati` },
       { label: "Rendita", value: `${Math.round(GAME_CONFIG.networkRentPointShare * 100)}% a punto`, detail: "del valore di rendita della scuola lasciata (iscritti × 40 € × 10%)" },
     ],
     rules: [
       "Serve una vittoria al Torneo Accademico, in Arena o in Stile, con la scuola corrente.",
-      "Sei rami: Scrittura (+1 carattere a ogni input, anche per Redazione e Social), Eventi (**Contatti** a ogni evento), Iscrizioni (probabilità dopo la prova), Social e Gadget (entrate dai **follower** e vendite dei gadget), Formazione (corsi di atleti, Istruttori, Tecnici e agonisti), Genetica (valori di base dei nuovi atleti e Preparazione atletica).",
+      "Sei rami: Scrittura (+1 carattere a ogni input, anche per Redazione e Social), Eventi (**Contatti** a ogni evento), Iscrizioni (probabilità dopo la prova), Business Strategy (tutte le entrate tranne le quote degli iscritti: Social, Gadget, Reptile, Rendita e sponsor del Network, interessi, premi), Formazione (corsi di atleti, Istruttori, Tecnici e agonisti), Genetica (valori di base dei nuovi atleti e Preparazione atletica).",
       `La mappa del [[Network]] conserva di ogni scuola solo nome, città e **Fama**; tiene la Sede madre e le ultime ${GAME_CONFIG.networkMapSchoolsLimit - 1}, le più vecchie restano contate.`,
       "La spesa è definitiva. I punti negli Upgrade restano per sempre; quelli nella rendita si consumano: bloccano una rendita fissa dalla scuola che lasci e la scuola successiva riparte da 0%.",
       "La rendita non ha tetto: è dove spendere la **Reputazione** quando gli Upgrade sono al massimo.",

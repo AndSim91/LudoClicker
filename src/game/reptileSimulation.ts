@@ -1,4 +1,4 @@
-import { getFormBonusMultiplier } from "./reputation";
+import { getBusinessMultiplier, getFormBonusMultiplier } from "./reputation";
 import { isSuperbaTournament } from "./reptileUnlock";
 import { getAthleteTournamentStats, hasCompletedFormOne } from "./athleteStats";
 import { ARENA_DECISIVENESS, createChampionsOpenAthletePairs } from "./tournamentSimulation";
@@ -542,7 +542,7 @@ export function simulateReptileTournament(
     economy: {
       venueCost: GAME_CONFIG.reptileVenueCost,
       gadgetGross: Math.round(
-        edition.teamCount * GAME_CONFIG.reptileMaximumGadgetGrossPerTeam * resa / 100,
+        edition.teamCount * GAME_CONFIG.reptileMaximumGadgetGrossPerTeam * resa / 100 * getBusinessMultiplier(state),
       ),
       requiredSwords: resaBreakdown.requiredSwords,
       usedSchoolSwords,

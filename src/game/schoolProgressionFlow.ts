@@ -24,6 +24,7 @@ import { FOUNDATION_MOMENT } from "./moments";
 import { canFoundSchool } from "./progression";
 import { nextRandom } from "./random";
 import {
+  getBusinessMultiplier,
   NO_REPUTATION_SPENDING,
   REPUTATION_UPGRADE_IDS,
   getPrestigeReputationPreview,
@@ -331,7 +332,7 @@ export function completeShortGoal(
   if (getShortGoalProgress(available) < available.shortGoal.target) return available;
 
   const definition = SHORT_GOALS[available.shortGoal.definitionId];
-  const reward = scaleCurrencyGain(getShortGoalReward(available.shortGoal), gainMultiplier * getFundsGainMultiplier(available.upgrades));
+  const reward = scaleCurrencyGain(getShortGoalReward(available.shortGoal) * getBusinessMultiplier(available), gainMultiplier * getFundsGainMultiplier(available.upgrades));
   const completedCount = available.shortGoal.completedCount + 1;
   const rewarded: GameState = {
     ...available,

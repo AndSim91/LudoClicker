@@ -155,7 +155,7 @@ export const GAME_CONFIG = {
   // Reputazione di rete (src/game/reputation.ts): +20% of the base value per point.
   reputationStep: 0.2,
   // 15/10 (Andrea): Formazione and Genetica +10% per point, the others stay at reputationStep.
-  reputationStepByUpgrade: { training: 0.1, genetics: 0.1 } as Partial<Record<string, number>>,
+  reputationStepByUpgrade: { training: 0.1, genetics: 0.1, socialGadgets: 0.25 } as Partial<Record<string, number>>,
   // The Accademico title that unlocks the prestige (13/10: 2 points like the tournaments, was 1).
   reputationAcademyTitlePoints: 2,
   // A national title (Arena or Style) of the school left behind (15/10: 3, was 2).
@@ -214,8 +214,8 @@ export const GAME_CONFIG = {
   // Reptile: base Stile and Arena of the external pairs (×1,1 per earlier victory).
   // 14/10/2026: 300 (was 500, never won by the test engine); above the Nazionale (200).
   reptileStandard: 300,
-  // New athletes: +0,1 Arena and Stile per Reputation point earned, before Genetica (14/10, test).
-  athleteBaseStatsPerReputation: 0.1,
+  // New athletes: Arena and Stile per Reputation point earned, before Genetica (14/10 test at 0,1; 0,2 dal 15/10).
+  athleteBaseStatsPerReputation: 0.2,
 } as const;
 
 export function getTechnicalArenaDurationMs(level: number): number {

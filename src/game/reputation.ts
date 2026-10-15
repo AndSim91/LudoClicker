@@ -32,7 +32,9 @@ export const REPUTATION_UPGRADES: Record<ReputationUpgradeId, { label: string; d
   writing: { label: "Scrittura", description: "+1 carattere a ogni input, anche per Redazione e Social" },
   events: { label: "Eventi", description: "contatti trovati a ogni evento" },
   enrollment: { label: "Iscrizioni", description: "probabilità base di iscrizione dopo la prova" },
-  socialGadgets: { label: "Social e Gadget", description: "entrate dai follower e dalle vendite dei gadget" },
+  // 15/10/2026 (Andrea): «Business Strategy», +25% a punto su ogni entrata che non sia la quota degli iscritti.
+  // The id stays socialGadgets so the saves keep their points.
+  socialGadgets: { label: "Business Strategy", description: "tutte le entrate tranne le quote degli iscritti" },
   training: { label: "Formazione", description: "velocità dei corsi di atleti, Istruttori, Tecnici e agonisti" },
   genetics: { label: "Genetica", description: "valori di base dei nuovi atleti e Preparazione atletica" },
 };
@@ -44,7 +46,7 @@ export interface ReputationSpending {
 
 export const NO_REPUTATION_SPENDING: ReputationSpending = { upgrades: {}, rent: 0 };
 
-/** Value of one point: +20%, Formazione and Genetica +10% (15/10). */
+/** Value of one point: +20%, Formazione and Genetica +10%, Business Strategy +25% (15/10). */
 export function getReputationStep(id: ReputationUpgradeId): number {
   return GAME_CONFIG.reputationStepByUpgrade[id] ?? GAME_CONFIG.reputationStep;
 }
@@ -70,6 +72,15 @@ export function getReputationMultiplier(
   return 1 + getReputationLevel(state, id) * getReputationStep(id);
 }
 
+/**
+ * Business Strategy: multiplies every euro the school earns except the members' fees
+ * (Social, Gadget, Reptile, network rents and sponsors, deposit interest, prizes,
+ * Missioni delle Onde, contributions from Eventi e Imprevisti).
+ */
+export function getBusinessMultiplier(state: Pick<GameState, "network">): number {
+  return getReputationMultiplier(state, "socialGadgets");
+}
+
 /** Base Arena and Stile of new athletes: Genetica (Reputation) and Arena del Network. */
 export function getAthleteGeneticsMultiplier(state: Pick<GameState, "network" | "upgrades">): number {
   return getReputationMultiplier(state, "genetics") *
@@ -78,7 +89,8 @@ export function getAthleteGeneticsMultiplier(state: Pick<GameState, "network" | 
 
 /**
  * Points added to the Arena and Stile rolls of new athletes, before Genetica:
- * 0,1 for every Reputation point the network has earned (Andrea, 14/10, test).
+ * GAME_CONFIG.athleteBaseStatsPerReputation (0,2 from 15/10) for every Reputation point
+ * the network has earned (Andrea, 14/10, test).
  */
 export function getAthleteBaseBonus(state: Pick<GameState, "statistics">): number {
   return getCareer(state).reputationEarned * GAME_CONFIG.athleteBaseStatsPerReputation;

@@ -118,14 +118,14 @@ it("refuses the foundation when the spending is not covered or exceeds a cap", (
   expect(foundSchool(nearlyMaxed, details, 2_000, { upgrades: {}, rent: 15 }).network.monthlyRent).toBe(750);
 });
 
-it("adds the fixed rents to the monthly income without multipliers", () => {
+it("adds the fixed rents to the monthly income, raised only by Business Strategy", () => {
   const initial = createInitialState(1_000, "Tester");
-  const withNetwork = {
-    ...initial,
-    network: { ...initial.network, monthlyRent: 1_200, reputationUpgrades: { socialGadgets: 10 } },
-  };
+  const withNetwork = { ...initial, network: { ...initial.network, monthlyRent: 1_200 } };
   expect(getMonthlyNetworkRent(withNetwork)).toBe(1_200);
   expect(getMonthlyOperationalIncome(withNetwork) - getMonthlyOperationalIncome(initial)).toBe(1_200);
+  // 15/10: +25% a punto su ogni entrata che non sia la quota degli iscritti.
+  const business = { ...withNetwork, network: { ...withNetwork.network, reputationUpgrades: { socialGadgets: 4 } } };
+  expect(getMonthlyOperationalIncome(business) - getMonthlyOperationalIncome(initial)).toBe(2_400);
 });
 
 it("moves the Quote mensili points to Social e Gadget (v94)", () => {
@@ -216,12 +216,12 @@ it("raises the base values by 20% a point (Formazione and Genetica 10%), probabi
     school: { ...withMembers.school, followers: 1_000 },
   };
   const socialUp = { ...withFollowers, network: { ...withFollowers.network, reputationUpgrades: { socialGadgets: 3 } } };
-  // Social e Gadget: the Social income grows, the member fees do not.
+  // Business Strategy: the Social income grows (+25% a punto), the member fees do not.
   expect(getMonthlySocialIncome(withFollowers)).toBeGreaterThan(0);
-  expect(getMonthlySocialIncome(socialUp)).toBeCloseTo(getMonthlySocialIncome(withFollowers) * 1.6);
+  expect(getMonthlySocialIncome(socialUp)).toBeCloseTo(getMonthlySocialIncome(withFollowers) * 1.75);
   expect(getMonthlyMemberFees(socialUp)).toBe(getMonthlyMemberFees(withFollowers));
   expect(getMonthlyOperationalIncome(socialUp) - getMonthlyOperationalIncome(withFollowers))
-    .toBeCloseTo(getMonthlySocialIncome(withFollowers) * 0.6);
+    .toBeCloseTo(getMonthlySocialIncome(withFollowers) * 0.75);
 });
 
 it("lets a secret legendary recruited before join the ordinary legendaries of the next schools", () => {
@@ -312,17 +312,17 @@ it("restarts the Missioni delle Onde from series 1 at every new school", () => {
   expect(completed.messages.some((message) => message.subject === "Si esce dalla palestra")).toBe(false);
 });
 
-it("adds 0,1 per Reputation point earned before Genetica, and Formazione raises what courses add", () => {
+it("adds 0,2 per Reputation point earned before Genetica, and Formazione raises what courses add", () => {
   const initial = createInitialState(1_000);
   const state = {
     ...initial,
     statistics: { ...initial.statistics, career: { ...initial.statistics.career!, reputationEarned: 10 } },
     network: { ...initial.network, reputationUpgrades: { training: 1 } },
   };
-  expect(getAthleteBaseBonus(state)).toBe(1);
+  expect(getAthleteBaseBonus(state)).toBe(2);
   const plain = rollAthleteBaseStats(7, "common");
   const boosted = rollAthleteBaseStats(7, "common", undefined, 1.4, getAthleteBaseBonus(state));
-  expect(boosted.arena).toBe(Math.round((plain.arena + 1) * 1.4));
+  expect(boosted.arena).toBe(Math.round((plain.arena + 2) * 1.4));
 
   const athlete = { ...initial.contacts[0], arenaBase: 100, styleBase: 100, forms: ["form-1" as const] };
   expect(getAthleteTournamentStats(athlete, athlete.forms, false, undefined, getFormBonusMultiplier(state)).arena)

@@ -1,6 +1,6 @@
 import { recordIncomeBySource } from "./membershipEconomy";
 import { getFundsGainMultiplier, getGadgetRarityChanceMultiplier, getGadgetWorkCapacity, getUpgradeEffectTotal } from "../content/upgrades";
-import { getReputationMultiplier } from "./reputation";
+import { getBusinessMultiplier } from "./reputation";
 import {
   GADGET_DEFINITIONS,
   GADGET_EVENT_STALL_CAPACITY_SHARE,
@@ -552,7 +552,7 @@ function processPrimarySalesPool(
         },
       },
     };
-    const applied = applySales(products, productId, rarity, sold, getReputationMultiplier(state, "socialGadgets"), tier === "extra");
+    const applied = applySales(products, productId, rarity, sold, getBusinessMultiplier(state), tier === "extra");
     products = applied.products;
     revenue = roundCurrency(revenue + applied.revenue);
     units += applied.units;
@@ -693,7 +693,7 @@ function processCrossSales(
       variant.productId,
       variant.rarity,
       allocations.get(variantKey(variant)) ?? 0,
-      getReputationMultiplier(state, "socialGadgets"),
+      getBusinessMultiplier(state),
     );
     nextProducts = applied.products;
     revenue = roundCurrency(revenue + applied.revenue);
@@ -853,7 +853,7 @@ export function sellGadgetsAtEvent(
       productId,
       rarity,
       sold,
-      getReputationMultiplier(state, "socialGadgets"),
+      getBusinessMultiplier(state),
       true,
     );
     products = applied.products;

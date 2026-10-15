@@ -1,4 +1,5 @@
 import { getFundsGainMultiplier } from "../content/upgrades";
+import { getBusinessMultiplier } from "./reputation";
 import { addLegendaryEncounters, addLegendaryEnrollment, createAcquiredContacts, mergeAcquiredContacts } from "./contacts";
 import { GAME_CONFIG } from "./config";
 import { makeGameId } from "./ids";
@@ -170,8 +171,9 @@ export function applyTournamentRewards(
   now: number,
 ): GameState {
   const resolvedResult = resolveTournamentRewardFallbacks(state, result, now);
+  // Prizes are not members' fees: Business Strategy raises them too (15/10).
   const euros = resolvedResult.rewards.reduce((total, reward) => total + reward.euros, 0) *
-    getFundsGainMultiplier(state.upgrades);
+    getFundsGainMultiplier(state.upgrades) * getBusinessMultiplier(state);
   const followers = resolvedResult.rewards.reduce(
     (total, reward) => total + getTournamentRewardFollowers(reward),
     0,

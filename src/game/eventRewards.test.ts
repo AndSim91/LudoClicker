@@ -151,8 +151,10 @@ describe("event contact rewards", () => {
 
   it("depletes the hidden contact market using active members and restores it after departures", () => {
     const initial = createInitialState(1_000);
+    // No waiting contacts: here only the members deplete the market.
     const withMembers = (activeMembers: number) => ({
       ...initial,
+      contacts: [],
       school: {
         ...initial.school,
         activeMembers,
@@ -163,6 +165,7 @@ describe("event contact rewards", () => {
 
     expect(getEventMarketAvailability({
       ...initial,
+      contacts: [],
       school: {
         ...initial.school,
         activeMembers: 10,
@@ -180,12 +183,18 @@ describe("event contact rewards", () => {
       network: { ...secondSchool.network, schoolCount: 1 },
     })).toBeCloseTo(0.5, 6);
     expect(getEventMarketAvailability(withMembers(10))).toBe(1);
+    // Contacts still waiting for an email count as already found (15/10/2026).
+    expect(getEventMarketAvailability({
+      ...withMembers(520),
+      availableContactPool: [{ source: "event", rarity: "common", count: 130 }],
+    })).toBe(0.5);
   });
 
   it("lets Social counterbalance a depleted contact market over time", () => {
     const initial = createInitialState(1_000);
     const depleted = maximizeEventUpgrades({
       ...withEventCollaborators(initial, 10),
+      contacts: [],
       school: { ...initial.school, activeMembers: 1_170 },
       unlocks: { ...initial.unlocks, social: true },
     });

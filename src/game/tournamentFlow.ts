@@ -1,4 +1,5 @@
 import { getFundsGainMultiplier } from "../content/upgrades";
+import { getBusinessMultiplier } from "./reputation";
 import { formatCurrency, formatList } from "../shared/formatters";
 import { addCareer } from "./career";
 import {
@@ -147,7 +148,7 @@ export function resolveSecretLegendaryDefeat(
     defeats: 0,
     failedTrials: 0,
   };
-  const euros = (profile.defeatRewardEuros ?? 0) * getFundsGainMultiplier(state.upgrades);
+  const euros = (profile.defeatRewardEuros ?? 0) * getFundsGainMultiplier(state.upgrades) * getBusinessMultiplier(state);
   const event = SECRET_DEFEAT_EVENTS[id as keyof typeof SECRET_DEFEAT_EVENTS];
   const rewardedState: GameState = {
     ...state,

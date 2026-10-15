@@ -422,6 +422,19 @@ export function hasCompletedUpgradePrerequisites(
  */
 export const UPGRADE_PRICING = { branchGrowth: 0.25, baseScale: 0.25 };
 
+/**
+ * Branches with their own curve (Andrea, 15/10/2026): Gadget opens late (with the
+ * Nazionale), so its prices start higher (×4) but rise much less (+10% a punto), and
+ * the branch can catch up with the others.
+ */
+export const UPGRADE_PRICING_BY_CATEGORY: Partial<Record<UpgradeCategory, { branchGrowth: number; baseScale: number }>> = {
+  gadget: { branchGrowth: 0.1, baseScale: 1 },
+};
+
+export function getUpgradePricing(category: UpgradeCategory) {
+  return UPGRADE_PRICING_BY_CATEGORY[category] ?? UPGRADE_PRICING;
+}
+
 /** Schools founded needed to buy the next level of a node. */
 export function getRequiredNetworkSchools(
   definition: UpgradeDefinition,
@@ -454,8 +467,9 @@ export function getUpgradeCost(
     return Math.round(localCost);
   }
   const branchPoints = levels ? getUpgradeCategoryPoints(levels, definition.category) : 0;
+  const pricing = getUpgradePricing(definition.category);
   return Math.round(
-    localCost * UPGRADE_PRICING.baseScale * (1 + UPGRADE_PRICING.branchGrowth) ** branchPoints,
+    localCost * pricing.baseScale * (1 + pricing.branchGrowth) ** branchPoints,
   );
 }
 

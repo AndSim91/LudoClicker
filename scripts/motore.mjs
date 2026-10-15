@@ -16,7 +16,7 @@
  *   --seme N      primo seme (1)
  *   --reputation  confronto tra strategie di Reputazione (anche --reputazione):
  *                 da solo, le partite si dividono in 8 gruppi: tutti i punti in
- *                 Scrittura, Eventi, Iscrizioni, Social e Gadget, Formazione,
+ *                 Scrittura, Eventi, Iscrizioni, Business Strategy, Formazione,
  *                 Genetica, Rendita del Network, oppure alla pari tra i rami;
  *                 con un ramo (es. --reputation scrittura) metà partite in quel
  *                 ramo e metà alla pari. Report e riepilogo finale per strategia.
@@ -62,13 +62,13 @@ const STRATEGIE = {
   scrittura: { modo: "writing", nome: "Scrittura" },
   eventi: { modo: "events", nome: "Eventi" },
   iscrizioni: { modo: "enrollment", nome: "Iscrizioni" },
-  social: { modo: "socialGadgets", nome: "Social e Gadget" },
+  social: { modo: "socialGadgets", nome: "Business Strategy" },
   formazione: { modo: "training", nome: "Formazione" },
   genetica: { modo: "genetics", nome: "Genetica" },
   rendita: { modo: "rendita", nome: "Rendita del Network" },
   pari: { modo: "pari", nome: "Alla pari" },
 };
-const ALIAS = { gadget: "social", socialgadget: "social", bilanciata: "pari", bilanciato: "pari" };
+const ALIAS = { gadget: "social", socialgadget: "social", business: "social", bilanciata: "pari", bilanciato: "pari" };
 const NOMI_STRATEGIE = Object.fromEntries(Object.values(STRATEGIE).map((s) => [s.modo, s.nome]));
 
 /** Senza --reputation: tutte alla pari. Da solo: le 8 strategie. Con un ramo: quel ramo e alla pari. */

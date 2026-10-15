@@ -3,7 +3,9 @@
  * più lento (minuti effettivi), più quante partite ci sono arrivate.
  */
 import { SECRET_LEGENDARIES } from "../content/secretLegendaries";
+import { SPECIAL_COLLABORATORS } from "../content/specialCollaborators";
 import { UPGRADE_DEFINITIONS } from "../content/upgrades";
+import { REGOLE } from "./giocatoreMedio";
 import type { Evento, RegistroPartita } from "./partita";
 
 export interface Distribuzione {
@@ -57,10 +59,11 @@ export const TAPPE: { tipo: string; chiave: string; etichetta: string }[] = [
   { tipo: "upgrade-completi", chiave: "tutti", etichetta: "Tutti gli Upgrade al massimo" },
 ];
 
-export const SCUOLE_MOSTRATE = [1, 2, 3, 5, 10, 20];
 
 /** Tappe misurate dall'inizio di ciascuna scuola. */
 export function tappePerScuola(registri: RegistroPartita[]) {
+  // Tutte le scuole raggiunte (Andrea, 15/10: prima solo 1, 2, 3, 5, 10, 20).
+  const SCUOLE_MOSTRATE = scuoleRaggiunte(registri);
   return TAPPE.map((tappa) => ({
     ...tappa,
     scuole: Object.fromEntries(SCUOLE_MOSTRATE.map((scuola) => {
@@ -72,6 +75,10 @@ export function tappePerScuola(registri: RegistroPartita[]) {
       return [scuola, distribuzione(valori)];
     })) as Record<number, Distribuzione>,
   }));
+}
+
+export function scuoleRaggiunte(registri: RegistroPartita[]): number[] {
+  return Array.from({ length: Math.max(1, ...registri.map((registro) => registro.scuoleRaggiunte)) }, (_, index) => index + 1);
 }
 
 /** Tempo totale per arrivare alla scuola n, e durata di ogni scuola. */
@@ -116,8 +123,10 @@ export function leggendariSegreti(registri: RegistroPartita[]) {
       (SECRET_LEGENDARIES[id as keyof typeof SECRET_LEGENDARIES] as { recruitment?: string }).recruitment !== "never";
     const persone = ids.map((id) => {
       const profile = SECRET_LEGENDARIES[id as keyof typeof SECRET_LEGENDARIES];
+      // Alle Chronicles il Segreto non perde in torneo: battuto nella sfida, si iscrive subito.
       const sconfitto = registri.map((registro) =>
-        primo(registro, (e) => e.tipo === "segreto" && e.chiave === id && (e.valore ?? 0) > 0)?.t);
+        primo(registro, (e) => e.tipo === "segreto" && e.chiave === id
+          && ((e.valore ?? 0) > 0 || (livello === "chronicles" && e.dati?.stato === "enrolled")))?.t);
       const iscritto = registri.map((registro) =>
         primo(registro, (e) => e.tipo === "segreto" && e.chiave === id && e.dati?.stato === "enrolled")?.t);
       return {
@@ -142,8 +151,13 @@ export function leggendariSegreti(registri: RegistroPartita[]) {
 export function leggendari(registri: RegistroPartita[]) {
   const ids = new Set(registri.flatMap((registro) =>
     registro.eventi.filter((e) => e.tipo === "leggendario").map((e) => e.chiave!)));
+  const nomi = new Map<string, string>([
+    ...SPECIAL_COLLABORATORS.map((p) => [p.id, `${p.firstName} ${p.lastName}`] as const),
+    ...Object.entries(SECRET_LEGENDARIES).map(([key, p]) => [key, `${p.firstName} ${p.lastName}`] as const),
+  ]);
   return [...ids].map((id) => ({
     id,
+    nome: nomi.get(id) ?? id,
     arrivo: distribuzione(registri.map((registro) =>
       primo(registro, (e) => e.tipo === "leggendario" && e.chiave === id)?.t)),
   })).sort((left, right) => (left.arrivo.p50 ?? Infinity) - (right.arrivo.p50 ?? Infinity));
@@ -255,12 +269,14 @@ export function reputazione(registri: RegistroPartita[]) {
 
 /** Tornei: per livello, miglior piazzamento di ogni edizione in Arena e Stile. */
 export function tornei(registri: RegistroPartita[]) {
-  const livelli = new Map<string, { arena: number[]; stile: number[]; edizioni: number }>();
+  const livelli = new Map<string, { arena: number[]; stile: number[]; edizioni: number; vinte: number }>();
   for (const registro of registri) {
     for (const evento of registro.eventi) {
       if (evento.tipo !== "torneo") continue;
-      const entry = livelli.get(evento.chiave!) ?? { arena: [], stile: [], edizioni: 0 };
+      const entry = livelli.get(evento.chiave!) ?? { arena: [], stile: [], edizioni: 0, vinte: 0 };
       entry.edizioni += 1;
+      // Il Reptile non ha classifiche: il registro dice solo se l'abbiamo vinto.
+      if (evento.dati?.vinto === true || evento.dati?.arena === 1 || evento.dati?.stile === 1) entry.vinte += 1;
       if (typeof evento.dati?.arena === "number") entry.arena.push(evento.dati.arena);
       if (typeof evento.dati?.stile === "number") entry.stile.push(evento.dati.stile);
       livelli.set(evento.chiave!, entry);
@@ -273,6 +289,7 @@ export function tornei(registri: RegistroPartita[]) {
     stile: distribuzione(entry.stile),
     vinteArena: entry.arena.filter((posto) => posto === 1).length / Math.max(1, entry.edizioni),
     vinteStile: entry.stile.filter((posto) => posto === 1).length / Math.max(1, entry.edizioni),
+    vinte: entry.vinte / Math.max(1, entry.edizioni),
   }));
 }
 
@@ -284,8 +301,18 @@ export function velocita(registri: RegistroPartita[]) {
   }));
 }
 
+/** Minuti effettivi passati a chiudere finestre (mezzo minuto l'una, a gioco fermo). */
+export function minutiFinestre(registro: RegistroPartita, tipo?: string): number {
+  const conteggi = registro.finestre ?? {};
+  const totale = tipo === undefined ? Object.values(conteggi).reduce((a, b) => a + b, 0) : conteggi[tipo] ?? 0;
+  return (totale * REGOLE.reazioneMs) / 60_000;
+}
+
 export function salute(registri: RegistroPartita[]) {
+  const tipi = [...new Set(registri.flatMap((registro) => Object.keys(registro.finestre ?? {})))].sort();
   return {
+    finestre: distribuzione(registri.map((registro) => minutiFinestre(registro))),
+    finestrePerTipo: tipi.map((tipo) => ({ tipo, minuti: distribuzione(registri.map((registro) => minutiFinestre(registro, tipo))) })),
     errori: registri.flatMap((registro) => registro.errori.map((errore) => `partita ${registro.seed}: ${errore}`)),
     msPerTick: distribuzione(registri.map((registro) => registro.msMotore / Math.max(1, registro.tick))),
     minutiPerPartita: distribuzione(registri.map((registro) => registro.minutiTotali)),
@@ -315,6 +342,14 @@ export type Analisi = ReturnType<typeof analizza>;
  * Confronto tra strategie di Reputazione (--reputation, Andrea 15/10): le stesse
  * misure per ogni gruppo di partite, a parità di regole del giocatore.
  */
+export const TITOLI = [
+  { chiave: "accademico", nome: "Accademico" },
+  { chiave: "nazionale", nome: "Nazionale" },
+  { chiave: "reptile", nome: "Reptile" },
+  { chiave: "champions", nome: "Champion's Arena" },
+  { chiave: "chronicles", nome: "Chronicles" },
+] as const;
+
 export function confrontaStrategie(registri: RegistroPartita[], obiettivo: number) {
   const gruppi = new Map<string, RegistroPartita[]>();
   for (const registro of registri) gruppi.set(registro.strategia, [...(gruppi.get(registro.strategia) ?? []), registro]);
@@ -337,6 +372,16 @@ export function confrontaStrategie(registri: RegistroPartita[], obiettivo: numbe
       })),
       nazionali: distribuzione(gruppo.map((registro) => conta(registro, "titolo", "nazionale"))),
       upgrade: distribuzione(gruppo.map((registro) => conta(registro, "upgrade"))),
+      // Scuola della prima vittoria di ogni torneo (il registro annota un «titolo» per scuola).
+      primeVittorie: TITOLI.map(({ chiave, nome }) => ({
+        chiave,
+        nome,
+        scuola: distribuzione(gruppo.map((registro) => primo(registro, (e) => e.tipo === "titolo" && e.chiave === chiave)?.scuola)),
+      })),
+      reputazionePerScuola: reputazione(gruppo).map((riga) => ({ scuola: riga.scuola, punti: riga.punti })),
+      finestre: distribuzione(gruppo.map((registro) => minutiFinestre(registro))),
+      fineSenzaFinestre: distribuzione(gruppo.map((registro) =>
+        registro.scuoleRaggiunte >= obiettivo ? registro.minutiTotali - minutiFinestre(registro) : undefined)),
     };
   });
 }

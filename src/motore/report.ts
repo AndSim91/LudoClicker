@@ -1,6 +1,6 @@
 /** La pagina HTML del motore: si apre nel browser, nessuna dipendenza esterna. */
 import type { Analisi, ConfrontoStrategie, Distribuzione } from "./analisi";
-import { MATERIE, NOMI_MATERIE, SCUOLE_MOSTRATE, VOTI } from "./analisi";
+import { MATERIE, NOMI_MATERIE, TITOLI, VOTI } from "./analisi";
 
 const LIVELLI: Record<string, string> = {
   school: "Scolastico",
@@ -18,9 +18,11 @@ function esc(text: string): string {
 /** Minuti effettivi in forma leggibile. */
 export function tempo(minuti?: number): string {
   if (minuti === undefined) return "—";
-  if (minuti < 60) return `${Math.round(minuti)} min`;
-  const ore = Math.floor(minuti / 60);
-  const resto = Math.round(minuti - ore * 60);
+  // Arrotondati prima di dividere: 119,7 minuti sono «2 h», non «1 h 60 min».
+  const totale = Math.round(minuti);
+  if (totale < 60) return `${totale} min`;
+  const ore = Math.floor(totale / 60);
+  const resto = totale - ore * 60;
   return resto === 0 ? `${ore} h` : `${ore} h ${resto} min`;
 }
 
@@ -35,6 +37,13 @@ function cellaNumero(d: Distribuzione, decimali = 0): string {
   if (d.raggiunte === 0) return `<td class="vuota">—</td>`;
   const f = (value?: number) => value === undefined ? "—" : value.toLocaleString("it-IT", { maximumFractionDigits: decimali });
   return `<td><strong>${f(d.p50)}</strong><small>${f(d.p10)} – ${f(d.p90)}</small></td>`;
+}
+
+/** Scuola della prima vittoria: mediana e code, «mai» se nessuna partita ci arriva. */
+function cellaScuola(d: Distribuzione): string {
+  if (d.raggiunte === 0) return `<td class="vuota">mai</td>`;
+  const quota = d.raggiunte < d.partite ? `<small class="quota">${d.raggiunte}/${d.partite}</small>` : "";
+  return `<td><strong>${d.p50}</strong><small>${d.p10} – ${d.p90}</small>${quota}</td>`;
 }
 
 function barraVoti(conteggio: Record<string, number>): string {
@@ -64,9 +73,22 @@ function sezioneStrategie(righe: ConfrontoStrategie, nomi: Record<string, string
       return arrivo ? cellaTempo(arrivo) : `<td class="vuota">—</td>`;
     }).join("")}</tr>`).join("")
   }</tbody></table>`;
+  const vittorie = `<h3>Prima vittoria di ogni torneo (scuola)</h3><table><thead><tr><th>Strategia</th>${TITOLI.map((t) => `<th>${t.nome}</th>`).join("")}</tr></thead><tbody>${
+    righe.map((riga) => `<tr><th>${nome(riga.strategia)}</th>${riga.primeVittorie.map((v) => cellaScuola(v.scuola)).join("")}</tr>`).join("")
+  }</tbody></table>`;
+  const scuoleRep = [...new Set(righe.flatMap((riga) => riga.reputazionePerScuola.map((r) => r.scuola)))].sort((a, b) => a - b);
+  const reputazione = `<h3>Reputazione guadagnata lasciando la scuola n</h3><table><thead><tr><th>Strategia</th>${scuoleRep.map((n) => `<th>${n}</th>`).join("")}</tr></thead><tbody>${
+    righe.map((riga) => `<tr><th>${nome(riga.strategia)}</th>${scuoleRep.map((n) => {
+      const punti = riga.reputazionePerScuola.find((r) => r.scuola === n)?.punti;
+      return punti ? cellaNumero(punti) : `<td class="vuota">—</td>`;
+    }).join("")}</tr>`).join("")
+  }</tbody></table>`;
+  const finestre = `<h3>Tempo nelle finestre</h3><p class="domanda">Ogni finestra che ferma il gioco (Pianificazione, scene, tutorial, minigiochi, sfide) costa al motore mezzo minuto: chi vince di più ne apre di più. «Senza finestre» è la fine della partita tolto quel tempo.</p><table><thead><tr><th>Strategia</th><th>Minuti nelle finestre</th><th>Fine senza finestre</th></tr></thead><tbody>${
+    righe.map((riga) => `<tr><th>${nome(riga.strategia)}</th>${cellaTempo(riga.finestre)}${cellaTempo(riga.fineSenzaFinestre)}</tr>`).join("")
+  }</tbody></table>`;
   return sezione("strategie", "Strategie di Reputazione",
     "Le stesse regole del giocatore medio, cambia solo come spende la Reputazione a ogni fondazione: tutti i punti in un ramo (oltre il tetto di 50, alla pari), tutti nella Rendita del Network, oppure alla pari tra i rami. Tempi in tempo di gioco effettivo dall'inizio della partita; in grassetto la mediana, sotto il 10% più veloce e il 10% più lento.",
-    riepilogo + arrivi);
+    riepilogo + vittorie + arrivi + reputazione + finestre);
 }
 
 function sezione(id: string, titolo: string, domanda: string, corpo: string): string {
@@ -83,10 +105,12 @@ export function creaReport(analisi: Analisi, meta: {
   confronto?: { righe: ConfrontoStrategie; nomi: Record<string, string> };
 }): string {
   const confronto = meta.confronto && meta.confronto.righe.length > 1 ? sezioneStrategie(meta.confronto.righe, meta.confronto.nomi, meta.scuole) : "";
+  const numeriScuole = Array.from({ length: Math.max(1, meta.scuole, ...analisi.scuole.map((s) => s.numero)) }, (_, i) => i + 1)
+    .filter((n) => analisi.scuole.some((s) => s.numero === n));
   const tappe = sezione("tappe", "Tappe della storia, scuola per scuola",
     "Domande A1–A8, B10, D22: quanto tempo effettivo dall'inizio di ogni scuola. In grassetto la mediana, sotto il 10% più veloce e il 10% più lento; «3/50» = partite che ci sono arrivate.",
-    `<table><thead><tr><th>Tappa</th>${SCUOLE_MOSTRATE.map((n) => `<th>Scuola ${n}</th>`).join("")}</tr></thead><tbody>${
-      analisi.tappe.map((tappa) => `<tr><th>${esc(tappa.etichetta)}</th>${SCUOLE_MOSTRATE.map((n) => cellaTempo(tappa.scuole[n])).join("")}</tr>`).join("")
+    `<table><thead><tr><th>Tappa</th>${numeriScuole.map((n) => `<th>Scuola ${n}</th>`).join("")}</tr></thead><tbody>${
+      analisi.tappe.map((tappa) => `<tr><th>${esc(tappa.etichetta)}</th>${numeriScuole.map((n) => cellaTempo(tappa.scuole[n])).join("")}</tr>`).join("")
     }</tbody></table>`);
 
   const scuole = sezione("scuole", "Scuole fondate",
@@ -104,7 +128,7 @@ export function creaReport(analisi: Analisi, meta: {
   const leggendari = sezione("leggendari", "Leggendari",
     "Domanda C15: quando arriva ogni Leggendario (prima volta nella partita).",
     `<table><thead><tr><th>Leggendario</th><th>Arrivo</th></tr></thead><tbody>${
-      analisi.leggendari.map((l) => `<tr><th>${esc(l.id)}</th>${cellaTempo(l.arrivo)}</tr>`).join("")
+      analisi.leggendari.map((l) => `<tr><th>${esc(l.nome)}</th>${cellaTempo(l.arrivo)}</tr>`).join("")
     }</tbody></table>`);
 
   const mai = analisi.upgrade.filter((u) => u.primoAcquisto.raggiunte === 0);
@@ -139,8 +163,8 @@ export function creaReport(analisi: Analisi, meta: {
 
   const tornei = sezione("tornei", "Tornei",
     "Domande F32–F34: per ogni torneo, miglior piazzamento della scuola in Arena e in Stile e quota di edizioni vinte.",
-    `<table><thead><tr><th>Torneo</th><th>Edizioni per partita</th><th>Posto Arena</th><th>Posto Stile</th><th>Vinte Arena</th><th>Vinte Stile</th></tr></thead><tbody>${
-      analisi.tornei.map((t) => `<tr><th>${LIVELLI[t.livello] ?? t.livello}</th><td>${t.edizioniPerPartita.toFixed(1)}</td>${cellaNumero(t.arena)}${cellaNumero(t.stile)}<td>${Math.round(t.vinteArena * 100)}%</td><td>${Math.round(t.vinteStile * 100)}%</td></tr>`).join("")
+    `<table><thead><tr><th>Torneo</th><th>Edizioni per partita</th><th>Posto Arena</th><th>Posto Stile</th><th>Vinte Arena</th><th>Vinte Stile</th><th>Vinte (almeno una)</th></tr></thead><tbody>${
+      analisi.tornei.map((t) => `<tr><th>${LIVELLI[t.livello] ?? t.livello}</th><td>${t.edizioniPerPartita.toFixed(1)}</td>${cellaNumero(t.arena)}${cellaNumero(t.stile)}<td>${Math.round(t.vinteArena * 100)}%</td><td>${Math.round(t.vinteStile * 100)}%</td><td>${Math.round(t.vinte * 100)}%</td></tr>`).join("")
     }</tbody></table>`);
 
   const s = analisi.salute;
@@ -150,6 +174,8 @@ export function creaReport(analisi: Analisi, meta: {
       <tr><th>Durata delle partite (tempo effettivo)</th>${cellaTempo(s.minutiPerPartita)}</tr>
       <tr><th>Scuole raggiunte</th>${cellaNumero(s.scuoleRaggiunte)}</tr>
       <tr><th>Millisecondi per tick del motore</th>${cellaNumero(s.msPerTick, 2)}</tr>
+      <tr><th>Tempo nelle finestre (mezzo minuto l'una)</th>${cellaTempo(s.finestre)}</tr>
+      ${s.finestrePerTipo.map((f) => `<tr><th>— ${esc(f.tipo)}</th>${cellaTempo(f.minuti)}</tr>`).join("")}
     </tbody></table>${s.errori.length
       ? `<h3>Problemi (${s.errori.length})</h3><ul>${s.errori.slice(0, 50).map((e) => `<li>${esc(e)}</li>`).join("")}</ul>`
       : `<p>Nessun problema trovato.</p>`}`);

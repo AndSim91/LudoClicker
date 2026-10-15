@@ -1,4 +1,4 @@
-import { getReputationMultiplier } from "./reputation";
+import { getBusinessMultiplier } from "./reputation";
 import { getUpgradePrimaryEffectTotal } from "../content/upgrades";
 import { GAME_CONFIG } from "./config";
 import { roundCurrency } from "./economy";
@@ -71,6 +71,6 @@ export function getMonthlySocialIncome(state: GameState): number {
     state.school.followers *
       getSocialFollowerValue(state.upgrades) *
       (1 + anderBonus) *
-      getReputationMultiplier(state, "socialGadgets"),
+      getBusinessMultiplier(state),
   );
 }
