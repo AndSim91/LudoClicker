@@ -1,3 +1,4 @@
+import { recordIncomeBySource } from "./membershipEconomy";
 import { getFundsGainMultiplier } from "../content/upgrades";
 import { getBusinessMultiplier } from "./reputation";
 import { addLegendaryEncounters, addLegendaryEnrollment, createAcquiredContacts, mergeAcquiredContacts } from "./contacts";
@@ -186,7 +187,7 @@ export function applyTournamentRewards(
       followers: state.school.followers + followers,
       fame: state.school.fame + followers,
     },
-    statistics: { ...state.statistics, eurosEarned: state.statistics.eurosEarned + euros },
+    statistics: { ...recordIncomeBySource(state.statistics, { prizes: euros }), eurosEarned: state.statistics.eurosEarned + euros },
   };
 
   for (const reward of resolvedResult.rewards) {

@@ -1,3 +1,4 @@
+import { recordIncomeBySource } from "./membershipEconomy";
 import { getFundsGainMultiplier } from "../content/upgrades";
 import { getBusinessMultiplier } from "./reputation";
 import { formatCurrency, formatList } from "../shared/formatters";
@@ -154,7 +155,7 @@ export function resolveSecretLegendaryDefeat(
     ...state,
     school: { ...state.school, euros: state.school.euros + euros },
     statistics: {
-      ...state.statistics,
+      ...recordIncomeBySource(state.statistics, { prizes: euros }),
       eurosEarned: state.statistics.eurosEarned + euros,
       narrativeEvents: state.statistics.narrativeEvents + (event ? 1 : 0),
     },

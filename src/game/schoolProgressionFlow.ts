@@ -1,3 +1,4 @@
+import { recordIncomeBySource } from "./membershipEconomy";
 import { createAnnualLedger } from "./annualReport";
 import { addCareer, getSchoolGadgetsSold, recordCareer } from "./career";
 import { getSchoolYear } from "./calendar";
@@ -345,7 +346,7 @@ export function completeShortGoal(
     ...available,
     school: { ...available.school, euros: available.school.euros + reward },
     statistics: {
-      ...available.statistics,
+      ...recordIncomeBySource(available.statistics, { missions: reward }),
       eurosEarned: available.statistics.eurosEarned + reward,
     },
   };

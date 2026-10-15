@@ -53,13 +53,23 @@ export const ANNUAL_SUBJECT_LABELS: Record<AnnualSubject, string> = {
   finances: "Finanze",
 };
 
+export const INCOME_SOURCES: readonly IncomeSource[] = [
+  "fees", "network", "social", "gadgets", "sponsors", "deposit", "prizes", "missions", "events", "trials", "reptile",
+];
+
 export const INCOME_SOURCE_LABELS: Record<IncomeSource | "other", string> = {
   fees: "quote",
   network: "Network",
   social: "Social",
   gadgets: "gadget",
   sponsors: "sponsor",
-  other: "premi e altro",
+  deposit: "interessi",
+  prizes: "premi dei tornei",
+  missions: "Missioni delle Onde",
+  events: "Eventi e Imprevisti",
+  trials: "bonus d'iscrizione",
+  reptile: "Reptile",
+  other: "altro",
 };
 
 const GRADES: readonly AnnualGrade[] = ["A", "B", "C", "D", "E"];
@@ -259,7 +269,7 @@ export function getAnnualYearData(state: GameState, now: number, ledger = state.
   const earned = delta("eurosEarned");
   const income: AnnualYearData["income"] = {};
   let tracked = 0;
-  for (const source of ["fees", "network", "social", "gadgets", "sponsors"] as IncomeSource[]) {
+  for (const source of INCOME_SOURCES) {
     const value = Math.max(0, (current.income[source] ?? 0) - (start.income[source] ?? 0));
     if (value > 0) income[source] = value;
     tracked += value;

@@ -308,6 +308,58 @@ export function minutiFinestre(registro: RegistroPartita, tipo?: string): number
   return (totale * REGOLE.reazioneMs) / 60_000;
 }
 
+/** Entrate di una partita, scuola per scuola e fonte per fonte (anni, anno lasciato a metà, fine). */
+function entrateDellaPartita(registro: RegistroPartita): Map<number, Record<string, number>> {
+  const perScuola = new Map<number, Record<string, number>>();
+  for (const evento of registro.eventi) {
+    const voci = evento.dati?.entrate as Record<string, number> | undefined;
+    if (!voci) continue;
+    const scuola = perScuola.get(evento.scuola) ?? {};
+    for (const [fonte, euro] of Object.entries(voci)) scuola[fonte] = (scuola[fonte] ?? 0) + euro;
+    perScuola.set(evento.scuola, scuola);
+  }
+  return perScuola;
+}
+
+export interface EntrateRiga {
+  /** Quota di ogni fonte sul totale, sommando tutte le partite (0–1). */
+  quote: Record<string, number>;
+  /** Euro per partita, mediana e code. */
+  euro: Record<string, Distribuzione>;
+  totale: Distribuzione;
+}
+
+function rigaEntrate(gruppi: Record<string, number>[]): EntrateRiga {
+  const fonti = [...new Set(gruppi.flatMap((g) => Object.keys(g)))];
+  const somma = (fonte: string) => gruppi.reduce((t, g) => t + (g[fonte] ?? 0), 0);
+  const totale = fonti.reduce((t, fonte) => t + somma(fonte), 0);
+  return {
+    quote: Object.fromEntries(fonti.map((fonte) => [fonte, totale > 0 ? somma(fonte) / totale : 0])),
+    euro: Object.fromEntries(fonti.map((fonte) => [fonte, distribuzione(gruppi.map((g) => g[fonte] ?? 0))])),
+    totale: distribuzione(gruppi.map((g) => Object.values(g).reduce((t, v) => t + v, 0))),
+  };
+}
+
+/** Andrea (15/10): da dove arrivano i Fondi, scuola per scuola, per bilanciare le sezioni. */
+export function entratePerScuola(registri: RegistroPartita[]) {
+  const partite = registri.map(entrateDellaPartita);
+  return scuoleRaggiunte(registri).map((numero) => ({
+    numero,
+    ...rigaEntrate(partite.flatMap((perScuola) => perScuola.has(numero) ? [perScuola.get(numero)!] : [])),
+  }));
+}
+
+/** Tutta la partita: le entrate di tutte le scuole sommate. */
+export function entrateTotali(registri: RegistroPartita[]): EntrateRiga {
+  return rigaEntrate(registri.map((registro) => {
+    const totale: Record<string, number> = {};
+    for (const scuola of entrateDellaPartita(registro).values()) {
+      for (const [fonte, euro] of Object.entries(scuola)) totale[fonte] = (totale[fonte] ?? 0) + euro;
+    }
+    return totale;
+  }));
+}
+
 export function salute(registri: RegistroPartita[]) {
   const tipi = [...new Set(registri.flatMap((registro) => Object.keys(registro.finestre ?? {})))].sort();
   return {
@@ -332,6 +384,7 @@ export function analizza(registri: RegistroPartita[]) {
     reputazione: reputazione(registri),
     tornei: tornei(registri),
     velocita: velocita(registri),
+    entrate: entratePerScuola(registri),
     salute: salute(registri),
   };
 }
@@ -380,6 +433,7 @@ export function confrontaStrategie(registri: RegistroPartita[], obiettivo: numbe
       })),
       reputazionePerScuola: reputazione(gruppo).map((riga) => ({ scuola: riga.scuola, punti: riga.punti })),
       finestre: distribuzione(gruppo.map((registro) => minutiFinestre(registro))),
+      entrate: entrateTotali(gruppo),
       fineSenzaFinestre: distribuzione(gruppo.map((registro) =>
         registro.scuoleRaggiunte >= obiettivo ? registro.minutiTotali - minutiFinestre(registro) : undefined)),
     };

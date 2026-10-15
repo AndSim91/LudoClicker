@@ -59,7 +59,7 @@ export function getMonthlySponsorIncome(state: GameState): number {
   return getSponsorIncome(state.upgrades, state.school.fame);
 }
 
-/** The monthly income split by source; deposit interest counts as «other». */
+/** The monthly income split by source. */
 export function getMonthlyIncomeBySource(state: GameState): Partial<Record<IncomeSource, number>> {
   const bonus = getFundsGainMultiplier(state.upgrades);
   return {
@@ -67,6 +67,7 @@ export function getMonthlyIncomeBySource(state: GameState): Partial<Record<Incom
     network: getMonthlyNetworkIncome(state) * bonus,
     social: getMonthlySocialIncome(state) * bonus,
     sponsors: getMonthlySponsorIncome(state) * bonus,
+    deposit: getMonthlyDepositInterest(state) * bonus,
   };
 }
 

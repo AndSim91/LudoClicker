@@ -136,7 +136,7 @@ export function applyReptileResult(
       result.economy.usedSchoolSwords,
     ),
     statistics: {
-      ...recordIncomeBySource(state.statistics, { gadgets: gadgetEarned }),
+      ...recordIncomeBySource(state.statistics, { reptile: gadgetEarned }),
       eurosEarned: state.statistics.eurosEarned + gadgetEarned,
       socialFollowersGained:
         state.statistics.socialFollowersGained + result.economy.followersGained,

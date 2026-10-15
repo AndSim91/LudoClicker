@@ -1,3 +1,4 @@
+import { recordIncomeBySource } from "./membershipEconomy";
 import { getFundsGainMultiplier } from "../content/upgrades";
 import { getBusinessMultiplier } from "./reputation";
 import { noteNarrativeEvent } from "./yearDigest";
@@ -129,7 +130,7 @@ export function processNarrativeEvent(
       ].slice(-GAME_CONFIG.narrativeHistoryLimit),
     },
     statistics: {
-      ...rewardState.state.statistics,
+      ...recordIncomeBySource(rewardState.state.statistics, { events: Math.max(0, euroDelta) }),
       contactsAcquired: rewardState.state.statistics.contactsAcquired + contacts.length,
       narrativeEvents: rewardState.state.statistics.narrativeEvents + 1,
       eurosEarned: rewardState.state.statistics.eurosEarned + Math.max(0, euroDelta),

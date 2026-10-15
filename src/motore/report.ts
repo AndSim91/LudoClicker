@@ -1,6 +1,8 @@
 /** La pagina HTML del motore: si apre nel browser, nessuna dipendenza esterna. */
 import type { Analisi, ConfrontoStrategie, Distribuzione } from "./analisi";
+import type { EntrateRiga } from "./analisi";
 import { MATERIE, NOMI_MATERIE, TITOLI, VOTI } from "./analisi";
+import { INCOME_SOURCE_LABELS, INCOME_SOURCES } from "../game/annualReport";
 
 const LIVELLI: Record<string, string> = {
   school: "Scolastico",
@@ -88,7 +90,38 @@ function sezioneStrategie(righe: ConfrontoStrategie, nomi: Record<string, string
   }</tbody></table>`;
   return sezione("strategie", "Strategie di Reputazione",
     "Le stesse regole del giocatore medio, cambia solo come spende la Reputazione a ogni fondazione: tutti i punti in un ramo (oltre il tetto di 50, alla pari), tutti nella Rendita del Network, oppure alla pari tra i rami. Tempi in tempo di gioco effettivo dall'inizio della partita; in grassetto la mediana, sotto il 10% più veloce e il 10% più lento.",
-    riepilogo + vittorie + arrivi + reputazione + finestre);
+    riepilogo + vittorie + arrivi + reputazione + finestre +
+    `<h3>Entrate di tutta la partita</h3>${tabellaEntrate(righe.map((riga) => ({ nome: nomi[riga.strategia] ?? riga.strategia, riga: riga.entrate })))}`);
+}
+
+const ORDINE_FONTI = [...INCOME_SOURCES, "altro"];
+const NOMI_FONTI: Record<string, string> = { ...INCOME_SOURCE_LABELS, altro: "altro" };
+
+function euro(valore?: number): string {
+  if (valore === undefined) return "—";
+  if (valore >= 1_000_000) return `${(valore / 1_000_000).toLocaleString("it-IT", { maximumFractionDigits: 1 })} M€`;
+  if (valore >= 1_000) return `${Math.round(valore / 1_000).toLocaleString("it-IT")}k €`;
+  return `${Math.round(valore)} €`;
+}
+
+/** Le fonti che compaiono almeno una volta, nell'ordine del gioco. */
+function fontiPresenti(righe: EntrateRiga[]): string[] {
+  return ORDINE_FONTI.filter((fonte) => righe.some((riga) => (riga.quote[fonte] ?? 0) > 0));
+}
+
+/** Quota sul totale in grassetto, euro per partita (mediana) sotto. */
+function cellaFonte(riga: EntrateRiga, fonte: string): string {
+  const quota = riga.quote[fonte] ?? 0;
+  if (quota === 0) return `<td class="vuota">—</td>`;
+  const pct = quota >= 0.1 ? Math.round(quota * 100).toString() : (quota * 100).toLocaleString("it-IT", { maximumSignificantDigits: 2 });
+  return `<td><strong>${pct}%</strong><small>${euro(riga.euro[fonte]?.p50)}</small></td>`;
+}
+
+function tabellaEntrate(righe: { nome: string; riga: EntrateRiga }[]): string {
+  const fonti = fontiPresenti(righe.map((r) => r.riga));
+  return `<table><thead><tr><th></th><th>Totale</th>${fonti.map((f) => `<th>${esc(NOMI_FONTI[f] ?? f)}</th>`).join("")}</tr></thead><tbody>${
+    righe.map(({ nome, riga }) => `<tr><th>${esc(nome)}</th><td><strong>${euro(riga.totale.p50)}</strong><small>${euro(riga.totale.p10)} – ${euro(riga.totale.p90)}</small></td>${fonti.map((f) => cellaFonte(riga, f)).join("")}</tr>`).join("")
+  }</tbody></table>`;
 }
 
 function sezione(id: string, titolo: string, domanda: string, corpo: string): string {
@@ -167,6 +200,10 @@ export function creaReport(analisi: Analisi, meta: {
       analisi.tornei.map((t) => `<tr><th>${LIVELLI[t.livello] ?? t.livello}</th><td>${t.edizioniPerPartita.toFixed(1)}</td>${cellaNumero(t.arena)}${cellaNumero(t.stile)}<td>${Math.round(t.vinteArena * 100)}%</td><td>${Math.round(t.vinteStile * 100)}%</td><td>${Math.round(t.vinte * 100)}%</td></tr>`).join("")
     }</tbody></table>`);
 
+  const entrate = sezione("entrate", "Entrate per fonte",
+    "Da dove arrivano i Fondi in ogni scuola (anni chiusi più l'anno lasciato a metà): in grassetto la quota sul totale di tutte le partite, sotto gli euro di una partita (mediana). «Altro» è ciò che nessuna fonte registra.",
+    tabellaEntrate(analisi.entrate.map((riga) => ({ nome: `Scuola ${riga.numero}`, riga }))));
+
   const s = analisi.salute;
   const salute = sezione("salute", "Salute della partita e del motore",
     "Domande L56–L58: numeri rotti, finestre che non si chiudono, costo del motore.",
@@ -180,7 +217,7 @@ export function creaReport(analisi: Analisi, meta: {
       ? `<h3>Problemi (${s.errori.length})</h3><ul>${s.errori.slice(0, 50).map((e) => `<li>${esc(e)}</li>`).join("")}</ul>`
       : `<p>Nessun problema trovato.</p>`}`);
 
-  const indice = [...(confronto ? [["strategie", "Strategie di Reputazione"]] : []), ["tappe", "Tappe"], ["scuole", "Scuole"], ["segreti", "Leggendari Segreti"], ["leggendari", "Leggendari"], ["upgrade", "Upgrade"], ["pagelle", "Pagelle"], ["reputazione", "Reputazione"], ["tornei", "Tornei"], ["salute", "Salute"]]
+  const indice = [...(confronto ? [["strategie", "Strategie di Reputazione"]] : []), ["tappe", "Tappe"], ["scuole", "Scuole"], ["segreti", "Leggendari Segreti"], ["leggendari", "Leggendari"], ["upgrade", "Upgrade"], ["pagelle", "Pagelle"], ["reputazione", "Reputazione"], ["tornei", "Tornei"], ["entrate", "Entrate"], ["salute", "Salute"]]
     .map(([id, nome]) => `<a href="#${id}">${nome}</a>`).join("");
 
   return `<!doctype html>
@@ -208,6 +245,6 @@ td strong{display:block}td small{display:block;color:var(--muted);font-size:12px
 <p class="meta">${meta.partite} partite del giocatore medio fino alla scuola ${meta.scuole} · versione del gioco ${esc(meta.versione)} · ${esc(meta.creato)} · calcolo ${tempo(meta.secondi / 60)}</p>
 <p class="meta">Tempi in tempo di gioco effettivo (il gioco avanza solo mentre è aperto). Regole del giocatore medio: Project, <code>claude/motore-giocatore-medio.md</code>.</p></header>
 <nav>${indice}</nav>
-<main>${confronto}${tappe}${scuole}${segreti}${leggendari}${upgrade}${pagelle}${reputazione}${tornei}${salute}</main>
+<main>${confronto}${tappe}${scuole}${segreti}${leggendari}${upgrade}${pagelle}${reputazione}${tornei}${entrate}${salute}</main>
 </body></html>`;
 }

@@ -69,6 +69,26 @@ const STEP_GIOCO_MS = 1_000;
 const UPGRADE_VISIBILI = UPGRADE_DEFINITIONS.filter((definition) => !definition.hidden);
 const START_MS = 1_700_000_000_000;
 
+/** Euros earned so far, by source and in total (statistics are career-long: the engine takes differences). */
+function entrate(state: GameState): Record<string, number> {
+  return { ...(state.statistics.incomeBySource ?? {}), totale: state.statistics.eurosEarned };
+}
+
+/** What came in between two readings; «altro» is what no source records (admin, refunds). */
+function entrateTra(prima: Record<string, number>, dopo: Record<string, number>): Record<string, number> {
+  const delta: Record<string, number> = {};
+  let fonti = 0;
+  for (const [fonte, valore] of Object.entries(dopo)) {
+    if (fonte === "totale") continue;
+    const diff = Math.max(0, valore - (prima[fonte] ?? 0));
+    if (diff >= 1) delta[fonte] = Math.round(diff);
+    fonti += diff;
+  }
+  const altro = Math.max(0, (dopo.totale ?? 0) - (prima.totale ?? 0) - fonti);
+  if (altro >= 1) delta.altro = Math.round(altro);
+  return delta;
+}
+
 function totaleLivelli(state: GameState): number {
   return Object.values(state.upgrades).reduce((total, level) => total + (level ?? 0), 0);
 }
@@ -122,6 +142,7 @@ export function giocaPartita({
   let annoCorrente = getSchoolYear(state.school.currentMonth);
   let anno: AnnoScolastico = { iscrittiInizio: state.school.activeMembers, upgradeComprati: 0 };
   let livelliInizioAnno = totaleLivelli(state);
+  let entrateInizioAnno = entrate(state);
   let ultimaPagella: number | undefined;
   const segretiVisti = new Map<string, string>();
   /** Mese in cui il giocatore fonderà: un anno dopo il muro. */
@@ -275,10 +296,13 @@ export function giocaPartita({
           collaboratori: state.collaborators.length,
           fama: state.school.fame,
           formeCompletate: state.statistics.formsCompleted,
+          // Andrea (15/10): le entrate dell'anno per fonte, per bilanciare le sezioni.
+          entrate: entrateTra(entrateInizioAnno, entrate(state)),
         });
         annoCorrente = getSchoolYear(state.school.currentMonth);
         anno = { iscrittiInizio: state.school.activeMembers, upgradeComprati: 0 };
         livelliInizioAnno = totaleLivelli(state);
+        entrateInizioAnno = entrate(state);
       }
 
       // Il muro (Andrea, 15/10): a ogni cambio di mese, il confronto con 12 mesi prima.
@@ -303,7 +327,7 @@ export function giocaPartita({
       if (fondaAlMese !== undefined && state.school.currentMonth >= fondaAlMese && canFoundSchool(state)) {
         fondaAlMese = undefined;
         if (scuola >= maxScuole) {
-          annota("fine", "scuola-completa");
+          annota("fine", "scuola-completa", undefined, { entrate: entrateTra(entrateInizioAnno, entrate(state)) });
           break;
         }
         {
@@ -315,6 +339,8 @@ export function giocaPartita({
             voci: { ...preview },
             upgradeComprati: UPGRADE_VISIBILI.filter((definition) => (state.upgrades[definition.id] ?? 0) > 0).length,
             upgradeTotali: UPGRADE_VISIBILI.length,
+            // L'anno lasciato a metà: le sue entrate non finiscono in nessun «anno».
+            entrate: entrateTra(entrateInizioAnno, entrate(state)),
           });
           effettivoMs += REGOLE.reazioneMs;
           state = fonda(state, scuola + 1, now, reputazione);
@@ -330,6 +356,7 @@ export function giocaPartita({
             annoCorrente = getSchoolYear(state.school.currentMonth);
             anno = { iscrittiInizio: state.school.activeMembers, upgradeComprati: 0 };
             livelliInizioAnno = totaleLivelli(state);
+            entrateInizioAnno = entrate(state);
           }
         }
       }

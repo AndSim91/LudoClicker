@@ -559,7 +559,13 @@ export interface Statistics {
   career?: CareerStatistics;
 }
 
-export type IncomeSource = "fees" | "network" | "social" | "gadgets" | "sponsors";
+/**
+ * Where the euros come from (Report annuale, test engine). 15/10/2026: also interests,
+ * prizes, Missioni, Eventi e Imprevisti, enrollment bonuses and the Reptile, which were «other».
+ */
+export type IncomeSource =
+  | "fees" | "network" | "social" | "gadgets" | "sponsors"
+  | "deposit" | "prizes" | "missions" | "events" | "trials" | "reptile";
 
 /** "council", "foundation", `victory:${level}` or `legendary:${profileId}` (src/game/moments.ts). */
 export type MomentKey = string;

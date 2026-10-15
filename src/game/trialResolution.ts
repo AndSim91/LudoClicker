@@ -1,3 +1,4 @@
+import { recordIncomeBySource } from "./membershipEconomy";
 import {
   addLegendaryEncounters,
   addLegendaryEnrollment,
@@ -172,7 +173,7 @@ export function resolveStartedTrialBatch(
       ),
       legendaryCollaborators,
       statistics: {
-        ...stateBeforeTrial.statistics,
+        ...recordIncomeBySource(stateBeforeTrial.statistics, { trials: enrolled ? enrollmentBonus : 0 }),
         trialsCompleted: stateBeforeTrial.statistics.trialsCompleted + 1,
         contactsLost: stateBeforeTrial.statistics.contactsLost +
           (enrolled || recoveredForSecondAttempt ? 0 : 1),
