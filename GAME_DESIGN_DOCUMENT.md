@@ -3430,25 +3430,39 @@ luglio e il tempo passato in sottofondo dopo quel momento non viene giocato dopo
 la conferma del piano (13/10). Nuove statistiche: `trialsCancelled`, `incomeBySource`
 (quote, Network, Social, gadget; il resto è «premi e altro»).
 
-**Pagella.** Voti A–E, niente media né «Ammesso», confronto con l'anno prima e
-frecce dal secondo anno. Soglie provvisorie, da tarare giocando:
+**Pagella.** Voti A–E, niente media né «Ammesso», frecce dal secondo anno.
+Dal 15/10/2026 ogni voto ha due passi: il **livello** dell'anno con le soglie
+qui sotto, poi la **tendenza**, un voto in più o in meno se l'anno è chiaramente
+migliore o peggiore del precedente. Il confronto (e le frecce) vale solo con
+l'anno appena prima nella stessa scuola: il primo anno di ogni scuola ha solo il
+livello. La pagella salva il numero dietro ogni voto (`numbers`,
+`getAnnualNumbers`) e lo mostra nella riga, per esempio «+35% sull'anno scorso»,
+così i Consigli possono dire cosa è andato meglio o peggio. Soglie provvisorie,
+da tarare col motore:
 - Iscrizioni: arrivati nell'anno, senza confronto con la dimensione della scuola
-  (14/10/2026): ≥ 300 A · 150 B · 75 C · 30 D. Dal 15/10 l'asticella è più bassa nei
-  primi anni della scuola: ×1/8 nell'anno 0 (gennaio–agosto dell'apertura), ×1/4
-  nell'anno 1, ×1/2 nell'anno 2, intera dall'anno 3 (`getEnrollmentYearFactor`).
-- Fidelizzazione: 1 − andati via ÷ (iscritti a inizio anno + arrivati) ≥ 0,9 · 0,8 · 0,7 · 0,55.
-- Didattica (solo con le Forme aperte): Forme insegnate ÷ iscritti ≥ 1 · 0,6 · 0,35 · 0,15.
-- Risultati Agonistici (solo con almeno un torneo disputato): miglior piazzamento
-  pesato sul livello (1° 0,85, 2° 0,7, 3–4° 0,55, 5–8° 0,4, 9–16° 0,25, poi 0,1;
-  +0,05 per livello sopra lo Scolastico) ≥ 0,8 · 0,6 · 0,45 · 0,3. Conta il
-  miglior risultato dell'anno; appena c'è un altro torneo lo Scolastico vale al
-  massimo C (15/10/2026: prima era escluso, e un Accademico perso dava E anche con
-  lo Scolastico vinto).
-- Amministrazione: prove annullate ÷ prove ≤ 2% A · 5% B · 10% C · 20% D; un voto
-  in meno se più di un quarto delle spade è rotto.
-- Finanze: entrate medie al mese contro l'anno prima (il primo anno: ultimi due
-  mesi contro i primi due) ≥ +20% · −2% · −10% · −25% (15/10/2026: tenere le
-  entrate dell'anno prima vale B, non più C); un voto in meno con il debito scaduto.
+  (14/10/2026): ≥ 300 A · 150 B · 75 C · 30 D, con l'asticella ×1/8 nell'anno 0
+  (gennaio–agosto dell'apertura), ×1/4 nell'anno 1, ×1/2 nell'anno 2
+  (`getEnrollmentYearFactor`). Tendenza: ±1 con il 25% di arrivi in più o in meno.
+- Fidelizzazione: 1 − andati via ÷ (iscritti a inizio anno + arrivati) ≥ 0,9 · 0,8
+  · 0,7 · 0,55. Nell'anno 0 nessun voto: sotto i 10 iscritti nessuno se ne va.
+  Tendenza: ±1 con 5 punti di differenza.
+- Didattica (solo con le Forme aperte): Forme insegnate ÷ iscritti, riportate a un
+  anno intero contando solo i mesi con le Forme aperte, ≥ 1 · 0,6 · 0,35 · 0,15.
+  Tendenza: ±25%.
+- Risultati Agonistici: lo Scolastico non conta mai (Andrea, 15/10); senza altri
+  tornei nell'anno nessun voto. Miglior piazzamento pesato sul livello (1° 0,85,
+  2° 0,7, 3–4° 0,55, 5–8° 0,4, 9–16° 0,25, poi 0,1; +0,05 per livello sopra lo
+  Scolastico) ≥ 0,8 · 0,6 · 0,45 · 0,3. L'Accademico conta sempre, anche quando
+  la regola nascosta prima della sua tappa lo fa perdere. Tendenza: ±1 per un
+  torneo più alto o un posto migliore (o peggiore) dell'anno prima.
+- Amministrazione: prove annullate (per mancanza di spade) ÷ prove ≤ 2% A · 5% B ·
+  10% C · 20% D; un voto in meno se più di un quarto delle spade è rotto.
+  Tendenza: ±1 con 3 punti di differenza.
+- Finanze (15/10, Andrea): guadagni medi al mese contro l'anno prima ≥ +50% A ·
+  +20% B · +5% C · −10% D; il primo anno di una scuola, ultimi due mesi contro i
+  primi due. È già un confronto, quindi niente tendenza in più; un voto in meno
+  con il debito scaduto. Nei test del motore la crescita va da +330% (anno 1) a
+  +10–18% (anni 9–11): Finanze in C/D segnala che la scuola si è fermata.
 
 **Highlight annuale** (H1 «Trofeo»). Scala: 1 tappe della storia, 2 titoli,
 3 Leggendari, 4 prime volte, 5 record di iscritti, 6 il numero dell'anno (la

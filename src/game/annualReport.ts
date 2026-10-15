@@ -218,9 +218,6 @@ export function getEnrollmentYearFactor(schoolYear: number): number {
   return Math.min(1, 2 ** (schoolYear - 3));
 }
 
-/** Best the won Scolastico can score once a bigger tournament was played: a C. */
-const SCHOOL_TOURNAMENT_CAP = 0.45;
-
 function lowerGrade(grade: AnnualGrade): AnnualGrade {
   return GRADES[Math.min(4, GRADES.indexOf(grade) + 1)];
 }
@@ -307,69 +304,165 @@ export function describeIncome(income: AnnualYearData["income"]): string {
     .join(", ");
 }
 
-/** One line of numbers per subject, the same with or without grades. */
-export function describeAnnualSubjects(state: GameState, data: AnnualYearData): Record<AnnualSubject, string> {
-  // The result the grade looks at: the best place, weighed by the level.
-  const best = data.tournaments
-    .filter((entry) => Number.isFinite(entry.place))
+/** Best result of the year beyond the Scolastico, weighed by the level; none if only the Scolastico. */
+function getBestTournament(data: AnnualYearData) {
+  // 15/10/2026 (Andrea): the Scolastico never counts. The Accademico always does, also
+  // before its tappa, when the school cannot win it.
+  return data.tournaments
+    .filter((entry) => Number.isFinite(entry.place) && entry.result.level !== "school")
     .sort((left, right) => placeScore(right.place, right.result.level) - placeScore(left.place, left.result.level))[0];
+}
+
+/** Months of the year with the Forme open; old ledgers without the flag count as open. */
+function getFormsMonths(data: AnnualYearData): number {
+  return data.months.filter((month) => month.formsOpen !== false).length;
+}
+
+/**
+ * The number behind each grade (15/10/2026), saved in the pagella so that the next
+ * year can be compared with it. A subject without a number has no grade.
+ */
+export function getAnnualNumbers(state: GameState, data: AnnualYearData): Partial<Record<AnnualSubject, number>> {
+  const numbers: Partial<Record<AnnualSubject, number>> = {
+    enrollment: data.enrolled,
+    administration: data.cancelled / Math.max(1, data.trials + data.cancelled),
+    finances: averageEarned(data.months),
+  };
+  // Year 0: under 10 Iscritti nobody leaves, so the subject would say nothing.
+  if (data.schoolYear > 0) {
+    numbers.loyalty = 1 - data.departed / Math.max(1, data.start.activeMembers + data.enrolled);
+  }
+  if (state.unlocks.forms) {
+    // Forme per iscritto in a full year: only the months with the Forme open count.
+    const formsMonths = getFormsMonths(data);
+    numbers.teaching = (data.forms / Math.max(1, data.now.activeMembers)) * (formsMonths > 0 ? 12 / formsMonths : 1);
+  }
+  const best = getBestTournament(data);
+  if (best) numbers.tournaments = placeScore(best.place, best.result.level);
+  return numbers;
+}
+
+/** Numbers of the year before, only if it is really the year before in the same school. */
+export function getComparableNumbers(
+  state: Pick<GameState, "network">,
+  data: Pick<AnnualYearData, "schoolYear">,
+  previous?: AnnualReport,
+): Partial<Record<AnnualSubject, number>> | undefined {
+  if (!previous?.numbers) return undefined;
+  if (previous.schoolCount !== state.network.schoolCount || previous.schoolYear !== data.schoolYear - 1) return undefined;
+  return previous.numbers;
+}
+
+function percentChange(now: number, before: number): string {
+  const change = Math.round((now / before - 1) * 100);
+  return `${change >= 0 ? "+" : "−"}${Math.abs(change)}%`;
+}
+
+/** One line of numbers per subject, the same with or without grades; with the year before when there is one. */
+export function describeAnnualSubjects(
+  state: GameState,
+  data: AnnualYearData,
+  previous?: AnnualReport,
+): Record<AnnualSubject, string> {
+  const best = getBestTournament(data);
   const sources = describeIncome(data.income);
+  const before = getComparableNumbers(state, data, previous);
+  const numbers = getAnnualNumbers(state, data);
+  const versus = (subject: AnnualSubject, text: (now: number, then: number) => string) => {
+    const now = numbers[subject];
+    const then = before?.[subject];
+    return now !== undefined && then !== undefined && then > 0 ? ` (${text(now, then)})` : "";
+  };
+  const schoolOnly = data.tournaments.some((entry) => entry.result.level === "school");
   return {
-    enrollment: `${nf(data.now.activeMembers)} ${data.now.activeMembers === 1 ? "Iscritto" : "Iscritti"}, ${nf(data.enrolled)} ${data.enrolled === 1 ? "arrivato" : "arrivati"} nell'anno`,
-    loyalty: `${nf(data.departed)} ${data.departed === 1 ? "andato" : "andati"} via, ${nf(data.now.activeMembers)} ${data.now.activeMembers === 1 ? "rimasto" : "rimasti"}`,
+    enrollment: `${nf(data.now.activeMembers)} ${data.now.activeMembers === 1 ? "Iscritto" : "Iscritti"}, ${nf(data.enrolled)} ${data.enrolled === 1 ? "arrivato" : "arrivati"} nell'anno` +
+      versus("enrollment", (now, then) => `${percentChange(now, then)} sull'anno scorso`),
+    loyalty: `${nf(data.departed)} ${data.departed === 1 ? "andato" : "andati"} via, ${nf(data.now.activeMembers)} ${data.now.activeMembers === 1 ? "rimasto" : "rimasti"}` +
+      versus("loyalty", (_now, then) => `l'anno scorso è rimasto il ${Math.round(then * 100)}%`),
     teaching: state.unlocks.forms ? `${nf(data.forms)} ${data.forms === 1 ? "Forma insegnata" : "Forme insegnate"} nell'anno` : "Le Forme non sono ancora aperte",
     tournaments: best
       ? `${TOURNAMENT_DEFINITIONS[best.result.level].label}: ${best.place}° posto${data.tournaments.length > 1 ? `, ${data.tournaments.length} tornei disputati` : ""}`
-      : "Nessun torneo disputato",
-    administration: `${nf(data.trials)} ${data.trials === 1 ? "prova fatta" : "prove fatte"}, ${data.cancelled > 0 ? `${nf(data.cancelled)} ${data.cancelled === 1 ? "annullata" : "annullate"}` : "nessuna annullata"}; ${nf(data.events)} ${data.events === 1 ? "evento" : "eventi"}`,
-    finances: `${formatCurrency(Math.round(data.earned))} guadagnati${sources ? `: ${sources}` : ""}`,
+      : schoolOnly ? "Solo il Torneo Scolastico, che non fa voto" : "Nessun torneo disputato",
+    administration: `${nf(data.trials)} ${data.trials === 1 ? "prova fatta" : "prove fatte"}, ${data.cancelled > 0 ? `${nf(data.cancelled)} ${data.cancelled === 1 ? "annullata" : "annullate"} per mancanza di spade` : "nessuna annullata"}; ${nf(data.events)} ${data.events === 1 ? "evento" : "eventi"}`,
+    finances: `${formatCurrency(Math.round(data.earned))} guadagnati${sources ? `: ${sources}` : ""}` +
+      versus("finances", (now, then) => `${percentChange(now, then)} al mese sull'anno scorso`),
   };
 }
 
-/** The grades (Andrea, 08/10). ponytail: thresholds are first guesses, to tune with play. */
+function raiseGrade(grade: AnnualGrade): AnnualGrade {
+  return GRADES[Math.max(0, GRADES.indexOf(grade) - 1)];
+}
+
+/** One grade up or down when the year is clearly better or worse than the one before. */
+function applyTrend(grade: AnnualGrade, trend: number): AnnualGrade {
+  return trend > 0 ? raiseGrade(grade) : trend < 0 ? lowerGrade(grade) : grade;
+}
+
+/** −1, 0 or +1: `now` against `then`, as a ratio (`ratio`) or as a difference (`step`). */
+function trendOf(now: number | undefined, then: number | undefined, rule: { ratio?: number; step?: number }): number {
+  if (now === undefined || then === undefined) return 0;
+  if (rule.ratio !== undefined) {
+    if (then <= 0) return 0;
+    return now >= then * (1 + rule.ratio) ? 1 : now <= then * (1 - rule.ratio) ? -1 : 0;
+  }
+  const step = rule.step ?? 0;
+  return now - then >= step ? 1 : then - now >= step ? -1 : 0;
+}
+
+/**
+ * The grades (Andrea, 08/10; rivisti il 15/10): the level of the year, then one grade
+ * up or down against the year before (same school, the year just before).
+ * ponytail: thresholds are first guesses, to tune with the test engine.
+ */
 export function gradeAnnualYear(
   state: GameState,
   data: AnnualYearData,
   previous?: AnnualReport,
 ): Partial<Record<AnnualSubject, AnnualGrade>> {
-  const base = data.start.activeMembers + data.enrolled;
-  const grades: Partial<Record<AnnualSubject, AnnualGrade>> = {
-    // 14/10/2026: the arrivals alone, not compared with the size of the school. 15/10: the
-    // bar is lower in the first years (×1/8, 1/4, 1/2, then full), when nobody gets 300.
-    enrollment: scoreToGrade(data.enrolled, scaleThresholds([300, 150, 75, 30], getEnrollmentYearFactor(data.schoolYear))),
-    loyalty: scoreToGrade(1 - data.departed / Math.max(1, base), [0.9, 0.8, 0.7, 0.55]),
-  };
-  if (state.unlocks.forms) {
-    grades.teaching = scoreToGrade(data.forms / Math.max(1, data.now.activeMembers), [1, 0.6, 0.35, 0.15]);
+  const numbers = getAnnualNumbers(state, data);
+  const before = getComparableNumbers(state, data, previous);
+  const grades: Partial<Record<AnnualSubject, AnnualGrade>> = {};
+
+  // Iscrizioni: the arrivals alone (14/10), a lower bar in the first three years, ±25% on last year.
+  grades.enrollment = applyTrend(
+    scoreToGrade(data.enrolled, scaleThresholds([300, 150, 75, 30], getEnrollmentYearFactor(data.schoolYear))),
+    trendOf(numbers.enrollment, before?.enrollment, { ratio: 0.25 }),
+  );
+  if (numbers.loyalty !== undefined) {
+    grades.loyalty = applyTrend(
+      scoreToGrade(numbers.loyalty, [0.9, 0.8, 0.7, 0.55]),
+      trendOf(numbers.loyalty, before?.loyalty, { step: 0.05 }),
+    );
   }
-  const played = data.tournaments.filter((entry) => Number.isFinite(entry.place));
-  if (played.length > 0) {
-    // 14/10/2026: the best result of the year, the Scolastico (always won) left out
-    // once another tournament was played.
-    // 15/10/2026: a lost Accademico no longer hides the won Scolastico, which then counts
-    // at most C: the year is judged on what the school could really play.
-    const beyondSchool = played.some((entry) => entry.result.level !== "school");
-    const score = Math.max(...played.map((entry) => {
-      const value = placeScore(entry.place, entry.result.level);
-      return beyondSchool && entry.result.level === "school" ? Math.min(value, SCHOOL_TOURNAMENT_CAP) : value;
-    }));
-    grades.tournaments = scoreToGrade(score, [0.8, 0.6, 0.45, 0.3]);
+  if (numbers.teaching !== undefined) {
+    grades.teaching = applyTrend(
+      scoreToGrade(numbers.teaching, [1, 0.6, 0.35, 0.15]),
+      trendOf(numbers.teaching, before?.teaching, { ratio: 0.25 }),
+    );
   }
-  const cancelledShare = data.cancelled / Math.max(1, data.trials + data.cancelled);
-  let administration = scoreToGrade(-cancelledShare, [-0.02, -0.05, -0.1, -0.2]);
+  if (numbers.tournaments !== undefined) {
+    // Any step up (a bigger tournament, a better place in the same) or down counts.
+    grades.tournaments = applyTrend(
+      scoreToGrade(numbers.tournaments, [0.8, 0.6, 0.45, 0.3]),
+      trendOf(numbers.tournaments, before?.tournaments, { step: 0.001 }),
+    );
+  }
+  let administration = scoreToGrade(-numbers.administration!, [-0.02, -0.05, -0.1, -0.2]);
   if (getEffectiveDamagedSwords(state.equipment) > state.equipment.totalSwords / 4) {
     administration = lowerGrade(administration);
   }
-  grades.administration = administration;
+  // Fewer cancelled trials is better: the trend runs on the opposite of the share.
+  grades.administration = applyTrend(
+    administration,
+    trendOf(-numbers.administration!, before?.administration === undefined ? undefined : -before.administration, { step: 0.03 }),
+  );
 
-  // Income per month against last year, or within the year for the first one.
-  const average = averageEarned(data.months);
-  const previousAverage = previous ? averageEarned(previous.months) : 0;
-  const growth = previousAverage > 0
-    ? average / previousAverage - 1
+  // Finanze (15/10, Andrea): income per month against the year before; it is the trend
+  // itself. The first year of a school: the last two months against the first two.
+  const growth = before?.finances && before.finances > 0
+    ? numbers.finances! / before.finances - 1
     : averageEarned(data.months.slice(-2)) / Math.max(1, averageEarned(data.months.slice(0, 2))) - 1;
-  // 15/10/2026: holding last year's income is a B, not a C (a grown school stops growing).
-  let finances = scoreToGrade(growth, [0.2, -0.02, -0.1, -0.25]);
+  let finances = scoreToGrade(growth, [0.5, 0.2, 0.05, -0.1]);
   if (isDebtBlocked(state)) finances = lowerGrade(finances);
   grades.finances = finances;
   return grades;
@@ -412,14 +505,16 @@ export function buildAnnualReport(state: GameState, now: number): AnnualReport {
   const ledger = state.annual?.ledger;
   const previous = state.annual?.report;
   const data = getAnnualYearData(state, now, ledger);
-  const texts = describeAnnualSubjects(state, data);
+  const texts = describeAnnualSubjects(state, data, previous);
   const grades = gradeAnnualYear(state, data, previous);
   const rows: AnnualGradeRow[] = ANNUAL_SUBJECTS.map((subject) => ({
     subject,
     text: texts[subject],
     ...(grades[subject] ? { grade: grades[subject] } : {}),
   }));
-  const previousGrades = previous
+  // Arrows only against the year just before in the same school (15/10/2026).
+  const sameSchool = previous?.schoolCount === undefined || previous.schoolCount === state.network.schoolCount;
+  const previousGrades = previous && sameSchool && previous.schoolYear === data.schoolYear - 1
     ? Object.fromEntries(previous.grades.flatMap((row) => row.grade ? [[row.subject, row.grade]] : []))
     : undefined;
   return {
@@ -429,6 +524,8 @@ export function buildAnnualReport(state: GameState, now: number): AnnualReport {
     ...(previousGrades ? { previousGrades } : {}),
     highlight: pickAnnualHighlight(data.marks, grades, data, state.annual?.lastHighlightCategory),
     months: data.months,
+    numbers: getAnnualNumbers(state, data),
+    schoolCount: state.network.schoolCount,
   };
 }
 
@@ -466,6 +563,7 @@ export function closeAnnualMonth(state: GameState, closedMonth: number, now: num
           month: closedMonth,
           earned: Math.max(0, snapshot.eurosEarned - before.eurosEarned),
           enrolled: Math.max(0, snapshot.membersEnrolled - before.membersEnrolled),
+          formsOpen: state.unlocks.forms,
         }],
         marks: [...previousLedger.marks, ...findAnnualMarks(before, snapshot, closedMonth)],
       }

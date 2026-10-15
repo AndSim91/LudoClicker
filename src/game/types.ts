@@ -1219,6 +1219,8 @@ export interface AnnualMonth {
   month: number;
   earned: number;
   enrolled: number;
+  /** The Forme were open at the end of the month (Didattica counts only those months; 15/10). */
+  formsOpen?: boolean;
 }
 
 /** Candidate for the Highlight annuale: categories 1 (story) … 5 (record). */
@@ -1288,6 +1290,10 @@ export interface AnnualReport {
   grades: AnnualGradeRow[];
   /** Grades of the year before, for the arrows. */
   previousGrades?: Partial<Record<AnnualSubject, AnnualGrade>>;
+  /** The number behind each grade, to compare with the next year (15/10/2026). */
+  numbers?: Partial<Record<AnnualSubject, number>>;
+  /** Schools founded when it was written: a report of the previous school is not compared. */
+  schoolCount?: number;
   highlight?: AnnualHighlight;
   months: AnnualMonth[];
   plan?: AnnualPlanSummary;

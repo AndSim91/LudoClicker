@@ -12,7 +12,7 @@ import { GAME_CONFIG } from "./config";
 import { createInitialState, gameReducer } from "./engine";
 import { collectFees } from "./membershipFlow";
 import { addAdminMembers } from "./adminFlow";
-import type { AnnualMark, FormId, TournamentResult } from "./types";
+import type { AnnualMark, AnnualReport, FormId, TournamentResult } from "./types";
 import { getSchoolYear } from "./calendar";
 
 describe("annual report", () => {
@@ -108,27 +108,51 @@ describe("annual report", () => {
     expect(closeAnnualMonth(state, 1, 0).annual?.ledger?.months).toHaveLength(1);
   });
 
-  it("grades Risultati Agonistici on the best result, the Scolastico at most C beside bigger tournaments (15/10/2026)", () => {
+  it("grades Risultati Agonistici without the Scolastico, and no grade if it is the only one (15/10/2026)", () => {
     const state = createInitialState(0);
     const data = getAnnualYearData(state, 0);
     const entry = (level: TournamentResult["level"], place: number) => ({ result: { level } as TournamentResult, place });
     const grade = (tournaments: ReturnType<typeof entry>[]) =>
       gradeAnnualYear(state, { ...data, tournaments }).tournaments;
 
-    expect(grade([entry("school", 1)])).toBe("A");
-    // A poor Accademico no longer hides the won Scolastico, which counts at most C (15/10).
-    expect(grade([entry("school", 1), entry("academy", 20)])).toBe("C");
-    expect(grade([entry("school", 9), entry("academy", 20)])).toBe("E");
+    expect(grade([entry("school", 1)])).toBeUndefined();
+    expect(grade([])).toBeUndefined();
+    // The Accademico always counts, also when the hidden rule makes the school lose it.
+    expect(grade([entry("school", 1), entry("academy", 20)])).toBe("E");
     expect(grade([entry("school", 1), entry("academy", 1)])).toBe("A");
-    // Winning the Accademico still counts in a year with a low Nazionale.
     expect(grade([entry("academy", 1), entry("national", 40)])).toBe("A");
-    // Iscrizioni: the arrivals of the year alone, whatever the size of the school,
-    // with a lower bar in the first three years (15/10).
-    const grown = { ...data, schoolYear: 4 };
-    expect(gradeAnnualYear(state, { ...grown, enrolled: 320 }).enrollment).toBe("A");
-    expect(gradeAnnualYear(state, { ...grown, enrolled: 20 }).enrollment).toBe("E");
+  });
+
+  it("grades the year, then one grade up or down against the year before (15/10/2026)", () => {
+    const state = createInitialState(0);
+    const data = { ...getAnnualYearData(state, 0), schoolYear: 4 };
+    const previous = (numbers: AnnualReport["numbers"]) =>
+      ({ schoolYear: 3, month: 0, grades: [], months: [], numbers, schoolCount: 0 }) as AnnualReport;
+
+    // Iscrizioni: the arrivals of the year alone, a lower bar in the first three years.
+    expect(gradeAnnualYear(state, { ...data, enrolled: 320 }).enrollment).toBe("A");
+    expect(gradeAnnualYear(state, { ...data, enrolled: 20 }).enrollment).toBe("E");
     expect(gradeAnnualYear(state, { ...data, schoolYear: 0, enrolled: 20 }).enrollment).toBe("B");
     expect(gradeAnnualYear(state, { ...data, schoolYear: 0, enrolled: 3 }).enrollment).toBe("E");
+    // 160 arrivals is a B; 25% more than last year makes it A, 25% less a C.
+    expect(gradeAnnualYear(state, { ...data, enrolled: 160 }, previous({ enrollment: 100 })).enrollment).toBe("A");
+    expect(gradeAnnualYear(state, { ...data, enrolled: 160 }, previous({ enrollment: 240 })).enrollment).toBe("C");
+    // A pagella of another school or of an older year is not compared.
+    expect(gradeAnnualYear(state, { ...data, enrolled: 160 }, { ...previous({ enrollment: 100 }), schoolCount: 1 }).enrollment).toBe("B");
+    expect(gradeAnnualYear(state, { ...data, enrolled: 160 }, { ...previous({ enrollment: 100 }), schoolYear: 2 }).enrollment).toBe("B");
+
+    // Fidelizzazione: no grade in year 0, when nobody can leave.
+    expect(gradeAnnualYear(state, { ...data, schoolYear: 0 }).loyalty).toBeUndefined();
+
+    // Finanze: income per month against last year, +50% A · +20% B · +5% C · −10% D.
+    const months = (earned: number) => Array.from({ length: 12 }, (_, month) => ({ month, earned, enrolled: 0 }));
+    const finances = (earned: number) =>
+      gradeAnnualYear(state, { ...data, months: months(earned) }, previous({ finances: 1_000 })).finances;
+    expect(finances(1_600)).toBe("A");
+    expect(finances(1_300)).toBe("B");
+    expect(finances(1_100)).toBe("C");
+    expect(finances(950)).toBe("D");
+    expect(finances(800)).toBe("E");
   });
 
   it("counts the June departures in the pagella of that year (14/10/2026)", () => {
