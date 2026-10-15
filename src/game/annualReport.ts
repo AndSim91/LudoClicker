@@ -58,6 +58,7 @@ export const INCOME_SOURCE_LABELS: Record<IncomeSource | "other", string> = {
   network: "Network",
   social: "Social",
   gadgets: "gadget",
+  sponsors: "sponsor",
   other: "premi e altro",
 };
 
@@ -258,7 +259,7 @@ export function getAnnualYearData(state: GameState, now: number, ledger = state.
   const earned = delta("eurosEarned");
   const income: AnnualYearData["income"] = {};
   let tracked = 0;
-  for (const source of ["fees", "network", "social", "gadgets"] as IncomeSource[]) {
+  for (const source of ["fees", "network", "social", "gadgets", "sponsors"] as IncomeSource[]) {
     const value = Math.max(0, (current.income[source] ?? 0) - (start.income[source] ?? 0));
     if (value > 0) income[source] = value;
     tracked += value;

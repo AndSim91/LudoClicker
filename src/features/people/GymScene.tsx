@@ -209,6 +209,7 @@ function useRackSwaps(enabled: boolean, fighterCount: number, counts: GymRarityC
 // Subscribes to members and contacts only, so money ticks do not repaint the scene.
 export function GymScene({ state: stateOverride }: { state?: GameState }) {
   const activeMembers = useGameSelector((state) => state.school.activeMembers, stateOverride);
+  const sponsorContracts = useGameSelector((state) => state.upgrades["sponsor-contracts"] ?? 0, stateOverride);
   const contacts = useGameSelector((state) => state.contacts, stateOverride);
   // Recounted only when the contacts array changes, not on every tick.
   const rarityCounts = useMemo(() => {
@@ -296,7 +297,7 @@ export function GymScene({ state: stateOverride }: { state?: GameState }) {
         {hall ? <HallLights layout={layout} /> : null}
 
         <svg className="gym-backdrop" viewBox={viewBox} preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-          {hall ? <HallFront layout={layout} /> : (
+          {hall ? <HallFront layout={layout} sponsorContracts={sponsorContracts} /> : (
             <>
               {judges ? (
                 <g className="gym-crowd">

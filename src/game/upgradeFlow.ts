@@ -37,6 +37,7 @@ function canBuyIgnoringFunds(
     (definition.requiredGadgetProduct !== undefined &&
       !state.gadgets.products[definition.requiredGadgetProduct].unlocked) ||
     state.school.fame < definition.requiredFame ||
+    state.school.peakActiveMembers < (definition.requiredPeakMembers ?? 0) ||
     !hasCompletedUpgradePrerequisites(state.upgrades, definition)
   );
 }

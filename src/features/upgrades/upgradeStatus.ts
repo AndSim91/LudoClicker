@@ -73,6 +73,14 @@ export function getUpgradeRequirementRows(state: GameState, definition: UpgradeD
       met: state.gadgets.products[definition.requiredGadgetProduct].unlocked,
     });
   }
+  if (definition.requiredPeakMembers !== undefined) {
+    const members = definition.requiredPeakMembers.toLocaleString("it-IT");
+    rows.push({
+      short: `${members} iscritti`,
+      full: `${members} iscritti nella scuola (il record conta)`,
+      met: state.school.peakActiveMembers >= definition.requiredPeakMembers,
+    });
+  }
   if (definition.requiredFame > 0) {
     rows.push({
       short: `Fama ${definition.requiredFame}`,

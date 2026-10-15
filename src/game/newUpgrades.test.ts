@@ -136,3 +136,27 @@ describe("upgrade del 05/10", () => {
     });
   });
 });
+
+describe("Contratti di sponsorizzazione", () => {
+  it("pays by the Fama, sponsor by sponsor, and opens at 1.000 members", async () => {
+    const { getSponsorIncome, getUpgradeDefinition } = await import("../content/upgrades");
+    const { createInitialState } = await import("./engine");
+    const { buyUpgrade } = await import("./upgradeFlow");
+    const base = createInitialState(1_000);
+    expect(getSponsorIncome({ ...base.upgrades, "sponsor-contracts": 0 }, 1_000)).toBe(0);
+    expect(getSponsorIncome({ ...base.upgrades, "sponsor-contracts": 2 }, 1_000)).toBe(3_000);
+    expect(getSponsorIncome({ ...base.upgrades, "sponsor-contracts": 4 }, 1_000)).toBe(11_000);
+    const writing = Object.fromEntries(
+      ["spell-check", "professional-email", "personalized-invite", "call-to-action", "email-layout", "winning-advertising", "marketing-course"].map((id) => [id, 5]),
+    );
+    const ready = {
+      ...base,
+      upgrades: { ...base.upgrades, ...writing },
+      school: { ...base.school, euros: 1e12, peakActiveMembers: 999 },
+    };
+    expect(getUpgradeDefinition("sponsor-contracts")?.category).toBe("writing");
+    expect(buyUpgrade(ready, "sponsor-contracts").upgrades["sponsor-contracts"]).toBe(0);
+    const big = { ...ready, school: { ...ready.school, peakActiveMembers: 1_000 } };
+    expect(buyUpgrade(big, "sponsor-contracts").upgrades["sponsor-contracts"]).toBe(1);
+  });
+});

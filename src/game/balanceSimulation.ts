@@ -173,6 +173,7 @@ function buyOneAffordableUpgrade(
     if (
       level < definition.maxLevel &&
       state.school.fame >= definition.requiredFame &&
+      state.school.peakActiveMembers >= (definition.requiredPeakMembers ?? 0) &&
       state.school.euros >= cost &&
       // The basic list keeps its historical behaviour (it stops at the first
       // affordable entry); the competitive one skips locked entries.

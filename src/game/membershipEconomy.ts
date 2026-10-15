@@ -1,4 +1,4 @@
-import { getFundsGainMultiplier, getNetworkSponsorIncome, getUpgradeEffectTotal } from "../content/upgrades";
+import { getFundsGainMultiplier, getNetworkSponsorIncome, getSponsorIncome, getUpgradeEffectTotal } from "../content/upgrades";
 import { GAME_CONFIG } from "./config";
 import { roundCurrency } from "./economy";
 import { getBusinessMultiplier, getMonthlyNetworkRent } from "./reputation";
@@ -54,6 +54,11 @@ export function getMonthlyNetworkIncome(state: GameState): number {
     getBusinessMultiplier(state);
 }
 
+/** Contratti di sponsorizzazione: the sponsors on the LED band pay by the Fama. */
+export function getMonthlySponsorIncome(state: GameState): number {
+  return getSponsorIncome(state.upgrades, state.school.fame);
+}
+
 /** The monthly income split by source; deposit interest counts as «other». */
 export function getMonthlyIncomeBySource(state: GameState): Partial<Record<IncomeSource, number>> {
   const bonus = getFundsGainMultiplier(state.upgrades);
@@ -61,12 +66,13 @@ export function getMonthlyIncomeBySource(state: GameState): Partial<Record<Incom
     fees: getMonthlyMembershipIncome(state) * bonus,
     network: getMonthlyNetworkIncome(state) * bonus,
     social: getMonthlySocialIncome(state) * bonus,
+    sponsors: getMonthlySponsorIncome(state) * bonus,
   };
 }
 
 export function getMonthlyOperationalIncome(state: GameState): number {
   // «Il tempo è denaro» 5 adds 10% to everything; Business Strategy is inside the parts.
   return (getMonthlyMembershipIncome(state) + getMonthlyNetworkIncome(state) +
-    getMonthlySocialIncome(state) + getMonthlyDepositInterest(state)) *
+    getMonthlySocialIncome(state) + getMonthlySponsorIncome(state) + getMonthlyDepositInterest(state)) *
     getFundsGainMultiplier(state.upgrades);
 }

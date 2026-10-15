@@ -291,6 +291,7 @@ export type UpgradeId =
   | "e-learning"
   | "event-multiverse"
   | "influencer-project"
+  | "sponsor-contracts"
   | "busy-calendar"
   | "group-chat"
   | "bring-a-friend"
@@ -558,7 +559,7 @@ export interface Statistics {
   career?: CareerStatistics;
 }
 
-export type IncomeSource = "fees" | "network" | "social" | "gadgets";
+export type IncomeSource = "fees" | "network" | "social" | "gadgets" | "sponsors";
 
 /** "council", "foundation", `victory:${level}` or `legendary:${profileId}` (src/game/moments.ts). */
 export type MomentKey = string;

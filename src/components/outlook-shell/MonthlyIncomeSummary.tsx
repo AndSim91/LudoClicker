@@ -1,7 +1,7 @@
 import { getNetworkSponsorIncome } from "../../content/upgrades";
 import { useId } from "react";
 import { getEstimatedMonthlyGadgetIncome } from "../../game/gadgetIncomeEstimate";
-import { getMonthlyDepositInterest, getMonthlyMembershipIncome } from "../../game/membershipEconomy";
+import { getMonthlyDepositInterest, getMonthlyMembershipIncome, getMonthlySponsorIncome } from "../../game/membershipEconomy";
 import { getBusinessMultiplier, getMonthlyNetworkRent } from "../../game/reputation";
 import { getMonthlySocialIncome } from "../../game/social";
 import { useGameSelector } from "../../game/GameStateContext";
@@ -17,6 +17,7 @@ interface MonthlyIncomePresentation {
   networkRent: number;
   depositInterest: number;
   networkSponsor: number;
+  sponsors: number;
 }
 
 function selectMonthlyIncomePresentation(state: GameState): MonthlyIncomePresentation {
@@ -28,6 +29,7 @@ function selectMonthlyIncomePresentation(state: GameState): MonthlyIncomePresent
     networkRent: getMonthlyNetworkRent(state) * getBusinessMultiplier(state),
     depositInterest: getMonthlyDepositInterest(state),
     networkSponsor: getNetworkSponsorIncome(state.upgrades, state.network.schoolCount) * getBusinessMultiplier(state),
+    sponsors: getMonthlySponsorIncome(state),
   };
 }
 
@@ -41,7 +43,8 @@ function isSameMonthlyIncomePresentation(
     left.gadgetUnlocked === right.gadgetUnlocked &&
     left.networkRent === right.networkRent &&
     left.depositInterest === right.depositInterest &&
-    left.networkSponsor === right.networkSponsor;
+    left.networkSponsor === right.networkSponsor &&
+    left.sponsors === right.sponsors;
 }
 
 export function MonthlyIncomeSummary({ state: stateOverride }: { state?: GameState }) {
@@ -54,12 +57,13 @@ export function MonthlyIncomeSummary({ state: stateOverride }: { state?: GameSta
     networkRent,
     depositInterest,
     networkSponsor,
+    sponsors,
   } = useGameSelector(
     selectMonthlyIncomePresentation,
     stateOverride,
     isSameMonthlyIncomePresentation,
   );
-  const monthlyIncome = memberFees + socialIncome + gadgetIncome + networkRent + depositInterest + networkSponsor;
+  const monthlyIncome = memberFees + socialIncome + gadgetIncome + networkRent + depositInterest + networkSponsor + sponsors;
 
   return (
     <div className="title-monthly-income">
@@ -93,6 +97,12 @@ export function MonthlyIncomeSummary({ state: stateOverride }: { state?: GameSta
             <div>
               <dt>Network delle Onde</dt>
               <dd>{formatCurrency(networkRent)}</dd>
+            </div>
+          ) : null}
+          {sponsors > 0 ? (
+            <div>
+              <dt>Sponsor della fascia LED</dt>
+              <dd>{formatCurrency(sponsors)}</dd>
             </div>
           ) : null}
           {networkSponsor > 0 ? (

@@ -126,11 +126,18 @@ export function sponsorPanels(): Record<Exclude<LedSponsorId, "lama-di-luce">, L
   };
 }
 
+/** The order the contracts sign them (Contratti di sponsorizzazione): Lama di Luce last. */
+const CONTRACT_ORDER: LedSponsorId[] = ["sartoria", "basito", "strutto", "lama-di-luce"];
+
+export function getSignedSponsors(contracts: number): LedSponsorId[] {
+  return CONTRACT_ORDER.slice(0, Math.max(0, contracts));
+}
+
 /** Dark LEDs between two panels, so each sponsor stands on its own. */
 const GAP = 28;
 
 /** The strip that scrolls: one panel per slot, each followed by a gap. */
-export function ledStrip(active: readonly LedSponsorId[] = LED_SPONSORS) {
+export function ledStrip(active: readonly LedSponsorId[]) {
   const sponsors = { "lama-di-luce": lamaDiLuce(), ...sponsorPanels() };
   const order = ordine();
   const panels = LED_SPONSORS.map((id) => (active.includes(id) ? sponsors[id] : order));
@@ -143,7 +150,7 @@ export function ledStrip(active: readonly LedSponsorId[] = LED_SPONSORS) {
 const cache = new Map<string, { href: string; cols: number }>();
 
 /** The strip as an image URL, built once per set of sponsors. */
-export function ledStripImage(active: readonly LedSponsorId[] = LED_SPONSORS) {
+export function ledStripImage(active: readonly LedSponsorId[]) {
   const key = LED_SPONSORS.filter((id) => active.includes(id)).join();
   let image = cache.get(key);
   if (!image) {

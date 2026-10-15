@@ -1,7 +1,7 @@
 import { GYM_SABER_COLORS } from "../../content/gymStages";
 import type { CSSProperties } from "react";
 import { GymLayer } from "./GymLayers";
-import { LED_ROWS, ledStripImage } from "./ledSponsors";
+import { LED_ROWS, getSignedSponsors, ledStripImage } from "./ledSponsors";
 import { HALL_LEVEL, type GymLayout } from "./gymHall";
 
 /**
@@ -60,7 +60,8 @@ function Cheer({ x, y, k, small = false }: { x: number; y: number; k: number; sm
 }
 
 /**
- * The LED band along the whole hall, behind the mat (sponsors of 15/10, concept C):
+ * The LED band along the whole hall, behind the mat (sponsors of 15/10, concept C),
+ * with the sponsors signed by «Contratti di sponsorizzazione»:
  * a pixel-art strip (ledSponsors.ts) that scrolls left, 24 LEDs a second. The strip
  * is one image repeated end to end and the group slides by one strip, then loops.
  */
@@ -71,8 +72,8 @@ const LED_TOP = 119;
 const LED_HEIGHT = 24;
 const LED_UNIT = LED_HEIGHT / LED_ROWS;
 
-function LedBand() {
-  const { href, cols } = ledStripImage();
+function LedBand({ contracts }: { contracts: number }) {
+  const { href, cols } = ledStripImage(getSignedSponsors(contracts));
   const strip = cols * LED_UNIT;
   const copies = Math.ceil(LED_WIDTH / strip) + 1;
   return (
@@ -268,7 +269,7 @@ export function HallLights({ layout }: { layout: GymLayout }) {
 }
 
 /** In front of the lights: the row behind the mat, the LED band, the mat and the Arena, standards and (stadium) cameras. */
-export function HallFront({ layout }: { layout: GymLayout }) {
+export function HallFront({ layout, sponsorContracts = 0 }: { layout: GymLayout; sponsorContracts?: number }) {
   const level = layout.hallLevel;
   const { mat, front } = layout;
   return (
@@ -283,7 +284,7 @@ export function HallFront({ layout }: { layout: GymLayout }) {
         {range(front.heads).map((index) => <circle key={index} cx={front.x + 12 + index * 24} cy={index % 2 ? 128 : 132} r={6} />)}
         {level >= HALL_LEVEL.onde ? null : <rect x={front.x} y="134" width={front.heads * 24} height="8" rx="2" />}
       </g>
-      {level >= HALL_LEVEL.onde ? <LedBand /> : null}
+      {level >= HALL_LEVEL.onde ? <LedBand contracts={sponsorContracts} /> : null}
 
       <rect x={mat.x} y="144" width={mat.w} height="10" rx="3" className="gym-mat" />
       <ellipse cx="321" cy="151" rx="66" ry="7" className="gym-arena" />

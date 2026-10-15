@@ -2311,6 +2311,19 @@ numero troppo piccolo: nella prima scuola i contenuti Social portano 3–14
 Follower in tutto. Ogni Follower vale anche 1 Fama: il nodo sta in fondo
 alla catena perché non acceleri troppo il prestigio.
 
+**Contratti di sponsorizzazione** (15/10, nono nodo: 35 punti di Creatività e
+1.000 iscritti di record nella scuola, cioè quando in Palestra c'è la fascia LED
+dell'Arena delle Onde; 2.000 / 4.000 / 8.000 / 16.000 € di catalogo, valori
+provvisori da verificare con il motore). Ogni livello firma uno sponsor, che
+compare sulla fascia LED al posto di un «ORDINE DELLE ONDE» e paga ogni mese in
+base alla **Fama** della scuola: Sartoria Cruna dell'Ago 1 €, F4 Basito 2 €,
+Focacceria Inquartata di Strutto 3 € e, per ultimo e più prestigioso, Lama di
+Luce 5 € per punto di Fama (`getSponsorIncome`). Le entrate passano per
+`getMonthlyOperationalIncome` (con il +10% di «Il tempo è denaro» 5, senza
+Business Strategy), il riepilogo mensile le mostra come «Sponsor della fascia
+LED» e il Report annuale come fonte «sponsor». Gli sponsor cambieranno anche
+altre schermate, una alla volta.
+
 ### 10.3 Carisma
 
 Migliora il pubblico raggiunto dagli eventi e la quota che lascia un contatto.
@@ -3228,8 +3241,9 @@ Un'unica pagina, in quest'ordine:
     che scorre verso sinistra (concept C del 15/10, 24 LED al secondo, ferma con
     «Riduci animazioni»), alta 24 unità (dal 15/10 pomeriggio, prima 15) e con
     28 LED spenti tra un pannello e l'altro. Ha uno slot per sponsor: dove lo
-    sponsor non c'è ancora compare «ORDINE DELLE ONDE», con tutti gli sponsor
-    l'Ordine non si vede. È pixel-art di 24 LED d'altezza, con un font a 5 righe
+    sponsor non è ancora sotto contratto (upgrade «Contratti di
+    sponsorizzazione», § 10.2) compare «ORDINE DELLE ONDE», con tutti gli
+    sponsor l'Ordine non si vede. È pixel-art di 24 LED d'altezza, con un font a 5 righe
     (`ledPixels.ts`, `ledSponsors.ts`): «ORDINE DELLE ONDE», Lama di Luce (L1:
     stella a otto lame, «LAMA·DI·LUCE» con il «DI» arancio e la barretta
     tricolore) e tre sponsor inventati, ognuno con il suo disegno: Sartoria Cruna
