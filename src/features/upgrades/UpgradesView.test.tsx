@@ -309,8 +309,9 @@ describe("UpgradesView", () => {
 
     // Only the cheapest node carries a buy button, right under the node itself.
     expect(screen.getAllByRole("button", { name: /^Compra / })).toHaveLength(1);
-    fireEvent.click(screen.getByRole("button", { name: "Compra Tastiera comoda" }));
-    expect(onBuyUpgrade).toHaveBeenCalledWith("comfortable-keyboard");
+    // From the 15/10 balance the cheapest first level is Procedura di benvenuto (5 €).
+    fireEvent.click(screen.getByRole("button", { name: "Compra Procedura di benvenuto" }));
+    expect(onBuyUpgrade).toHaveBeenCalledWith("welcome-procedure");
 
   });
 
@@ -337,14 +338,14 @@ describe("UpgradesView", () => {
     const initial = createInitialState(1_000);
     render(
       <UpgradesView
-        state={{ ...initial, school: { ...initial.school, euros: 5 } }}
+        state={{ ...initial, school: { ...initial.school, euros: 2 } }}
         onBuyUpgrade={() => undefined}
       />,
     );
 
-    const quickBuy = screen.getByRole("button", { name: "Compra Tastiera comoda" });
+    const quickBuy = screen.getByRole("button", { name: "Compra Procedura di benvenuto" });
     expect(quickBuy).toBeDisabled();
-    expect(quickBuy).toHaveAttribute("title", expect.stringMatching(/^Mancano 8,00/));
+    expect(quickBuy).toHaveAttribute("title", expect.stringMatching(/^Mancano 3,00/));
   });
 
   it("summarizes cumulative benefits without claiming free swords", () => {

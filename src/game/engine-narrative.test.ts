@@ -435,7 +435,7 @@ describe("game engine: narrative", () => {
       { ...founded, school: { ...founded.school, euros: 100 } },
       { type: "BUY_UPGRADE", upgradeId: "comfortable-keyboard", now: 4_000 },
     );
-    expect(upgraded.school.euros).toBe(87);
+    expect(upgraded.school.euros).toBe(85);
   });
 
   it("runs events together while both members and swords remain available", () => {

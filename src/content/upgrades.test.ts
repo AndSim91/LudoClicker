@@ -24,6 +24,7 @@ import {
   getTrainingExamSuccessChanceBonus,
   getUpgradeCost,
   getUpgradeEffectTotal,
+  UPGRADE_COMPLETION_TARGET,
   isAgonistCourseUnlocked,
   isAthleticPreparationUnlocked,
 } from "./upgrades";
@@ -190,20 +191,44 @@ describe("upgrade catalog", () => {
     const gadget = definitionsFor("gadget")[0];
     const teaching = definitionsFor("instructors")[0];
     const writing = definitionsFor("speed")[0];
-    // Gadget has its own curve from 15/10: full catalogue price, +10% a punto.
-    expect(getUpgradeCost(gadget, 0)).toBe(2_500);
-    expect(getUpgradeCost(gadget, 0, { ...createInitialUpgradeLevels(), "gadget-design-tools": 2 })).toBe(3_025);
-    expect(getUpgradeCost(teaching, 0)).toBe(250);
-    expect(getUpgradeCost(writing, 0)).toBe(13);
+    // From 15/10 each branch has its own scale on the catalogue, same +20% curve.
+    expect(getUpgradeCost(gadget, 0)).toBe(44);
+    expect(getUpgradeCost(gadget, 0, { ...createInitialUpgradeLevels(), "gadget-design-tools": 2 })).toBe(63);
+    expect(getUpgradeCost(teaching, 0)).toBe(50);
+    expect(getUpgradeCost(writing, 0)).toBe(15);
   });
 
-  it("raises prices by 25% for every level already bought in the same branch", () => {
+  it("raises prices by 20% for every level already bought in the same branch", () => {
     const keyboard = getUpgradeDefinition("comfortable-keyboard")!;
     const levels = { ...createInitialUpgradeLevels(), "writing-rhythm": 2, "spell-check": 3 };
-    // Two points in Scrittura: 50 € × ¼ × 1,25² ≈ 20 €. Creatività does not count.
-    expect(getUpgradeCost(keyboard, 0, levels)).toBe(20);
-    // A new school starts from no levels: back to the catalogue price.
-    expect(getUpgradeCost(keyboard, 0, createInitialUpgradeLevels())).toBe(13);
+    // Two points in Scrittura: 50 € × 0,308 × 1,2² ≈ 22 €. Creatività does not count.
+    expect(getUpgradeCost(keyboard, 0, levels)).toBe(22);
+    // A new school starts from no levels: back to the starting price.
+    expect(getUpgradeCost(keyboard, 0, createInitialUpgradeLevels())).toBe(15);
+  });
+
+  it("costs about the same to complete every branch: 250 M for 44 points, in proportion", () => {
+    for (const category of UPGRADE_CATEGORIES) {
+      if (category.id === "network" || category.id === "secrets") continue;
+      const definitions = definitionsFor(category.id);
+      let levels = createInitialUpgradeLevels();
+      let points = 0;
+      let total = 0;
+      // The cheapest way: always the cheapest level the branch points allow.
+      for (;;) {
+        const open = definitions.filter((definition) =>
+          levels[definition.id] < definition.maxLevel && (definition.requiredBranchPoints ?? 0) <= points);
+        if (open.length === 0) break;
+        const [cost, next] = open
+          .map((definition) => [getUpgradeCost(definition, levels[definition.id], levels), definition] as const)
+          .sort((left, right) => left[0] - right[0])[0];
+        total += cost;
+        points += 1;
+        levels = { ...levels, [next.id]: levels[next.id] + 1 };
+      }
+      const target = UPGRADE_COMPLETION_TARGET.euros * points / UPGRADE_COMPLETION_TARGET.points;
+      expect(Math.abs(total / target - 1), category.id).toBeLessThan(0.01);
+    }
   });
 
   it("keeps the Network delle Onde at its own prices", () => {

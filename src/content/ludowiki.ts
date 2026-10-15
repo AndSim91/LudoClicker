@@ -7,7 +7,7 @@ import {
   getSecretLegendaryProfile,
   type SecretLegendaryId,
 } from "./secretLegendaries";
-import { UPGRADE_PRICING, UPGRADE_PRICING_BY_CATEGORY } from "./upgrades";
+import { UPGRADE_COMPLETION_TARGET, UPGRADE_PRICING } from "./upgrades";
 import { SPECIAL_COLLABORATORS } from "./specialCollaborators";
 import { TOURNAMENT_DEFINITIONS } from "./tournaments";
 import { GAME_CONFIG } from "../game/config";
@@ -350,7 +350,7 @@ export const LUDOWIKI_CHAPTERS: readonly LudoWikiChapter[] = [
     numbers: [
       { label: "Rami pubblici", value: "8", detail: "Scrittura, Creatività, Carisma, Accoglienza, Attrezzatura, Gadget, Insegnamento e Organizzazione" },
       { label: "Punti", value: "1 a livello", detail: "contano nel ramo del nodo comprato" },
-      { label: "Prezzo", value: `+${Math.round(UPGRADE_PRICING.branchGrowth * 100)}% a punto`, detail: `per ogni livello già comprato nello stesso ramo; Gadget +${Math.round(UPGRADE_PRICING_BY_CATEGORY.gadget!.branchGrowth * 100)}%, con prezzi di partenza più alti` },
+      { label: "Prezzo", value: `+${Math.round(UPGRADE_PRICING.branchGrowth * 100)}% a punto`, detail: `per ogni livello già comprato nello stesso ramo; completare un ramo costa più o meno lo stesso in tutti, circa ${Math.round(UPGRADE_COMPLETION_TARGET.euros / 1e6)} milioni` },
       { label: "Sblocco iniziale", value: "1 iscritto", detail: "insieme alla pagina della scuola" },
     ],
     rules: [

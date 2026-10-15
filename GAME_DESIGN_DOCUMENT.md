@@ -2222,19 +2222,40 @@ Livello 2: …»); per le tabelle, i valori in fila fino all'ultimo livello. Le
 parole sono quelle del giocatore («caratteri a ogni tasto», «contatti a ogni
 evento», «probabilità che chi fa la prova si iscriva»), non quelle del codice.
 
-**Prezzi.** I prezzi nelle tabelle sono quelli di catalogo. In negozio valgono
-**un quarto** e salgono del **25% per ogni livello già comprato nello stesso
-ramo** (20% fino al 06/10): prezzo = catalogo × 0,25 × 1,25^(punti del ramo), arrotondato all'euro
-(`UPGRADE_PRICING` e `getUpgradeCost` in `src/content/upgrades.ts`). Gli altri
-rami non cambiano. Dal 15/10 il ramo Gadget, che si apre tardi (col Nazionale), ha
-una curva sua: prezzo = catalogo × 1 × 1,10^(punti del ramo), cioè parte da prezzi
-più alti ma sale molto meno, così può mettersi in pari con gli altri rami
-(`UPGRADE_PRICING_BY_CATEGORY`). In una nuova scuola gli Upgrade ripartono da zero e con
-loro i prezzi (tranne gli upgrade fissi: Corso X e «Il tempo è denaro», vedi
-§ 17.6): è il motivo per fondare, e le cime dei rami si raggiungono
-scuola dopo scuola con la Reputazione. Network delle Onde e Percorsi Segreti
-tengono i prezzi di catalogo. Non c'è più la maggiorazione del 15% per scuola
-fondata (decisioni di Andrea del 05/10; misure in § 10.10).
+**Prezzi.** I prezzi nelle tabelle sono quelli di catalogo. In negozio salgono
+del **20% per ogni livello già comprato nello stesso ramo** e ogni ramo ha una
+sua **scala** sul catalogo: prezzo = catalogo × scala del ramo × 1,2^(punti del
+ramo), arrotondato all'euro (`UPGRADE_PRICING_BY_CATEGORY` e `getUpgradeCost` in
+`src/content/upgrades.ts`). Gli altri rami non cambiano.
+
+Bilanciamento del 15/10 (Andrea): **completare un ramo costa più o meno lo
+stesso in tutti**, 250 milioni per 44 punti, in proporzione ai punti del ramo
+(`UPGRADE_COMPLETION_TARGET`). La curva è la stessa per tutti; la scala di ogni
+ramo è calcolata perché il modo più economico di completarlo (comprare sempre il
+livello più economico disponibile) arrivi a quel totale. Un test in
+`upgrades.test.ts` lo controlla: se si aggiunge o si cambia un nodo, il test
+fallisce e la scala va ricalcolata. Prima la curva era +25% per punto con
+prezzi a un quarto (Gadget × 1 e +10%), e completare un ramo costava da 275
+milioni (Gadget) a 6,3 miliardi (Insegnamento); Creatività a 30 punti costava
+22 milioni contro i 3 di Scrittura.
+
+| Ramo | Punti | Scala | Completo | 35 punti |
+| --- | ---: | ---: | ---: | ---: |
+| Scrittura | 44 | 0,308 | 250 M | 5,9 M |
+| Creatività | 44 | 0,113 | 251 M | 9,2 M |
+| Carisma | 42 | 0,15 | 238 M | 10,4 M |
+| Accoglienza | 45 | 0,0926 | 256 M | 4,2 M |
+| Attrezzatura | 41 | 0,367 | 233 M | 15,7 M |
+| Gadget | 51 | 0,0174 | 290 M | 2,7 M |
+| Insegnamento | 43 | 0,0499 | 245 M | 15,1 M |
+| Organizzazione | 37 | 0,502 | 210 M | 91,5 M |
+
+In una nuova scuola gli Upgrade ripartono da zero e con loro i prezzi (tranne
+gli upgrade fissi: Corso X e «Il tempo è denaro», vedi § 17.6): è il motivo per
+fondare, e le cime dei rami si raggiungono scuola dopo scuola con la
+Reputazione. Network delle Onde e Percorsi Segreti tengono i prezzi di catalogo
+e restano fuori dal bilanciamento. Non c'è più la maggiorazione del 15% per
+scuola fondata (decisioni di Andrea del 05/10; misure in § 10.10).
 
 **Sblocco a punti.** Ogni livello comprato in un ramo vale **1 punto di quel
 ramo**. Un nodo si apre quando nel ramo hai speso almeno la sua **soglia** di
@@ -2313,9 +2334,8 @@ alla catena perché non acceleri troppo il prestigio.
 
 **Contratti di sponsorizzazione** (15/10, nono nodo: 35 punti di Creatività e
 1.000 iscritti di record nella scuola, cioè quando in Palestra c'è la fascia LED
-dell'Arena delle Onde; prezzo fisso, deciso da Andrea il 15/10: 10.000 /
-30.000 / 80.000 / 200.000 €, che non sale con i punti del ramo, come nel
-Network). Ogni livello firma uno sponsor, che
+dell'Arena delle Onde; 10.000 / 30.000 / 80.000 / 200.000 € di catalogo, con
+la curva di Creatività come gli altri nodi dal bilanciamento del 15/10). Ogni livello firma uno sponsor, che
 compare sulla fascia LED al posto di un «ORDINE DELLE ONDE» e paga ogni mese in
 base alla **Fama** della scuola: Sartoria Cruna dell'Ago 1 €, F4 Basito 2 €,
 Focacceria Inquartata di Strutto 3 € e, per ultimo e più prestigioso, Lama di
