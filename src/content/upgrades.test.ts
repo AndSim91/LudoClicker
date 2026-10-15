@@ -407,13 +407,13 @@ describe("prerequisites and secret paths", () => {
 });
 
 describe("Il tempo è denaro", () => {
-  it("allows 2× to 5× from one, three, five and eight schools founded, at fixed prices", () => {
+  it("allows 2× to 5× from one to four schools founded and +10% Fondi at five, at fixed prices", () => {
     const node = getUpgradeDefinition("time-is-money")!;
     expect(node.category).toBe("network");
     expect(getRequiredNetworkSchools(node, 0)).toBe(1);
-    expect([0, 1, 2, 3].map((level) => getRequiredNetworkSchools(node, level))).toEqual([1, 3, 5, 8]);
-    expect([0, 1, 2, 3].map((level) => getUpgradeCost(node, level, createInitialUpgradeLevels()))).toEqual([
-      25_000, 150_000, 500_000, 2_000_000,
+    expect([0, 1, 2, 3, 4].map((level) => getRequiredNetworkSchools(node, level))).toEqual([1, 2, 3, 4, 5]);
+    expect([0, 1, 2, 3, 4].map((level) => getUpgradeCost(node, level, createInitialUpgradeLevels()))).toEqual([
+      25_000, 150_000, 500_000, 1_000_000, 2_000_000,
     ]);
     expect(getMaxGameSpeed(createInitialUpgradeLevels())).toBe(1);
     expect(getMaxGameSpeed({ ...createInitialUpgradeLevels(), "time-is-money": 1 })).toBe(2);

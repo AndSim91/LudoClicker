@@ -10,7 +10,7 @@ import {
   planBuyAllUpgrades,
   setGameSpeed,
 } from "./upgradeFlow";
-import { UPGRADE_DEFINITIONS, getUpgradeCost } from "../content/upgrades";
+import { UPGRADE_DEFINITIONS, getFundsGainMultiplier, getMaxGameSpeed, getUpgradeCost } from "../content/upgrades";
 
 describe("buyUpgrade prerequisites", () => {
   it("buys Corso X for one euro only after its independent discovery", () => {
@@ -264,28 +264,45 @@ describe("Compra tutto", () => {
 });
 
 describe("Il tempo è denaro", () => {
-  it("opens level 2 only with five schools and keeps the chosen speed within the level", () => {
+  it("opens one level per school founded (1–5) and keeps the chosen speed within the level", () => {
     const initial = createInitialState(1_000);
-    const oneSchool = {
-      ...initial,
-      school: { ...initial.school, euros: 1_000_000 },
-      network: { ...initial.network, schoolCount: 1 },
-    };
+    const withSchools = (state: GameState, schoolCount: number): GameState =>
+      ({ ...state, network: { ...state.network, schoolCount } });
+    const oneSchool = withSchools({ ...initial, school: { ...initial.school, euros: 10_000_000 } }, 1);
     expect(setGameSpeed(oneSchool, 3)).toBe(oneSchool);
 
     const levelOne = buyUpgrade(oneSchool, "time-is-money");
     expect(levelOne.upgrades["time-is-money"]).toBe(1);
-    expect(levelOne.school.euros).toBe(975_000);
+    expect(levelOne.school.euros).toBe(9_975_000);
     expect(buyUpgrade(levelOne, "time-is-money")).toBe(levelOne);
     expect(getPlayerGameSpeed(setGameSpeed(levelOne, 3))).toBe(2);
 
-    const threeSchools = { ...levelOne, network: { ...levelOne.network, schoolCount: 3 } };
-    const levelTwo = setGameSpeed(buyUpgrade(threeSchools, "time-is-money"), 3);
-    expect(levelTwo.upgrades["time-is-money"]).toBe(2);
-    expect(getPlayerGameSpeed(levelTwo)).toBe(3);
-    // 4× waits for the fifth school founded.
-    expect(buyUpgrade(levelTwo, "time-is-money")).toBe(levelTwo);
-    // A new school starts with no levels: the saved 3× counts as 1× until the node is bought again.
-    expect(getPlayerGameSpeed({ ...levelTwo, upgrades: initial.upgrades })).toBe(1);
+    let state = levelOne;
+    for (const [schools, cost] of [[2, 150_000], [3, 500_000], [4, 1_000_000], [5, 2_000_000]]) {
+      const before = withSchools(state, schools);
+      state = buyUpgrade(before, "time-is-money");
+      expect(before.school.euros - state.school.euros).toBe(cost);
+    }
+    expect(state.upgrades["time-is-money"]).toBe(5);
+    // Level 5 gives Fondi, not a 6× speed.
+    expect(getMaxGameSpeed(state.upgrades)).toBe(5);
+    expect(getPlayerGameSpeed(setGameSpeed(state, 9))).toBe(5);
+    expect(getFundsGainMultiplier(state.upgrades)).toBe(1.1);
+    expect(getFundsGainMultiplier(levelOne.upgrades)).toBe(1);
+    // A new school starts with no levels: the saved speed counts as 1× until the node is bought again.
+    expect(getPlayerGameSpeed({ ...setGameSpeed(state, 3), upgrades: initial.upgrades })).toBe(1);
+  });
+
+  it("goes first in the automatic buying when the funds can pay it", () => {
+    const initial = createInitialState(1_000);
+    const state = {
+      ...initial,
+      school: { ...initial.school, euros: 30_000 },
+      network: { ...initial.network, schoolCount: 1 },
+    };
+    expect(planBuyAllUpgrades(state).purchases[0]).toBe("time-is-money");
+    // Not affordable: the cheapest nodes go on as before.
+    const poor = { ...state, school: { ...state.school, euros: 5_000 } };
+    expect(planBuyAllUpgrades(poor).purchases).not.toContain("time-is-money");
   });
 });

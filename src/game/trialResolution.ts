@@ -5,7 +5,7 @@ import {
   mergeAcquiredContacts,
 } from "./contacts";
 import { recruitCollaborator } from "./collaboratorFlow";
-import { getUpgradeEffectTotal } from "../content/upgrades";
+import { getFundsGainMultiplier, getUpgradeEffectTotal } from "../content/upgrades";
 import { GAME_CONFIG } from "./config";
 import { scaleCurrencyGain } from "./economy";
 import { completeEquipmentUse, getPlannedEquipmentWear } from "./equipment";
@@ -69,7 +69,7 @@ export function resolveStartedTrialBatch(
   );
   const trialUpdates = new Map<string, ScheduledTrial>();
   const contactUpdates = new Map<string, Contact>();
-  const enrollmentBonus = scaleCurrencyGain(GAME_CONFIG.enrollmentBonus, gainMultiplier);
+  const enrollmentBonus = scaleCurrencyGain(GAME_CONFIG.enrollmentBonus, gainMultiplier * getFundsGainMultiplier(state.upgrades));
   let nextState = state;
   let resolvedCount = 0;
   // Porta un amico: new members who bring a contact, added once after the batch.

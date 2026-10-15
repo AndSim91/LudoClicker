@@ -1,3 +1,4 @@
+import { getFundsGainMultiplier } from "../content/upgrades";
 import { addLegendaryEncounters, addLegendaryEnrollment, createAcquiredContacts, mergeAcquiredContacts } from "./contacts";
 import { GAME_CONFIG } from "./config";
 import { makeGameId } from "./ids";
@@ -169,7 +170,8 @@ export function applyTournamentRewards(
   now: number,
 ): GameState {
   const resolvedResult = resolveTournamentRewardFallbacks(state, result, now);
-  const euros = resolvedResult.rewards.reduce((total, reward) => total + reward.euros, 0);
+  const euros = resolvedResult.rewards.reduce((total, reward) => total + reward.euros, 0) *
+    getFundsGainMultiplier(state.upgrades);
   const followers = resolvedResult.rewards.reduce(
     (total, reward) => total + getTournamentRewardFollowers(reward),
     0,

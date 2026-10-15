@@ -2178,7 +2178,10 @@ separato: i suoi effetti sono distribuiti tra Scrittura e Creatività.
 
 **La pagina.** In alto, accanto al titolo, c'è il pulsante **«Compra tutto ·
 N livelli»**, con sotto il totale e i fondi che restano dopo l'acquisto (dal più
-economico in su finché i fondi bastano; i Percorsi Segreti restano esclusi). I
+economico in su finché i fondi bastano; i Percorsi Segreti restano esclusi,
+tranne gli upgrade fissi. Dal 15/10 un upgrade fisso, se i fondi bastano, passa
+davanti a tutti gli altri: vale per «Compra tutto», per la coda della
+Pianificazione e per il motore di test). I
 Fondi non si ripetono: sono già nella barra delle informazioni. Sotto, una riga dice quanti nodi sono
 completati (senza il totale: quanti ne mancano resta una sorpresa) e la legenda
 (da comprare, fondi insufficienti, completati, da scoprire); il riepilogo **Bonus totali** è una tendina chiusa. Ogni ramo è
@@ -2685,9 +2688,13 @@ visibile fino alla 20ª scuola.
 **Il tempo è denaro** (decisione del 06/10). Descrizione: «Abbiamo scoperto che
 il tempo scorre più velocemente quando ci si diverte, quindi abbiamo deciso che
 ci stiamo divertendo moltissimo.» Un nodo può chiedere scuole diverse per
-livello (`levelNetworkSchools`): qui 1, 3, 5 e 8 per i livelli da 1 a 4 (2×, 3×, 4×, 5×), così
-tutte e quattro le velocità si aprono prima della decima scuola (decisione del
-06/10).
+livello (`levelNetworkSchools`): qui 1, 2, 3, 4 e 5 per i livelli da 1 a 5
+(decisione del 15/10, prima 1, 3, 5 e 8). I livelli da 1 a 4 danno 2×, 3×, 4× e
+5×; il livello 5 non accelera ma dà **+10% a tutti i Fondi guadagnati**
+(`getFundsGainMultiplier`): entrate mensili (rette, Social, Rete delle Onde,
+Sponsor, interessi), Gadget (anche al Reptile), premi dei tornei e dei Leggendari
+Segreti sconfitti, bonus d'iscrizione, obiettivi brevi ed Eventi e Imprevisti
+positivi. Non tocca i rimborsi (eventi annullati, Reptile) né il pannello Admin.
 La velocità si sceglie con il pulsante «avanti veloce» accanto alla pausa
 (concept B: ogni clic passa alla velocità successiva, poi torna a 1×), visibile
 solo con il nodo comprato. Accelera l'orologio del gioco (`gameClock.ts`): mesi
@@ -2703,7 +2710,7 @@ colonna per nodo.
 | Scuole | Potenziamento | Effetto | Costi per livello |
 | ---: | --- | --- | --- |
 | 1 | Coordinamento multi-sede | +10% velocità automazioni generiche per livello; massimo +50% | 25.000 / 50.000 / 100.000 / 200.000 / 400.000 € |
-| 1 · 3 · 5 · 8 | Il tempo è denaro | velocità del gioco a scelta: L1 fino a 2× (1 scuola fondata), L2 3× (3), L3 4× (5), L4 5× (8) | 25.000 / 150.000 / 500.000 / 2.000.000 € |
+| 1 · 2 · 3 · 4 · 5 | Il tempo è denaro | velocità del gioco a scelta: L1 fino a 2× (1 scuola fondata), L2 3× (2), L3 4× (3), L4 5× (4); L5 +10% a tutti i Fondi guadagnati (5) | 25.000 / 150.000 / 500.000 / 1.000.000 / 2.000.000 € |
 | 2 | Scambio di Istruttori | +10% velocità di tutti i corsi per livello; massimo +50% | 20.000 / 40.000 / 80.000 / 160.000 / 320.000 € |
 | 3 | Lettere di raccomandazione | +1 punto Reputazione alla prossima fondazione per livello | 50.000 / 150.000 / 450.000 € |
 | 5 | Circuito del Network | +1% contatti dagli eventi per ogni scuola del Network, per livello | 100.000 / 200.000 / 400.000 / 800.000 / 1.600.000 € |
@@ -4248,7 +4255,8 @@ Multitasking (Gadget) e Eventi nel Multiverso (Carisma).
 Ogni scuola lasciata entra nel **Network delle Onde**. Versa una rendita
 mensile fissa solo se alla fondazione si spendono punti Reputazione nella
 rendita (§ 5.7): ogni punto vale `iscritti × 40 € × 10% × 10%`. La rendita non
-è toccata da moltiplicatori e si somma alle entrate mensili
+è toccata da moltiplicatori (unica eccezione, dal 15/10: il +10% sui Fondi del
+livello 5 di «Il tempo è denaro», § 10.13) e si somma alle entrate mensili
 (`getMonthlyOperationalIncome`); il riepilogo delle entrate la mostra come
 «Network delle Onde».
 

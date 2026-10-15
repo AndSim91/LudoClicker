@@ -1,3 +1,4 @@
+import { getFundsGainMultiplier } from "../content/upgrades";
 import { noteNarrativeEvent } from "./yearDigest";
 import { NARRATIVE_EVENTS } from "../content/narrativeEvents";
 import { formatCurrency } from "../shared/formatters";
@@ -63,7 +64,7 @@ export function processNarrativeEvent(
     : { contacts: [], nextSeed: rewardState.state.randomSeed };
   const contacts = acquired.contacts;
   const euroDelta = (definition.euroDelta ?? 0) > 0
-    ? scaleCurrencyGain(definition.euroDelta ?? 0, gainMultiplier)
+    ? scaleCurrencyGain(definition.euroDelta ?? 0, gainMultiplier * getFundsGainMultiplier(state.upgrades))
     : (definition.euroDelta ?? 0);
   const baseSummary = definition.euroDelta && definition.euroDelta > 0
     ? `${definition.description} Contributo ricevuto: ${formatCurrency(euroDelta)}.`

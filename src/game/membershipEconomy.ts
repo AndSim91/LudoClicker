@@ -1,4 +1,4 @@
-import { getNetworkSponsorIncome, getUpgradeEffectTotal } from "../content/upgrades";
+import { getFundsGainMultiplier, getNetworkSponsorIncome, getUpgradeEffectTotal } from "../content/upgrades";
 import { GAME_CONFIG } from "./config";
 import { roundCurrency } from "./economy";
 import { getMonthlyNetworkRent } from "./reputation";
@@ -48,17 +48,19 @@ export function recordIncomeBySource(
 
 /** The monthly income split by source; deposit interest counts as «other». */
 export function getMonthlyIncomeBySource(state: GameState): Partial<Record<IncomeSource, number>> {
+  const bonus = getFundsGainMultiplier(state.upgrades);
   return {
-    fees: getMonthlyMembershipIncome(state),
-    network: getMonthlyNetworkRent(state) +
-      getNetworkSponsorIncome(state.upgrades, state.network.schoolCount),
-    social: getMonthlySocialIncome(state),
+    fees: getMonthlyMembershipIncome(state) * bonus,
+    network: (getMonthlyNetworkRent(state) +
+      getNetworkSponsorIncome(state.upgrades, state.network.schoolCount)) * bonus,
+    social: getMonthlySocialIncome(state) * bonus,
   };
 }
 
 export function getMonthlyOperationalIncome(state: GameState): number {
-  // Rents of the schools in the network are fixed: no multiplier touches them.
-  return getMonthlyMembershipIncome(state) + getMonthlyNetworkRent(state) +
+  // Rents of the schools in the network are fixed: only «Il tempo è denaro» 5 touches them (+10% on everything).
+  return (getMonthlyMembershipIncome(state) + getMonthlyNetworkRent(state) +
     getMonthlySocialIncome(state) + getMonthlyDepositInterest(state) +
-    getNetworkSponsorIncome(state.upgrades, state.network.schoolCount);
+    getNetworkSponsorIncome(state.upgrades, state.network.schoolCount)) *
+    getFundsGainMultiplier(state.upgrades);
 }

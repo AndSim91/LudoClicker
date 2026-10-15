@@ -288,7 +288,7 @@ const UPGRADE_CATALOG: UpgradeDefinition[] = [
 
   // Network delle Onde: si apre con le scuole fondate.
   { id: "multi-site-coordination", category: "network", title: "Coordinamento multi-sede", description: "Le scuole del Network condividono strumenti e procedure. Quello che funziona in una sede, adesso funziona in tutte.", effectLabel: "Ogni livello: tutti i collaboratori lavorano il 10% più in fretta · Livello 5: +50%", effect: "automationMultiplier", effectPerLevel: 0.1, baseCost: 25_000, costGrowth: LEVEL_GROWTH, levelCosts: [25_000, 50_000, 100_000, 200_000, 400_000], maxLevel: 5, requiredFame: noFame, requiredNetworkSchools: 1, requiredBranchPoints: 0 },
-  { id: "time-is-money", category: "network", title: "Il tempo è denaro", description: "Abbiamo scoperto che il tempo scorre più velocemente quando ci si diverte, quindi abbiamo deciso che ci stiamo divertendo moltissimo.", effectLabel: "Livello 1: puoi far andare il gioco a 2× · Livello 2: anche a 3× · Livello 3: a 4× · Livello 4: a 5× · La velocità si cambia accanto alla pausa; le email scritte da te restano al tuo ritmo", effect: "gameSpeedLevel", effectPerLevel: 1, baseCost: 25_000, costGrowth: LEVEL_GROWTH, levelCosts: [25_000, 150_000, 500_000, 2_000_000], maxLevel: 4, requiredFame: noFame, requiredNetworkSchools: 1, levelNetworkSchools: [1, 3, 5, 8], requiredBranchPoints: 0 },
+  { id: "time-is-money", category: "network", title: "Il tempo è denaro", description: "Abbiamo scoperto che il tempo scorre più velocemente quando ci si diverte, quindi abbiamo deciso che ci stiamo divertendo moltissimo.", effectLabel: "Livello 1: puoi far andare il gioco a 2× · Livello 2: anche a 3× · Livello 3: a 4× · Livello 4: a 5× · Livello 5: +10% a tutti i Fondi guadagnati · La velocità si cambia accanto alla pausa; le email scritte da te restano al tuo ritmo", effect: "gameSpeedLevel", effectPerLevel: 1, baseCost: 25_000, costGrowth: LEVEL_GROWTH, levelCosts: [25_000, 150_000, 500_000, 1_000_000, 2_000_000], maxLevel: 5, requiredFame: noFame, requiredNetworkSchools: 1, levelNetworkSchools: [1, 2, 3, 4, 5], requiredBranchPoints: 0 },
   { id: "instructor-exchange", category: "network", title: "Scambio di Istruttori", description: "Un mese qui, un mese là. Tornano con idee nuove e una valigia di spade da riparare.", effectLabel: "Ogni livello: tutti i corsi il 10% più veloci · Livello 5: +50%", effect: "courseSpeedBonus", effectPerLevel: 0.1, baseCost: 20_000, costGrowth: LEVEL_GROWTH, levelCosts: [20_000, 40_000, 80_000, 160_000, 320_000], maxLevel: 5, requiredFame: noFame, requiredNetworkSchools: 2, requiredBranchPoints: 0 },
   { id: "recommendation-letters", category: "network", title: "Lettere di raccomandazione", description: "Tre righe firmate dalla Sede madre aprono porte che nemmeno sapevi chiuse.", effectLabel: "Ogni livello: +1 punto **Reputazione** alla prossima fondazione · Livello 3: +3", effect: "foundationReputationBonus", effectPerLevel: 1, baseCost: 50_000, costGrowth: LEVEL_GROWTH, levelCosts: [50_000, 150_000, 450_000], maxLevel: 3, requiredFame: noFame, requiredNetworkSchools: 3, requiredBranchPoints: 0 },
   { id: "network-circuit", category: "network", title: "Circuito del Network", description: "Le scuole si passano piazze, date e contatti. Il gazebo, invece, se lo tengono stretto.", effectLabel: "Ogni livello: +1% di **Contatti** dagli eventi per ogni scuola del [[Network]]", effect: "networkEventContactBonus", effectPerLevel: 0.01, baseCost: 100_000, costGrowth: LEVEL_GROWTH, levelCosts: [100_000, 200_000, 400_000, 800_000, 1_600_000], maxLevel: 5, requiredFame: noFame, requiredNetworkSchools: 5, requiredBranchPoints: 0 },
@@ -431,8 +431,16 @@ export function getRequiredNetworkSchools(
 }
 
 /** Fastest game speed the player may choose: 1×, plus one step per level of «Il tempo è denaro». */
+/** Levels of «Il tempo è denaro» that raise the speed; the 5th gives Fondi instead (15/10). */
+const TIME_IS_MONEY_SPEED_LEVELS = 4;
+
 export function getMaxGameSpeed(levels: UpgradeLevels): number {
-  return 1 + getUpgradeEffectTotal(levels, "gameSpeedLevel");
+  return 1 + Math.min(levels["time-is-money"] ?? 0, TIME_IS_MONEY_SPEED_LEVELS);
+}
+
+/** «Il tempo è denaro» level 5: +10% on every euro the school earns (not refunds). */
+export function getFundsGainMultiplier(levels: UpgradeLevels): number {
+  return (levels["time-is-money"] ?? 0) > TIME_IS_MONEY_SPEED_LEVELS ? 1.1 : 1;
 }
 
 export function getUpgradeCost(

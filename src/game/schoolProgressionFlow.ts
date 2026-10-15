@@ -2,7 +2,7 @@ import { createAnnualLedger } from "./annualReport";
 import { addCareer, getSchoolGadgetsSold, recordCareer } from "./career";
 import { getSchoolYear } from "./calendar";
 import { describeAchievementKey, getNewAchievementKeys } from "../content/achievements";
-import { getPermanentUpgradeLevels } from "../content/upgrades";
+import { getFundsGainMultiplier, getPermanentUpgradeLevels } from "../content/upgrades";
 import {
   SHORT_GOALS,
   createNextShortGoal,
@@ -331,7 +331,7 @@ export function completeShortGoal(
   if (getShortGoalProgress(available) < available.shortGoal.target) return available;
 
   const definition = SHORT_GOALS[available.shortGoal.definitionId];
-  const reward = scaleCurrencyGain(getShortGoalReward(available.shortGoal), gainMultiplier);
+  const reward = scaleCurrencyGain(getShortGoalReward(available.shortGoal), gainMultiplier * getFundsGainMultiplier(available.upgrades));
   const completedCount = available.shortGoal.completedCount + 1;
   const rewarded: GameState = {
     ...available,

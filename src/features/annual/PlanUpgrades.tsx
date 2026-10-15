@@ -61,7 +61,7 @@ export function PlanUpgrades({
   const [selection, setSelection] = useState<{ upgradeId: UpgradeId; anchor: HTMLButtonElement }>();
   const room = view.school.euros;
   const queue = useMemo(() => planBuyAllUpgrades(view), [view]);
-  const next = useMemo(() => findCheapestPurchase(view), [view]);
+  const next = useMemo(() => findCheapestPurchase(view, view.school.euros), [view]);
   const rank = useMemo(() => {
     const places = new Map<UpgradeId, number>();
     queue.purchases.forEach((upgradeId, index) => { if (!places.has(upgradeId)) places.set(upgradeId, index + 1); });

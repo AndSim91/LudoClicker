@@ -1,5 +1,5 @@
 import { recordIncomeBySource } from "./membershipEconomy";
-import { getGadgetRarityChanceMultiplier, getGadgetWorkCapacity, getUpgradeEffectTotal } from "../content/upgrades";
+import { getFundsGainMultiplier, getGadgetRarityChanceMultiplier, getGadgetWorkCapacity, getUpgradeEffectTotal } from "../content/upgrades";
 import { getReputationMultiplier } from "./reputation";
 import {
   GADGET_DEFINITIONS,
@@ -779,9 +779,10 @@ function processGadgetSales(
 function bookGadgetSales(
   state: GameState,
   gadgets: GadgetState,
-  revenue: number,
+  baseRevenue: number,
   now: number,
 ): GameState {
+  const revenue = roundCurrency(baseRevenue * getFundsGainMultiplier(state.upgrades));
   const soldState: GameState = {
     ...state,
     school: {

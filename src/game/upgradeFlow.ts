@@ -5,6 +5,7 @@ import {
   getRequiredNetworkSchools,
   getUpgradeDefinition,
   hasCompletedUpgradePrerequisites,
+  isPermanentUpgrade,
   type UpgradeDefinition,
 } from "../content/upgrades";
 import { getWritingPower } from "./formulas";
@@ -69,20 +70,33 @@ export interface BuyAllPlan {
   maxEuros: number;
 }
 
+// Secret paths stay a deliberate choice, except the permanent ones (15/10): bought once for the whole career.
 const BUY_ALL_DEFINITIONS = UPGRADE_DEFINITIONS.filter(
-  (definition) => definition.category !== "secrets",
+  (definition) => definition.category !== "secrets" || isPermanentUpgrade(definition.id),
 );
 
-/** The cheapest node the rules allow, with its price at these levels. */
-export function findCheapestPurchase(state: GameState): { id: UpgradeId; cost: number } | undefined {
+/**
+ * The next node the automatic buying picks, with its price at these levels: the
+ * cheapest node the rules allow, but a permanent upgrade the funds can pay comes
+ * first (Andrea, 15/10), so it is never left behind for cheaper levels.
+ */
+export function findCheapestPurchase(
+  state: GameState,
+  funds = Infinity,
+): { id: UpgradeId; cost: number } | undefined {
   let cheapest: { id: UpgradeId; cost: number } | undefined;
+  let permanent: { id: UpgradeId; cost: number } | undefined;
   for (const definition of BUY_ALL_DEFINITIONS) {
     const cost = getUpgradeCost(definition, state.upgrades[definition.id], state.upgrades);
     // Strictly cheaper: on a tie the earlier node in the catalogue wins, as before.
-    if (cheapest && cost >= cheapest.cost) continue;
-    if (canBuyIgnoringFunds(state, definition)) cheapest = { id: definition.id, cost };
+    const takesCheapest = !cheapest || cost < cheapest.cost;
+    const takesPermanent = isPermanentUpgrade(definition.id) && cost <= funds &&
+      (!permanent || cost < permanent.cost);
+    if (!(takesCheapest || takesPermanent) || !canBuyIgnoringFunds(state, definition)) continue;
+    if (takesCheapest) cheapest = { id: definition.id, cost };
+    if (takesPermanent) permanent = { id: definition.id, cost };
   }
-  return cheapest;
+  return permanent ?? cheapest;
 }
 
 /** «Il tempo è denaro»: the chosen speed, never above what its level allows. */
@@ -109,7 +123,7 @@ export function planBuyAllUpgrades(state: GameState): BuyAllPlan {
   const purchases: UpgradeId[] = [];
   for (;;) {
     const view: GameState = levels === state.upgrades ? state : { ...state, upgrades: levels };
-    const next = findCheapestPurchase(view);
+    const next = findCheapestPurchase(view, euros);
     if (!next || next.cost > euros) {
       const total = state.school.euros - euros;
       return {

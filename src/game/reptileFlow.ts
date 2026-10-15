@@ -1,3 +1,4 @@
+import { getFundsGainMultiplier } from "../content/upgrades";
 import { recordIncomeBySource } from "./membershipEconomy";
 import { addCareer } from "./career";
 import { getContactBaseStats } from "./athleteStats";
@@ -109,6 +110,7 @@ export function applyReptileResult(
   );
   const winner = result.teams.find((team) => team.id === result.podiumTeamIds[0])!;
   const schoolWon = winner.home;
+  const gadgetEarned = result.economy.gadgetGross * getFundsGainMultiplier(state.upgrades);
   let nextState: GameState = {
     ...state,
     contacts: state.contacts.map((contact) => {
@@ -125,7 +127,7 @@ export function applyReptileResult(
     }),
     school: {
       ...state.school,
-      euros: state.school.euros + result.economy.gadgetGross,
+      euros: state.school.euros + gadgetEarned,
       followers: state.school.followers + result.economy.followersGained,
     },
     equipment: applyEquipmentWear(
@@ -134,8 +136,8 @@ export function applyReptileResult(
       result.economy.usedSchoolSwords,
     ),
     statistics: {
-      ...recordIncomeBySource(state.statistics, { gadgets: result.economy.gadgetGross }),
-      eurosEarned: state.statistics.eurosEarned + result.economy.gadgetGross,
+      ...recordIncomeBySource(state.statistics, { gadgets: gadgetEarned }),
+      eurosEarned: state.statistics.eurosEarned + gadgetEarned,
       socialFollowersGained:
         state.statistics.socialFollowersGained + result.economy.followersGained,
       eventsCompleted: state.statistics.eventsCompleted + 1,
