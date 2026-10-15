@@ -326,18 +326,34 @@ async function principale() {
       "",
       tenue(`  ${"PARTITA".padEnd(larghezzaNome - 2)}${"SCUOLA".padEnd(o.scuole + 9)}${"GIOCO".padEnd(10)}${"ISCRITTI".padEnd(10)}STATO`),
     ];
-    // Prima le partite in corso, poi (se c'è posto) le finite e quelle in coda.
+    // Le partite in corso si vedono sempre tutte; finite e in coda solo se avanza posto.
     const spazio = Math.max(4, (process.stdout.rows ?? 40) - 16);
+    const etichetta = (voce) => o.strategie.length > 1 ? `#${voce.seed} ${NOMI_STRATEGIE[voce.reputazione]}` : `#${voce.seed}`;
+    if (lista.length > spazio) {
+      // Troppe per una riga ciascuna: griglia compatta «#seme scuola/totale iscritti».
+      righe.pop();
+      const celle = lista.map((p) => {
+        const testo = `${etichetta(p)} ${p.scuola}/${o.scuole} ${p.iscritti.toLocaleString("it-IT")}`;
+        return { testo, tinta: p.pausa ? viola : p.stato.startsWith("muro") ? oro : azzurro };
+      });
+      const larga = Math.max(...celle.map((c) => c.testo.length)) + 3;
+      const perRiga = Math.max(1, Math.floor(((process.stdout.columns ?? 100) - 2) / larga));
+      righe.push(tenue(`  IN CORSO (${lista.length}) · scuola e iscritti · ${oro("oro")} sta per fondare · ${viola("viola")} in pausa`));
+      for (let i = 0; i < celle.length; i += perRiga) {
+        righe.push(`  ${celle.slice(i, i + perRiga).map((c) => c.tinta(c.testo.padEnd(larga))).join("")}`);
+      }
+    }
     const voci = [
-      ...lista.map((p) => ({ seed: p.seed, reputazione: p.reputazione, p })),
+      ...(lista.length > spazio ? [] : lista.map((p) => ({ seed: p.seed, reputazione: p.reputazione, p }))),
       ...[...finite.values()].map((finita) => ({ seed: finita.seed, reputazione: finita.reputazione, finita })),
       ...coda.map((voce) => ({ seed: voce.seed, reputazione: voce.reputazione, coda: true })),
     ];
-    for (const voce of voci.slice(0, spazio)) {
+    const mostrate = lista.length > spazio ? [] : voci.slice(0, spazio);
+    for (const voce of mostrate) {
       const nome = (o.strategie.length > 1 ? `  #${voce.seed} ${NOMI_STRATEGIE[voce.reputazione]}` : `  #${voce.seed}`).padEnd(larghezzaNome);
       if (voce.p) {
         const p = voce.p;
-        const stato = p.pausa ? viola("in pausa (PC occupato)") : p.stato.startsWith("pronta") ? oro(p.stato) : tenue(p.stato);
+        const stato = p.pausa ? viola("in pausa (PC occupato)") : p.stato.startsWith("muro") ? oro(p.stato) : tenue(p.stato);
         righe.push(`${nome}${barra(p.scuola - 1, o.scuole, o.scuole, azzurro)} ${`${p.scuola}/${o.scuole}`.padEnd(7)}${oreGioco(p.minuti).padEnd(10)}${p.iscritti.toLocaleString("it-IT").padEnd(10)}${stato}`);
       } else if (voce.finita) {
         righe.push(`${nome}${verde("█".repeat(o.scuole))} ${verde("✓".padEnd(7))}${oreGioco(voce.finita.minuti).padEnd(10)}${voce.finita.iscritti.toLocaleString("it-IT").padEnd(10)}${verde("finita")}`);
@@ -345,7 +361,11 @@ async function principale() {
         righe.push(`${nome}${tenue("░".repeat(o.scuole))} ${"".padEnd(7)}${"".padEnd(20)}${tenue("in coda")}`);
       }
     }
-    if (voci.length > spazio) righe.push(tenue(`  … altre ${voci.length - spazio} (finite o in coda)`));
+    const nascoste = voci.slice(mostrate.length);
+    if (nascoste.length) {
+      const finiteNascoste = nascoste.filter((voce) => voce.finita).length;
+      righe.push(tenue(`  … e ${[finiteNascoste && `${finiteNascoste} finite`, nascoste.length - finiteNascoste && `${nascoste.length - finiteNascoste} in coda`].filter(Boolean).join(", ")}`));
+    }
     righe.push(
       "",
       tenue(`  PC: altri programmi ${Math.round(altri * 100)}% CPU · RAM libera ${(freemem() / MB / 1024).toFixed(1).replace(".", ",")} GB · priorità ${o.priorita}`),
