@@ -178,7 +178,9 @@ describe("TrainingControl Instructor students", () => {
     fireEvent.click(within(view.container).getByRole("button", { name: /Corso Tecnici/ }));
     expect(within(view.container).getByRole("option", { name: /Forma 1/, hidden: true })).not.toHaveClass("is-uncovered");
     expect(within(view.container).getByRole("option", { name: /Forma 1.*1 Tecnico qualificato/, hidden: true })).toBeInTheDocument();
-    const uncoveredTechnicianOption = within(view.container).getByRole("option", { name: /Corso X/, hidden: true });
+    // Corso X is never a Tecnico course: its title comes from Forma 1 + Forma 2.
+    expect(within(view.container).queryByRole("option", { name: /Corso X/, hidden: true })).toBeNull();
+    const uncoveredTechnicianOption = within(view.container).getByRole("option", { name: /Forma 2/, hidden: true });
     expect(uncoveredTechnicianOption).toHaveClass("is-uncovered");
     fireEvent.click(uncoveredTechnicianOption);
     expect(uncoveredTechnicianOption).toHaveClass("is-selected", "is-uncovered");

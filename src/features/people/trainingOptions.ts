@@ -98,8 +98,9 @@ export function getTechnicianCourseDefinitions(
   if (courseXUnlocked && needsCourseXRecovery(collaborator.forms)) return [];
   return collaborator.forms.flatMap((formId) => {
     const definition = getFormDefinition(formId);
+    // Never Corso X: its Tecnico title comes from Forma 1 + Forma 2 (courseXTitles.ts).
     return definition &&
-      (courseXUnlocked || formId !== "course-x") &&
+      hasOwnInstructorCourse(formId) &&
       collaborator.instructorForms.includes(formId) &&
       !(collaborator.technicianForms ?? []).includes(formId)
       ? [definition]
