@@ -852,9 +852,9 @@
 .gym-stage.is-hall .gym-truss { stroke: #1f5a78; }
 .gym-order-banner path { fill: #07090b; stroke: #d9e2e8; stroke-linejoin: round; }
 .gym-led-band { fill: #021220; }
-.gym-led-name { fill: #6cd3d6; font: 600 9px var(--font-display, sans-serif); }
-.gym-led-slot rect { fill: none; stroke: #2b5d78; stroke-width: 0.8; stroke-dasharray: 3 2; }
-.gym-led-slot text { fill: #3f7590; font: 600 6.9px var(--font-display, sans-serif); letter-spacing: 0.2em; }
+/* The band scrolls by one strip and loops; «Riduci animazioni» stops it on the first frame. */
+.gym-led-scroll { animation: gym-led-scroll linear infinite; }
+@keyframes gym-led-scroll { to { transform: translateX(var(--led-shift)); } }
 .gym-camera path { fill: none; stroke: #2a6f8f; stroke-width: 1.4; }
 .gym-camera rect { fill: #021e33; stroke: #2a6f8f; stroke-width: 0.8; }
 /* Stadio delle Onde: the Lanterna turns, fireworks now and then. */

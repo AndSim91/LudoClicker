@@ -3213,9 +3213,16 @@ Un'unica pagina, in quest'ordine:
     l'Arena, una pozza di luce sul tappeto e una nebbiolina azzurra ferma;
   - **Arena delle Onde** (1.000): due stendardi neri con il logo bianco
     dell'Ordine delle Onde ai lati del traliccio, una seconda rastrelliera
-    speculare a sinistra e una fascia LED a tutta larghezza dietro il tappeto,
-    con il nome dell'Ordine e gli spazi per gli sponsor (in pixel-art, da fare
-    con un codice a sé);
+    speculare a sinistra e una fascia LED a tutta larghezza dietro il tappeto
+    che scorre verso sinistra (concept C del 15/10, 24 LED al secondo, ferma con
+    «Riduci animazioni»). È pixel-art di 24 LED d'altezza, con un font a 5 righe
+    (`ledPixels.ts`, `ledSponsors.ts`): «ORDINE DELLE ONDE», Lama di Luce (L1:
+    stella a otto lame, «LAMA·DI·LUCE» con il «DI» arancio e la barretta
+    tricolore) e tre sponsor inventati, ognuno con il suo disegno: Sartoria Cruna
+    dell'Ago (A1, l'ago illuminato con il filo rosso), F4 Basito · Solo Basilico
+    Genovese (B2b, il mortaio genovese basito con pesto, basilico e pestello) e
+    Focacceria Inquartata di Strutto (C2, la spada nella focaccia). Solo
+    scenografia, senza effetti di gioco; l'ironia è solo sugli sponsor inventati;
   - **Arena da Campionato** (2.000): cinque coppie su un tappeto più lungo, con
     l'incontro arbitrato al centro e i giudici accanto all'Arena; un anello di
     luci sul bordo dell'Arena, bandierine lungo il traliccio, un piano di

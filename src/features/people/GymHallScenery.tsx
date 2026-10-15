@@ -1,5 +1,7 @@
 import { GYM_SABER_COLORS } from "../../content/gymStages";
+import type { CSSProperties } from "react";
 import { GymLayer } from "./GymLayers";
+import { LED_ROWS, ledStripImage } from "./ledSponsors";
 import { HALL_LEVEL, type GymLayout } from "./gymHall";
 
 /**
@@ -58,29 +60,37 @@ function Cheer({ x, y, k, small = false }: { x: number; y: number; k: number; sm
 }
 
 /**
- * The LED band along the whole hall, behind the mat: the Order's name every third
- * panel, sponsor slots in between (the pixel-art sponsors come later, with their own code).
+ * The LED band along the whole hall, behind the mat (sponsors of 15/10, concept C):
+ * a pixel-art strip (ledSponsors.ts) that scrolls left, 24 LEDs a second. The strip
+ * is one image repeated end to end and the group slides by one strip, then loops.
  */
+const LED_FROM = -440;
+const LED_WIDTH = 1520;
+const LED_UNIT = 15 / LED_ROWS;
+
 function LedBand() {
-  const from = -440;
-  const slot = 95;
+  const { href, cols } = ledStripImage();
+  const strip = cols * LED_UNIT;
+  const copies = Math.ceil(LED_WIDTH / strip) + 1;
   return (
     <g className="gym-led">
-      <rect x={from} y={128} width={1520} height={15} className="gym-led-band" />
-      {range(16).map((k) => {
-        const x = from + k * slot;
-        return k % 3 === 1 ? (
-          <text key={k} x={x + slot / 2} y={138.9} textAnchor="middle" textLength={slot - 14} lengthAdjust="spacing" className="gym-led-name">
-            ORDINE DELLE ONDE
-          </text>
-        ) : (
-          <g key={k} className="gym-led-slot">
-            <rect x={x + 6} y={130.4} width={slot - 12} height={10.2} rx={1.2} />
-            <text x={x + slot / 2} y={137.8} textAnchor="middle">SPONSOR</text>
-          </g>
-        );
-      })}
-      <rect x={from} y={128} width={1520} height={1.2} fill={TEAL} opacity={0.7} />
+      <defs>
+        <clipPath id="gym-led-clip">
+          <rect x={LED_FROM} y={128} width={LED_WIDTH} height={15} />
+        </clipPath>
+      </defs>
+      <rect x={LED_FROM} y={128} width={LED_WIDTH} height={15} className="gym-led-band" />
+      <g clipPath="url(#gym-led-clip)">
+        <g
+          className="gym-led-scroll"
+          style={{ "--led-shift": `${-strip}px`, animationDuration: `${strip / (24 * LED_UNIT)}s` } as CSSProperties}
+        >
+          {range(copies).map((k) => (
+            <image key={k} href={href} x={LED_FROM + k * strip} y={128} width={strip} height={15} preserveAspectRatio="none" />
+          ))}
+        </g>
+      </g>
+      <rect x={LED_FROM} y={128} width={LED_WIDTH} height={1.2} fill={TEAL} opacity={0.7} />
     </g>
   );
 }
