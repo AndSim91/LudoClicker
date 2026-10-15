@@ -78,6 +78,7 @@ import { migrateMomentsState } from "./saveMigrations/moments";
 import { migrateAutomaticShareLevelsState } from "./saveMigrations/automaticShareLevels";
 import { migrateLightInflationDemandState } from "./saveMigrations/lightInflationDemand";
 import { migrateLightInflationFoundationState } from "./saveMigrations/lightInflationFoundation";
+import { migrateGadgetAutoSaleState } from "./saveMigrations/gadgetAutoSale";
 import { migrateLeanHistoryState } from "./saveMigrations/leanHistory";
 import type { MigratableState, SaveMigrationStage } from "./saveMigrations/types";
 import type { GameState } from "./types";
@@ -161,6 +162,7 @@ const SAVE_MIGRATION_STAGES: SaveMigrationStage[] = [
   migrateCareerUnlocksState,
   migrateWritingReputationState,
   migrateLightInflationFoundationState,
+  migrateGadgetAutoSaleState,
 ];
 
 function canCompactHistory(state: MigratableState): boolean {

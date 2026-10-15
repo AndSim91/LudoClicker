@@ -13,7 +13,6 @@ import {
   type GadgetTimingJudgment,
 } from "../../game/gadgetMinigame";
 import type { GadgetMinigameState } from "../../game/types";
-import { formatCurrency } from "../../shared/formatters";
 import { GadgetProcessArtwork, type GadgetProcessStage } from "./GadgetArtwork";
 
 const LANE_CONTROLS = [
@@ -131,25 +130,13 @@ function getLaneFromKey(key: string): GadgetLane | undefined {
 export function GadgetRhythmGame({
   minigame,
   quality,
-  accepted,
-  revisionCost,
-  canRevise,
-  canAffordRevision,
   onComplete,
-  onAccept,
-  onRevision,
   onContinue,
   practice = false,
 }: {
   minigame: GadgetMinigameState;
   quality: number;
-  accepted: boolean;
-  revisionCost: number;
-  canRevise: boolean;
-  canAffordRevision: boolean;
   onComplete: (score: number) => void;
-  onAccept: () => void;
-  onRevision: () => void;
   onContinue: () => void;
   /** Free play on a mastered rarity: nothing is saved. */
   practice?: boolean;
@@ -393,30 +380,14 @@ export function GadgetRhythmGame({
           </p>
           {quality === 0 ? (
             <p className="gadget-result-warning">
-              Il prodotto può essere accettato, ma non venderà finché la qualità resta allo 0%.
+              Il prodotto è in vendita, ma non venderà finché la qualità resta allo 0%.
             </p>
           ) : null}
           <div className="gadget-result-actions">
-            {accepted ? (
-              <button type="button" className="primary" onClick={onContinue}>
-                Continua
-              </button>
-            ) : (
-              <>
-                <button type="button" className="primary" onClick={onAccept}>
-                  Metti in vendita
-                </button>
-                {canRevise ? (
-                  <button type="button" onClick={onRevision} disabled={!canAffordRevision}>
-                    Revisiona · {formatCurrency(revisionCost)}
-                  </button>
-                ) : null}
-              </>
-            )}
+            <button type="button" className="primary" onClick={onContinue}>
+              Continua
+            </button>
           </div>
-          {!accepted && canRevise && !canAffordRevision ? (
-            <small>Fondi insufficienti per una revisione.</small>
-          ) : null}
         </section>
       </div>
     );

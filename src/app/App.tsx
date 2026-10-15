@@ -695,16 +695,6 @@ export function App() {
     },
     [dispatch],
   );
-  const acceptGadgetProduct = useCallback(
-    (productId: GadgetProductId) => {
-      setView("gadget");
-      dispatch({
-        type: "ACCEPT_GADGET_PRODUCT",
-        productId,
-      });
-    },
-    [dispatch],
-  );
 
   if (!state.profile.displayName.trim()) {
     return <ProfileNameDialog onSubmit={updateProfileName} />;
@@ -842,7 +832,6 @@ export function App() {
               onSkipMinigame={skipGadgetMinigame}
               onCompleteMinigame={completeGadgetMinigame}
               onDismissMinigameResult={dismissGadgetMinigameResult}
-              onAccept={acceptGadgetProduct}
               onPracticeRunningChange={setPracticePaused}
             />
           ) : activeView === "ludowiki" ? (

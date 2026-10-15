@@ -293,7 +293,8 @@ function applyGadgetCollaudo(
     minigame.opportunityRarity !== undefined &&
     minigame.opportunityRarity === getNextGadgetRarity(rarity) &&
     !product.rarities[minigame.opportunityRarity].unlocked &&
-    (skipped || score > GADGET_RARITY_UNLOCK_SCORE_THRESHOLD)
+    // 50 is enough when played too, like «Salta» (Andrea, 15/10/2026).
+    (skipped || score >= GADGET_RARITY_UNLOCK_SCORE_THRESHOLD)
     ? minigame.opportunityRarity
     : undefined;
   const rarities = unlockedRarity
@@ -317,9 +318,11 @@ function applyGadgetCollaudo(
   return {
     products: {
       ...state.gadgets.products,
+      // A finished collaudo puts the product on sale at once (Andrea, 15/10/2026: no «Metti in vendita»).
       [productId]: {
         ...product,
         prototypeCompleted: true,
+        accepted: true,
         rarities,
       },
     },
@@ -364,35 +367,6 @@ export function dismissGadgetMinigameResult(
   };
 }
 
-export function acceptGadgetProduct(
-  state: GameState,
-  productId: GadgetProductId,
-): GameState {
-  const product = state.gadgets.products[productId];
-  const minigame = state.gadgets.minigame;
-  if (
-    !state.unlocks.gadget ||
-    !product?.unlocked ||
-    !product?.projectPurchased ||
-    !product.prototypeCompleted ||
-    product.accepted ||
-    getGadgetWorkFor(state.gadgets, productId) ||
-    isGadgetMinigameQueued(state.gadgets, productId) ||
-    (minigame?.productId === productId && minigame.status !== "result")
-  ) return state;
-  return {
-    ...state,
-    gadgets: promoteNextMinigame({
-      ...state.gadgets,
-      minigame: minigame?.productId === productId ? undefined : minigame,
-      products: {
-        ...state.gadgets.products,
-        [productId]: { ...product, accepted: true },
-      },
-    }),
-  };
-}
-
 /** Every bench works at the full speed of the laboratory (Multitasking). */
 function processGadgetWork(state: GameState, elapsedMs: number): GameState {
   if (state.gadgets.activeWorks.length === 0 || elapsedMs <= 0) return state;
@@ -429,7 +403,7 @@ function finishGadgetWork(state: GameState, work: GadgetWorkState): GameState {
   };
   // The collaudo is played at the opportunity's rarity when there is one (as in the UI).
   if (isGadgetRarityMastered(state, work.productId, work.opportunityRarity ?? work.rarity)) {
-    // Maestria: 100 without playing and no result window; the card offers «Metti in vendita».
+    // Maestria: 100 without playing and no result window; the product goes on sale at once.
     const { products } = applyGadgetCollaudo(state, minigame, 100);
     return { ...state, randomSeed, gadgets: { ...state.gadgets, products } };
   }

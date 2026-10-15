@@ -8,8 +8,8 @@ import {
 import { createInitialCollaboratorMastery } from "../content/mastery";
 import { GAME_CONFIG } from "./config";
 import {
-  acceptGadgetProduct,
   completeGadgetMinigame,
+  dismissGadgetMinigameResult,
   processGadgets,
   startGadgetMinigame,
   startGadgetProject,
@@ -598,14 +598,13 @@ describe("Gadget flow", () => {
     });
   });
 
-  it("allows accepting a zero-quality prototype without making it sell", () => {
+  it("puts every finished prototype on sale at once, even at zero quality (15/10/2026)", () => {
     const ready = completeCurrentWork(startGadgetProject(unlockedState(), "wristband"));
-    const result = completeGadgetMinigame(
+    const accepted = completeGadgetMinigame(
       startGadgetMinigame(ready, "wristband"),
       "wristband",
       0,
     );
-    const accepted = acceptGadgetProduct(result, "wristband");
 
     expect(accepted.gadgets.products.wristband.accepted).toBe(true);
     expect(commonRarity(accepted, "wristband").quality).toBe(0);
@@ -747,7 +746,7 @@ describe("Gadget flow", () => {
     });
   });
 
-  it("does not unlock the offered rarity at exactly 50%", () => {
+  it("unlocks the offered rarity at exactly 50%, like «Salta» (15/10/2026), not below", () => {
     const initial = unlockedState();
     const ready: GameState = {
       ...initial,
@@ -770,13 +769,23 @@ describe("Gadget flow", () => {
         "wristband",
       ),
       "wristband",
-      50,
+      49,
     );
 
     expect(result.gadgets.minigame?.opportunityRarity).toBe("rare");
     expect(result.gadgets.minigame?.unlockedRarity).toBeUndefined();
     expect(result.gadgets.products.wristband.rarities.rare.unlocked).toBe(false);
     expect(commonRarity(result, "wristband").quality).toBe(75);
+
+    const fifty = completeGadgetMinigame(
+      startGadgetMinigame(
+        completeCurrentWork(startGadgetRevision(ready, "wristband")),
+        "wristband",
+      ),
+      "wristband",
+      50,
+    );
+    expect(fifty.gadgets.products.wristband.rarities.rare.unlocked).toBe(true);
   });
 
   it("shares sales capacity across rarity variants and applies their value multiplier", () => {
@@ -898,7 +907,8 @@ describe("Multitasking", () => {
     expect(done.gadgets.minigameQueue?.map((queued) => queued.productId)).toEqual(["keychain", "mug"]);
 
     const played = completeGadgetMinigame(startGadgetMinigame(done, "wristband"), "wristband", 80);
-    const accepted = acceptGadgetProduct(played, "wristband");
+    expect(played.gadgets.products.wristband.accepted).toBe(true);
+    const accepted = dismissGadgetMinigameResult(played, "wristband");
     expect(accepted.gadgets.minigame?.productId).toBe("keychain");
     expect(accepted.gadgets.minigameQueue?.map((queued) => queued.productId)).toEqual(["mug"]);
   });

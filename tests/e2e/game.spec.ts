@@ -163,7 +163,8 @@ test("completa il collaudo Gadget con controlli touch accessibili", async ({ pag
 
   await minigame.getByRole("button", { name: "Abbandona il tentativo" }).click();
   await expect(page.getByText("La qualità massima resta al 0%.")).toBeVisible();
-  await page.getByRole("button", { name: "Metti in vendita" }).click();
+  // 15/10/2026: the collaudo puts the product on sale at once; the result only closes.
+  await page.getByRole("button", { name: "Continua" }).click();
 
   await expect(page.getByText("Non vendibile")).toBeVisible();
   await expect(page.getByText("Venduti")).toBeVisible();

@@ -939,7 +939,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "A.N.D.E.R.",
         title: "Dal progetto alle borse di studio",
         body: [
-          "Acquista un progetto, attendi lo sviluppo e affronta il collaudo. Quando accetti il risultato, il prodotto entra in vendita automatica.",
+          "Acquista un progetto, attendi lo sviluppo e affronta il collaudo. Finito il collaudo, il prodotto entra subito in vendita.",
           "Una qualità più alta aumenta la possibilità di vendita ed anche il guadagno per unità venduta.",
           "Migliorare la qualità dei prodotti potrebbe anche sbloccare nuove rarità!",
         ],

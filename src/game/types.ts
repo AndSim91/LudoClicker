@@ -1384,7 +1384,6 @@ export type GameAction =
   | { type: "SKIP_GADGET_MINIGAME"; productId: GadgetProductId }
   | { type: "COMPLETE_GADGET_MINIGAME"; productId: GadgetProductId; score: number }
   | { type: "DISMISS_GADGET_MINIGAME_RESULT"; productId: GadgetProductId }
-  | { type: "ACCEPT_GADGET_PRODUCT"; productId: GadgetProductId }
   | { type: "MARK_MESSAGE_READ"; messageId: string }
   | { type: "MARK_ALL_MESSAGES_READ" }
   | { type: "FINISH_TUTORIAL_SCENE"; sceneId: string; skipped: boolean }

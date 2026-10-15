@@ -39,7 +39,6 @@ import { startChroniclesTournament } from "./tournamentFlow";
 import { buyAllAffordableUpgrades, buyUpgrade, setGameSpeed } from "./upgradeFlow";
 import { finishTutorialScene } from "./tutorialProgress";
 import {
-  acceptGadgetProduct,
   completeGadgetMinigame,
   dismissGadgetMinigameResult,
   startGadgetMinigame,
@@ -177,10 +176,6 @@ export function createGameActionHandlers(
     ),
     DISMISS_GADGET_MINIGAME_RESULT: (state, action) =>
       dismissGadgetMinigameResult(state, action.productId),
-    ACCEPT_GADGET_PRODUCT: (state, action) => acceptGadgetProduct(
-      state,
-      action.productId,
-    ),
     MARK_MESSAGE_READ: (state, action) => markMessageRead(state, action.messageId),
     MARK_ALL_MESSAGES_READ: (state) => markAllMessagesRead(state),
     DISMISS_MOMENT: (state) => dismissMoment(state),

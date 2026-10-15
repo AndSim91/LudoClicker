@@ -274,7 +274,6 @@ function openEGadget(state: GameState, now: number): GameState {
     for (const [productId, product] of Object.entries(next.gadgets.products) as [GadgetProductId, typeof next.gadgets.products[GadgetProductId]][]) {
       if (!product.unlocked) continue;
       if (!product.projectPurchased) next = act(next, { type: "START_GADGET_PROJECT", productId, now });
-      else if (product.prototypeCompleted && !product.accepted) next = act(next, { type: "ACCEPT_GADGET_PRODUCT", productId });
     }
   }
   return next;

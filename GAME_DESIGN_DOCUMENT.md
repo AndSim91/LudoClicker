@@ -4618,9 +4618,10 @@ scheda e cambio di orientamento mettono in pausa anche il minigioco. Il seed e
 il tentativo pendente sono salvati, così un reload non genera una nuova
 sequenza. Abbandonare assegna 0 al tentativo, senza rimborso e senza ridurre la
 qualità massima già ottenuta; l'eventuale occasione di rarità viene consumata.
-Il primo risultato permette di accettare il
-prodotto o revisionarlo; un prodotto accettato resta in vendita per sempre. È
-possibile accettare qualità 0%, ma il prodotto non vende finché non migliora.
+Finito il collaudo, il prodotto entra subito in vendita e ci resta per sempre
+(decisione del 15/10/2026: non serve più «Metti in vendita»); la qualità si
+migliora poi con le revisioni. Anche con qualità 0% è in vendita, ma non vende
+finché non migliora.
 
 All'avvio pagato di ogni revisione viene effettuata e salvata un'estrazione
 casuale nascosta usando soltanto vendite e qualità già accumulate dalla rarità
@@ -4641,10 +4642,10 @@ mostra la percentuale esatta e la rarità di destinazione.
 Se l'estrazione riesce, la prova usa lo sfondo della rarità raggiungibile e
 mostra l'etichetta testuale `Occasione: <rarità>`, senza mostrare la
 percentuale. In assenza di occasione lo sfondo usa la rarità attuale. Un
-risultato strettamente superiore al 50% sblocca la nuova variante: la rarità
+risultato di almeno il 50% (come «Salta», decisione del 15/10/2026) sblocca la nuova variante: la rarità
 precedente sale automaticamente al 100%, mentre quella nuova nasce con la
 qualità appena ottenuta ed entra subito in vendita se la famiglia è già in
-catalogo. Con 50% o meno la nuova rarità non viene sbloccata e un'altra
+catalogo. Sotto il 50% la nuova rarità non viene sbloccata e un'altra
 revisione effettua una nuova estrazione.
 
 Il Leggendario Segreto applica la stessa estrazione soltanto dopo il
@@ -4674,7 +4675,7 @@ carriera» in 19.1).
 
 Con la Maestria la prova si salta: sviluppo e revisione si pagano e si
 aspettano come sempre, poi il risultato è 100 senza giocare e senza finestra
-di esito: un prototipo nuovo resta sulla scheda con «Metti in vendita». La prova da saltare è quella della rarità su cui si
+di esito: un prototipo nuovo entra subito in vendita. La prova da saltare è quella della rarità su cui si
 gioca: l'occasione se c'è, altrimenti la rarità attuale. Se la rarità attuale
 ha la Maestria e quella dell'occasione no, si gioca la prova della nuova
 rarità. Nella riga della rarità la barra della qualità diventa il timbro

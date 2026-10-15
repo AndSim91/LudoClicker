@@ -28,7 +28,6 @@ const handlers = () => ({
   onSkipMinigame: vi.fn(),
   onCompleteMinigame: vi.fn(),
   onDismissMinigameResult: vi.fn(),
-  onAccept: vi.fn(),
 });
 
 function unlockedState(): GameState {

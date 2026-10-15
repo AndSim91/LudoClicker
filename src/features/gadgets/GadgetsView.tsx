@@ -126,7 +126,6 @@ const GadgetProductCard = memo(function GadgetProductCard({
   onStartRevision,
   onStartMinigame,
   onSkipMinigame,
-  onAccept,
   mastery,
   onPractice,
 }: {
@@ -149,7 +148,6 @@ const GadgetProductCard = memo(function GadgetProductCard({
   onStartRevision: (productId: GadgetProductId) => void;
   onStartMinigame: (productId: GadgetProductId) => void;
   onSkipMinigame: (productId: GadgetProductId) => void;
-  onAccept: (productId: GadgetProductId) => void;
 }) {
   const definition = GADGET_DEFINITIONS[productId];
   const highestRarity = getHighestUnlockedGadgetRarity(product);
@@ -281,22 +279,7 @@ const GadgetProductCard = memo(function GadgetProductCard({
               Salta · 50%
             </button>
           </>
-        ) : work || minigame || queued ? null : !product.prototypeCompleted ? null : !product.accepted ? (
-          <>
-            <button type="button" className="primary" onClick={() => onAccept(productId)}>
-              Metti in vendita
-            </button>
-            {canImproveQuality ? (
-              <button
-                type="button"
-                disabled={slotBusy || !canAffordRevision}
-                onClick={() => onStartRevision(productId)}
-              >
-                Revisiona · {formatCurrency(revisionCost)}
-              </button>
-            ) : null}
-          </>
-        ) : canImproveQuality ? (
+        ) : work || minigame || queued ? null : !product.prototypeCompleted ? null : canImproveQuality ? (
           <button
             type="button"
             disabled={slotBusy || !canAffordRevision}
@@ -349,7 +332,6 @@ export function GadgetsView({
   onSkipMinigame,
   onCompleteMinigame,
   onDismissMinigameResult,
-  onAccept,
   onPracticeRunningChange,
 }: {
   state?: GameState;
@@ -359,7 +341,6 @@ export function GadgetsView({
   onSkipMinigame: (productId: GadgetProductId) => void;
   onCompleteMinigame: (productId: GadgetProductId, score: number) => void;
   onDismissMinigameResult: (productId: GadgetProductId) => void;
-  onAccept: (productId: GadgetProductId) => void;
   /** Free practice pauses the game while it runs, like the real minigame. */
   onPracticeRunningChange?: (running: boolean) => void;
 }) {
@@ -394,15 +375,6 @@ export function GadgetsView({
     : "common";
   const minigameQuality = minigameProduct
     ? minigameProduct.rarities[minigameHighestRarity].quality
-    : 0;
-  const minigameCanRevise = Boolean(
-    minigame && minigameProduct && (
-      minigameQuality < 100 ||
-      canRollNextGadgetRarity(state, minigame.productId, minigameHighestRarity)
-    ),
-  );
-  const minigameRevisionCost = minigame
-    ? getGadgetRevisionCost(minigame.productId, minigameHighestRarity)
     : 0;
 
   return (
@@ -518,7 +490,6 @@ export function GadgetsView({
               onStartRevision={onStartRevision}
               onStartMinigame={onStartMinigame}
               onSkipMinigame={onSkipMinigame}
-              onAccept={onAccept}
               mastery={state.network.gadgetMastery?.[productId]}
               onPractice={startPractice}
             />
@@ -531,13 +502,7 @@ export function GadgetsView({
           key={`${minigame.productId}-${minigame.seed}`}
           minigame={minigame}
           quality={minigameQuality}
-          accepted={minigameProduct.accepted}
-          revisionCost={minigameRevisionCost}
-          canRevise={minigameCanRevise}
-          canAffordRevision={state.school.euros >= minigameRevisionCost}
           onComplete={(score) => onCompleteMinigame(minigame.productId, score)}
-          onAccept={() => onAccept(minigame.productId)}
-          onRevision={() => onStartRevision(minigame.productId)}
           onContinue={() => onDismissMinigameResult(minigame.productId)}
         />
       ) : practice ? (
@@ -554,13 +519,7 @@ export function GadgetsView({
             score: practice.score,
           }}
           quality={100}
-          accepted
-          revisionCost={0}
-          canRevise={false}
-          canAffordRevision={false}
           onComplete={(score) => setPractice((current) => current && { ...current, score })}
-          onAccept={() => setPractice(undefined)}
-          onRevision={() => setPractice(undefined)}
           onContinue={() => setPractice(undefined)}
         />
       ) : null}

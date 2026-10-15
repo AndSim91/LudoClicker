@@ -484,7 +484,7 @@ export const LUDOWIKI_CHAPTERS: readonly LudoWikiChapter[] = [
     ],
     numbers: [
       { label: "Sblocco", value: "1ª vittoria al Nazionale", detail: "apre il Laboratorio" },
-      { label: "Qualità minima utile", value: "> 50%", detail: "può sbloccare una nuova rarità" },
+      { label: "Qualità minima utile", value: "50%", detail: "può sbloccare una nuova rarità" },
       { label: "Guadagno massimo squadra", value: `€ ${GAME_CONFIG.reptileMaximumGadgetGrossPerTeam.toLocaleString("it-IT")}`, detail: "limite per squadra nel Reptile" },
     ],
     rules: [
