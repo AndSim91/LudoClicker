@@ -45,6 +45,8 @@ export const GAME_CONFIG = {
   technicianTeacherExamBonus: 0.15,
   /** Corso di aggiornamento: share of a normal Corso Istruttori with a Tecnico. */
   refresherCourseDurationShare: 0.5,
+  /** e-Learning Corso Istruttori: 200% of the Form instead of 300% (15/10/2026). */
+  eLearningInstructorDurationShare: 2 / 3,
   refresherCourseCostShare: 0.25,
   instructorTrainingWhileTeachingDurationMultiplier: 3,
   sendDelayMs: 350,

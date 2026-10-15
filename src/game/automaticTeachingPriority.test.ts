@@ -11,7 +11,7 @@ const BASE_PRIORITY: AutomaticTeachingStudentPriority = {
   departureRisk: 0,
   rarityPriority: 0,
   formPriority: 0,
-  isCollaborator: false,
+  collaboratorPriority: 0,
   acquiredAt: 1_000,
   originalOrder: 0,
 };
@@ -50,13 +50,23 @@ describe("automatic teaching student priority", () => {
         ...BASE_PRIORITY,
         departureRisk: 1,
         rarityPriority: 4,
-        isCollaborator: true,
+        collaboratorPriority: 1,
       },
     },
     {
       name: "collaborator before departure risk",
-      preferred: { ...BASE_PRIORITY, isCollaborator: true },
+      preferred: { ...BASE_PRIORITY, collaboratorPriority: 1 },
       other: { ...BASE_PRIORITY, departureRisk: 0.8 },
+    },
+    {
+      name: "Istruttore before other collaborators",
+      preferred: { ...BASE_PRIORITY, collaboratorPriority: 2 },
+      other: { ...BASE_PRIORITY, collaboratorPriority: 1, departureRisk: 0.8 },
+    },
+    {
+      name: "Istruttore with a Tecnico for his next Form first",
+      preferred: { ...BASE_PRIORITY, collaboratorPriority: 3 },
+      other: { ...BASE_PRIORITY, collaboratorPriority: 2, rarityPriority: 4 },
     },
     {
       name: "departure risk before rarity",
@@ -70,12 +80,12 @@ describe("automatic teaching student priority", () => {
     },
     {
       name: "collaborator status before less advanced training",
-      preferred: { ...BASE_PRIORITY, formPriority: 1, isCollaborator: true },
+      preferred: { ...BASE_PRIORITY, formPriority: 1, collaboratorPriority: 1 },
       other: { ...BASE_PRIORITY, formPriority: 0 },
     },
     {
       name: "collaborator before enrollment age",
-      preferred: { ...BASE_PRIORITY, isCollaborator: true, acquiredAt: 2_000 },
+      preferred: { ...BASE_PRIORITY, collaboratorPriority: 1, acquiredAt: 2_000 },
       other: { ...BASE_PRIORITY, acquiredAt: 1_000 },
     },
     {

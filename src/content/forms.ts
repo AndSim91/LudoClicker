@@ -151,8 +151,10 @@ export function getTechnicianCourseCost(cost: number): number {
   return Math.round(cost * 10 * 100) / 100;
 }
 
+// 15/10/2026: Corso Istruttori 300% (e-Learning 200%, `eLearningInstructorDurationShare`),
+// «Impara e abilita» 100% + 300%, Corso Tecnici SIS 500% of the Form.
 export function getInstructorQualificationDuration(durationMs: number): number {
-  return Math.round(durationMs * 0.75);
+  return Math.round(durationMs * 3);
 }
 
 export function getInstructorFormDuration(durationMs: number): number {
@@ -160,7 +162,7 @@ export function getInstructorFormDuration(durationMs: number): number {
 }
 
 export function getTechnicianCourseDuration(durationMs: number): number {
-  return Math.round(durationMs * 10);
+  return Math.round(durationMs * 5);
 }
 
 export function getStudentFormCost(cost: number): number {

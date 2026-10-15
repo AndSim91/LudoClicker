@@ -95,9 +95,9 @@ describe("Tecnici e Corsi Istruttori interni", () => {
     expect(getInstructorFormCost(100)).toBe(350);
     expect(getInternalInstructorQualificationCost(100)).toBe(187.5);
     expect(getTechnicianCourseCost(100)).toBe(1_000);
-    expect(getInstructorQualificationDuration(20_000)).toBe(15_000);
-    expect(getInstructorFormDuration(20_000)).toBe(35_000);
-    expect(getTechnicianCourseDuration(20_000)).toBe(200_000);
+    expect(getInstructorQualificationDuration(20_000)).toBe(60_000);
+    expect(getInstructorFormDuration(20_000)).toBe(80_000);
+    expect(getTechnicianCourseDuration(20_000)).toBe(100_000);
   });
 
   it("charges a SIS booking immediately and starts it in the next July", () => {
@@ -616,7 +616,7 @@ describe("Tecnici e Corsi Istruttori interni", () => {
     )).toBe(1);
   });
 
-  it("updates e-Learning Istruttori only after those who do not teach the Form yet", () => {
+  it("updates e-Learning Istruttori before those who do not teach the Form yet", () => {
     const initial = createInitialState(1_000, "", false);
     const technician = instructor(initial, "refresh-technician", 1_000, ["form-1"], ["form-1"], ["form-1"]);
     const eLearner: Collaborator = {
@@ -631,10 +631,10 @@ describe("Tecnici e Corsi Istruttori interni", () => {
       collaborators: [technician, eLearner, newcomer],
     };
 
+    // 15/10/2026: the Corso di aggiornamento comes first.
     const first = processAutomaticInstructorQualifications(ready, 4_000);
-    expect(first.collaborators[1].instructorCourse).toBeUndefined();
-    expect(first.collaborators[2].instructorCourse).toMatchObject({ technicianId: technician.id });
-    expect(first.collaborators[2].instructorCourse?.refresher).toBeUndefined();
+    expect(first.collaborators[1].instructorCourse).toMatchObject({ technicianId: technician.id, refresher: true });
+    expect(first.collaborators[2].instructorCourse).toBeUndefined();
 
     const alone = { ...ready, collaborators: [technician, eLearner] };
     const refreshed = processAutomaticInstructorQualifications(alone, 4_000);
@@ -648,7 +648,11 @@ describe("Tecnici e Corsi Istruttori interni", () => {
     expect(refreshed.school.euros).toBeCloseTo(
       1_000 - getInternalInstructorQualificationCost(50) * 0.25,
     );
-    const normalDuration = (first.collaborators[2].instructorCourse?.completesAt ?? 0) - 4_000;
+    const normal = processAutomaticInstructorQualifications(
+      { ...ready, collaborators: [technician, newcomer] },
+      4_000,
+    );
+    const normalDuration = (normal.collaborators[1].instructorCourse?.completesAt ?? 0) - 4_000;
     expect((training?.completesAt ?? 0) - 4_000).toBeCloseTo(normalDuration / 2, -1);
   });
 

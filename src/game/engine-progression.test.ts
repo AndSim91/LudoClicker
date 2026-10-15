@@ -699,7 +699,7 @@ describe("game engine: progression", () => {
       formId: "form-1",
       trainingTrack: "instructor",
       trainingPhase: "instructor",
-      trainingBaseDurationMs: 10_000,
+      trainingBaseDurationMs: 40_000,
     });
   });
 

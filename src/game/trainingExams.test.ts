@@ -283,7 +283,8 @@ describe("esami di formazione nascosti", () => {
 
     it("delays a failed e-Learning qualification by 25%", () => {
       const failed = resolve({ ...timed, eLearning: true }, {}, seedWith((roll) => roll < 0.5));
-      expect(failed.training?.completesAt).toBe(4_500);
+      // 25% of an e-Learning course, which lasts 2/3 of a normal one (15/10/2026).
+      expect(failed.training?.completesAt).toBe(3_667);
     });
 
     it("marks the Form after e-Learning and clears it with a refresher or the Corso Tecnici", () => {

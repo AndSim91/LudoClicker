@@ -1786,12 +1786,14 @@ Regole:
   assegnano un `instructorId` umano;
 - un Istruttore può insegnare soltanto le Forme già completate e qualificate;
   ogni Forma, inclusi Corso X e Corso Y, richiede la relativa qualifica;
-- chi conosce già una Forma completa un Corso Istruttori pari al **75% della
-  durata base della Forma** e paga il **250% del costo base**; il Corso
+- chi conosce già una Forma completa un Corso Istruttori pari al **300% della
+  durata base della Forma** (**200%** se avviato dall'e-Learning; Andrea,
+  15/10/2026: il Corso Istruttori si fa tutto l'anno, il Corso Tecnici solo
+  d'estate) e paga il **250% del costo base**; il Corso
   Istruttori non consuma slot annuali;
 - chi non conosce ancora la Forma segue un percorso combinato composto dalla
-  Forma da atleta e dal modulo da Istruttore: dura complessivamente il **175%**
-  della Forma (100% + 75%), paga subito il **350% del costo base** e consuma un
+  Forma da atleta e dal modulo da Istruttore: dura complessivamente il **400%**
+  della Forma (100% + 300%; 300% con l'e-Learning), paga subito il **350% del costo base** e consuma un
   solo slot annuale;
 - in entrambi i casi la durata viene divisa per la produttività da Istruttore
   del collaboratore stesso;
@@ -1894,7 +1896,9 @@ Regole:
 - i costi di Arena Tecnica e Corso Agonisti sono importi diretti per atleta e
   non ricevono la riduzione applicata alle Forme insegnate;
 - l'automazione ordina gli allievi privilegiando, nell'ordine: gli atleti
-  preferiti, i collaboratori, il rischio di abbandono annuale più alto, la
+  preferiti, i collaboratori (dal 15/10/2026 prima gli Istruttori assegnati la
+  cui prossima Forma ha un Tecnico nella scuola, poi gli altri Istruttori
+  assegnati, poi gli altri collaboratori), il rischio di abbandono annuale più alto, la
   rarità (**Leggendario Segreto → Leggendario → Ultra Raro → Raro → Comune**),
   la prossima formazione meno avanzata e infine gli iscritti con `acquiredAt`
   meno recente. A parità completa conserva l'ordine originale. Il rischio usato
@@ -2030,7 +2034,7 @@ Regole:
 - lo stesso Collaboratore può ottenere più qualifiche da Tecnico;
 - il Corso Tecnico è esterno, si svolge alla **SIS — Scuola Internazionale
   Superiore** ed è tenuto dai Maestri Fondatori di LudoSport;
-- il corso costa il **1000% del costo base** e ha una durata base pari al **1000%
+- il corso costa il **1000% del costo base** e ha una durata base pari al **500%
   della durata della Forma**;
 - la prenotazione è disponibile tutto l'anno e viene pagata subito. In luglio o
   agosto il corso parte immediatamente; negli altri mesi viene programmato per
@@ -2045,8 +2049,8 @@ Regole:
   cioè il **187,5% del costo base**, e mantiene durata ed esame del modulo da
   Istruttore;
 - **corso di aggiornamento**: con la stessa automazione un Tecnico aggiorna gli
-  Istruttori abilitati con l'e-Learning nella sua Forma, dopo aver formato chi
-  non la insegna ancora. Dura il **50%** e costa il **25%** del Corso
+  Istruttori abilitati con l'e-Learning nella sua Forma, **prima** di formare chi
+  la sa solo da atleta (Andrea, 15/10/2026). Dura il **50%** e costa il **25%** del Corso
   Istruttori interno, ha l'esame normale da Istruttore e al termine l'Istruttore
   è normale a tutti gli effetti. Anche diventare Tecnico della Forma toglie il
   malus dell'e-Learning;

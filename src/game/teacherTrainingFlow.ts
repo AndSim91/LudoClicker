@@ -93,8 +93,14 @@ export function getTrainingDurationMultiplier(
       getSISTechnicianCourseSpeedBonus(state.upgrades);
   }
 
+  // e-Learning Istruttore phase: 200% instead of 300%. The flag lands right after the
+  // start, so the next tick's refresh rescales the course (15/10/2026).
+  const eLearningShare = training.eLearning && !training.refresher &&
+    getTrainingPhase(training) === "instructor"
+    ? GAME_CONFIG.eLearningInstructorDurationShare
+    : 1;
   // Corsi in parallelo (13/10/2026): the share of capacity left for this course.
-  return 1 / (Math.max(1, speed) * getTrainingRate(state, personId, training));
+  return eLearningShare / (Math.max(1, speed) * getTrainingRate(state, personId, training));
 }
 
 export function scheduleTraining(
@@ -420,8 +426,8 @@ function processInstructorQualifications(
     ) return [];
     const eLearningForms = collaborator.eLearningInstructorForms ?? [];
     return collaborator.forms.flatMap((formId) => {
-      // An e-Learning Istruttore gets the Corso di aggiornamento, after everyone
-      // who does not teach the Form yet.
+      // 15/10/2026: the Corso di aggiornamento of e-Learning Istruttori comes first,
+      // then the Corso Istruttori for whoever knows the Form only as an athlete.
       // Corso X: the Tecnico teaches Forma 1 and Forma 2 together, to whoever
       // knows both and still misses one of the two titles.
       const courseX = formId === "course-x";
@@ -452,7 +458,7 @@ function processInstructorQualifications(
     ...candidate,
     demand: demandByForm.get(candidate.formId) ?? 0,
   })).sort((left, right) =>
-    Number(left.refresher) - Number(right.refresher) ||
+    Number(right.refresher) - Number(left.refresher) ||
     // Two titles in one course beat Forma 1 or Forma 2 alone.
     Number(right.formId === "course-x") - Number(left.formId === "course-x") ||
     left.rank - right.rank ||

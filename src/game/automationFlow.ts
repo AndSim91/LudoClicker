@@ -894,6 +894,10 @@ export function processAutomaticTeaching(
   const originalIndex = (id: string) =>
     (originalOrder ??= new Map(students.map((student, index) => [student.id, index]))).get(id)!;
   const departureRiskReduction = getDepartureRiskReduction(state.upgrades);
+  // Forms with a Tecnico able to hold a Corso Istruttori (assigned as Istruttore).
+  const technicianForms = new Set(state.collaborators.flatMap((collaborator) =>
+    collaborator.assignment === "instructor" ? collaborator.technicianForms ?? [] : []
+  ));
   // Priorities are computed only for the students a pass can act on (14/10/2026: in
   // big schools most of them can start nothing this step). The order is the same:
   // each pass sorts its own students with the same total order.
@@ -933,7 +937,11 @@ export function processAutomaticTeaching(
         ? student.favorite === true
         : favoriteContactIds.has(student.contactId)),
       rarityPriority,
-      isCollaborator: !("acquiredAt" in student),
+      collaboratorPriority: "acquiredAt" in student
+        ? 0
+        : student.assignment !== "instructor"
+          ? 1
+          : candidate && technicianForms.has(candidate as FormId) ? 3 : 2,
       formPriority: candidate
         ? automaticFormPriority.get(candidate) ?? Number.MAX_SAFE_INTEGER
         : Number.MAX_SAFE_INTEGER,

@@ -23,7 +23,12 @@ export interface AutomaticTeachingStudentPriority {
   departureRisk: number;
   rarityPriority: number;
   formPriority: number;
-  isCollaborator: boolean;
+  /**
+   * 0 iscritto, 1 collaboratore, 2 Istruttore assegnato, 3 Istruttore assegnato
+   * whose next Form has a Tecnico in the school (15/10/2026: after the Form he can
+   * get the instructor title from him).
+   */
+  collaboratorPriority: number;
   acquiredAt: number;
   originalOrder: number;
 }
@@ -42,9 +47,9 @@ export function compareAutomaticTeachingStudentPriority(
   left: AutomaticTeachingStudentPriority,
   right: AutomaticTeachingStudentPriority,
 ): number {
-  // 13/10/2026: collaborators before departure risk.
+  // 13/10/2026: collaborators before departure risk; 15/10/2026: Istruttori first among them.
   return Number(right.isFavorite) - Number(left.isFavorite) ||
-    Number(right.isCollaborator) - Number(left.isCollaborator) ||
+    right.collaboratorPriority - left.collaboratorPriority ||
     right.departureRisk - left.departureRisk ||
     right.rarityPriority - left.rarityPriority ||
     left.formPriority - right.formPriority ||
