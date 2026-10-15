@@ -6,7 +6,7 @@ import { getBusinessMultiplier, getMonthlyNetworkRent } from "../../game/reputat
 import { getMonthlySocialIncome } from "../../game/social";
 import { useGameSelector } from "../../game/GameStateContext";
 import type { GameState } from "../../game/types";
-import { formatCurrency } from "../../shared/formatters";
+import { formatCurrency, formatWholeCurrency } from "../../shared/formatters";
 import { formatCompactCurrency } from "./resourceFormatting";
 
 interface MonthlyIncomePresentation {
@@ -81,40 +81,40 @@ export function MonthlyIncomeSummary({ state: stateOverride }: { state?: GameSta
         <dl>
           <div>
             <dt>Quote iscritti</dt>
-            <dd>{formatCurrency(memberFees)}</dd>
+            <dd>{formatWholeCurrency(memberFees)}</dd>
           </div>
           <div>
             <dt>Bonus Social</dt>
-            <dd>{formatCurrency(socialIncome)}</dd>
+            <dd>{formatWholeCurrency(socialIncome)}</dd>
           </div>
           {gadgetUnlocked ? (
             <div>
               <dt>Vendite Gadget (stima)</dt>
-              <dd>{formatCurrency(gadgetIncome)}</dd>
+              <dd>{formatWholeCurrency(gadgetIncome)}</dd>
             </div>
           ) : null}
           {networkRent > 0 ? (
             <div>
               <dt>Network delle Onde</dt>
-              <dd>{formatCurrency(networkRent)}</dd>
+              <dd>{formatWholeCurrency(networkRent)}</dd>
             </div>
           ) : null}
           {sponsors > 0 ? (
             <div>
               <dt>Sponsor della fascia LED</dt>
-              <dd>{formatCurrency(sponsors)}</dd>
+              <dd>{formatWholeCurrency(sponsors)}</dd>
             </div>
           ) : null}
           {networkSponsor > 0 ? (
             <div>
               <dt>Sponsor nazionale</dt>
-              <dd>{formatCurrency(networkSponsor)}</dd>
+              <dd>{formatWholeCurrency(networkSponsor)}</dd>
             </div>
           ) : null}
           {depositInterest > 0 ? (
             <div>
               <dt>Conto deposito</dt>
-              <dd>{formatCurrency(depositInterest)}</dd>
+              <dd>{formatWholeCurrency(depositInterest)}</dd>
             </div>
           ) : null}
         </dl>

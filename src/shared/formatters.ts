@@ -43,6 +43,11 @@ const wholeCurrencyFormatter = new Intl.NumberFormat("it-IT", {
 const statFormatter = new Intl.NumberFormat("it-IT", { maximumFractionDigits: 0, useGrouping: true });
 const voteFormatter = new Intl.NumberFormat("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+/** Euro without cents, for monthly earnings (Dettaglio mensile, Social; 15/10/2026). */
+export function formatWholeCurrency(value: number): string {
+  return wholeCurrencyFormatter.format(value);
+}
+
 /** Cents only below 10.000 €: above that they are noise (Fase 8). */
 export function formatCurrency(value: number): string {
   return (Math.abs(value) >= 10_000 ? wholeCurrencyFormatter : currencyFormatter).format(value);

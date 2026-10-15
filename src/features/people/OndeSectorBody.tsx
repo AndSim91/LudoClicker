@@ -3,7 +3,7 @@ import { formatCompactNumber } from "../../components/outlook-shell/resourceForm
 import { GADGET_DEFINITIONS, GADGET_PRODUCT_ORDER } from "../../content/gadgets";
 import { getMonthlySocialIncome, getSocialEventPromotionBonus } from "../../game/social";
 import type { CollaboratorMasteryRole, GameState } from "../../game/types";
-import { formatCurrency, formatPercent } from "../../shared/formatters";
+import { formatCurrency, formatPercent, formatWholeCurrency } from "../../shared/formatters";
 import type { CollaboratorAutomationPresentation } from "./collaboratorAutomationPresentation";
 import { SectorScene } from "./SectorScene";
 
@@ -108,7 +108,7 @@ export function OndeSectorBody({
           {state.unlocks.social ? (
             <>
               <span className="sector-scene-chip is-top-left">{formatCompactNumber(state.school.followers ?? 0)} follower</span>
-              <span className="sector-scene-chip is-top-right">{formatCurrency(getMonthlySocialIncome(state))}/mese</span>
+              <span className="sector-scene-chip is-top-right">{formatWholeCurrency(getMonthlySocialIncome(state))}/mese</span>
               <span className="sector-scene-chip is-top-right is-second is-teal">
                 +{formatPercent(getSocialEventPromotionBonus(state.school.followers ?? 0))} Eventi
               </span>

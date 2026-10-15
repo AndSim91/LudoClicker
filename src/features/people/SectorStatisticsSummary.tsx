@@ -10,7 +10,7 @@ import {
 } from "../../game/social";
 import { useGameStateSlices } from "../../game/GameStateContext";
 import type { Collaborator, CollaboratorMasteryRole, GameState } from "../../game/types";
-import { formatCurrency, formatPercent } from "../../shared/formatters";
+import { formatPercent, formatWholeCurrency } from "../../shared/formatters";
 import { getInstructorCoverageForms } from "./instructorGroupPresentation";
 
 export interface SectorStatistic {
@@ -52,7 +52,7 @@ function getSectorStatistics(
         },
         {
           label: "Sponsorizzazioni",
-          value: formatCurrency(getMonthlySocialIncome(state)),
+          value: formatWholeCurrency(getMonthlySocialIncome(state)),
           detail: "al mese",
         },
       ];

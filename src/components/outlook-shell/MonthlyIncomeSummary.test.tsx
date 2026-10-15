@@ -45,9 +45,11 @@ describe("MonthlyIncomeSummary", () => {
     const tooltip = screen.getByRole("tooltip");
     expect(income).toHaveAttribute("aria-describedby", tooltip.id);
     expect(tooltip).toHaveTextContent("Quote iscritti");
-    expect(tooltip).toHaveTextContent(/80,00\s*€/);
+    expect(tooltip).toHaveTextContent(/80\s*€/);
+    // Whole euros in the Dettaglio mensile (15/10/2026).
+    expect(tooltip).not.toHaveTextContent(",00");
     expect(tooltip).toHaveTextContent("Bonus Social");
-    expect(tooltip).toHaveTextContent(/20,00\s*€/);
+    expect(tooltip).toHaveTextContent(/20\s*€/);
     expect(tooltip).not.toHaveTextContent("Vendite Gadget (stima)");
   });
 
@@ -104,6 +106,6 @@ describe("MonthlyIncomeSummary", () => {
     const tooltip = screen.getByRole("tooltip");
     expect(tooltip).toHaveTextContent("Vendite Gadget (stima)");
     expect(hotState.gadgets.monthlyRevenue).toBeUndefined();
-    expect(tooltip).toHaveTextContent(/30,00\s*€/);
+    expect(tooltip).toHaveTextContent(/30\s*€/);
   });
 });
