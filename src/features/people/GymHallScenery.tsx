@@ -66,7 +66,10 @@ function Cheer({ x, y, k, small = false }: { x: number; y: number; k: number; sm
  */
 const LED_FROM = -440;
 const LED_WIDTH = 1520;
-const LED_UNIT = 15 / LED_ROWS;
+// 15/10: taller than the first 15 units, so the sponsors show above the front row.
+const LED_TOP = 119;
+const LED_HEIGHT = 24;
+const LED_UNIT = LED_HEIGHT / LED_ROWS;
 
 function LedBand() {
   const { href, cols } = ledStripImage();
@@ -76,21 +79,21 @@ function LedBand() {
     <g className="gym-led">
       <defs>
         <clipPath id="gym-led-clip">
-          <rect x={LED_FROM} y={128} width={LED_WIDTH} height={15} />
+          <rect x={LED_FROM} y={LED_TOP} width={LED_WIDTH} height={LED_HEIGHT} />
         </clipPath>
       </defs>
-      <rect x={LED_FROM} y={128} width={LED_WIDTH} height={15} className="gym-led-band" />
+      <rect x={LED_FROM} y={LED_TOP} width={LED_WIDTH} height={LED_HEIGHT} className="gym-led-band" />
       <g clipPath="url(#gym-led-clip)">
         <g
           className="gym-led-scroll"
           style={{ "--led-shift": `${-strip}px`, animationDuration: `${strip / (24 * LED_UNIT)}s` } as CSSProperties}
         >
           {range(copies).map((k) => (
-            <image key={k} href={href} x={LED_FROM + k * strip} y={128} width={strip} height={15} preserveAspectRatio="none" />
+            <image key={k} href={href} x={LED_FROM + k * strip} y={LED_TOP} width={strip} height={LED_HEIGHT} preserveAspectRatio="none" />
           ))}
         </g>
       </g>
-      <rect x={LED_FROM} y={128} width={LED_WIDTH} height={1.2} fill={TEAL} opacity={0.7} />
+      <rect x={LED_FROM} y={LED_TOP} width={LED_WIDTH} height={1.2} fill={TEAL} opacity={0.7} />
     </g>
   );
 }

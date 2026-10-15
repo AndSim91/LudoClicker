@@ -5,7 +5,8 @@ import { blit, disc, ledGrid, ledSvg, line, off, path, polygon, rect, ring, setL
  * Luce (L1: the eight-blade star, LAMA·DI·LUCE and the tricolour) and three invented
  * sponsors with their drawings (A1 «Ago illuminato», B2b «Mortaio basito», C2 «Spada
  * nella focaccia»). The band scrolls (concept C), so a sponsor's panel is as wide
- * as its name needs. Real sponsors carry no jokes; the invented ones do.
+ * as its name needs. Real sponsors carry no jokes; the invented ones do. The Order
+ * only fills the slots of sponsors not yet under contract.
  */
 
 export const LED_ROWS = 24;
@@ -112,32 +113,43 @@ function sponsor(art: LedGrid, lines: [string, string][]) {
   return g;
 }
 
-export function sponsorPanels() {
-  return [
-    sponsor(needle(), [["SARTORIA", C.thread], ["CRUNA DELL'AGO", C.white]]),
-    sponsor(mortar(), [["F4 BASITO", C.leaf], ["SOLO BASILICO GENOVESE", C.white]]),
-    sponsor(focaccia(), [["FOCACCERIA INQUARTATA", C.dough], ["DI STRUTTO", C.white]]),
-  ];
+export type LedSponsorId = "lama-di-luce" | "sartoria" | "basito" | "strutto";
+
+/** The band's slots, in order. A slot whose sponsor is not under contract shows the Order. */
+export const LED_SPONSORS: LedSponsorId[] = ["lama-di-luce", "sartoria", "basito", "strutto"];
+
+export function sponsorPanels(): Record<Exclude<LedSponsorId, "lama-di-luce">, LedGrid> {
+  return {
+    sartoria: sponsor(needle(), [["SARTORIA", C.thread], ["CRUNA DELL'AGO", C.white]]),
+    basito: sponsor(mortar(), [["F4 BASITO", C.leaf], ["SOLO BASILICO GENOVESE", C.white]]),
+    strutto: sponsor(focaccia(), [["FOCACCERIA INQUARTATA", C.dough], ["DI STRUTTO", C.white]]),
+  };
 }
 
-/** The strip that scrolls: Order, Lama di Luce and two sponsors, three times. */
-export function ledStrip() {
-  const [sartoria, basito, strutto] = sponsorPanels();
-  const order = ordine(), ldl = lamaDiLuce();
-  const panels = [order, ldl, sartoria, basito, order, ldl, strutto, sartoria, order, ldl, basito, strutto];
-  const g = ledGrid(panels.reduce((sum, p) => sum + p.w, 0), LED_ROWS);
+/** Dark LEDs between two panels, so each sponsor stands on its own. */
+const GAP = 28;
+
+/** The strip that scrolls: one panel per slot, each followed by a gap. */
+export function ledStrip(active: readonly LedSponsorId[] = LED_SPONSORS) {
+  const sponsors = { "lama-di-luce": lamaDiLuce(), ...sponsorPanels() };
+  const order = ordine();
+  const panels = LED_SPONSORS.map((id) => (active.includes(id) ? sponsors[id] : order));
+  const g = ledGrid(panels.reduce((sum, p) => sum + p.w + GAP, 0), LED_ROWS);
   let x = 0;
-  for (const p of panels) { blit(g, p, x); x += p.w; }
+  for (const p of panels) { blit(g, p, x); x += p.w + GAP; }
   return g;
 }
 
-let cached: { href: string; cols: number } | null = null;
+const cache = new Map<string, { href: string; cols: number }>();
 
-/** The strip as an image URL, built once. */
-export function ledStripImage() {
-  if (!cached) {
-    const g = ledStrip();
-    cached = { href: `data:image/svg+xml,${encodeURIComponent(ledSvg(g))}`, cols: g.w };
+/** The strip as an image URL, built once per set of sponsors. */
+export function ledStripImage(active: readonly LedSponsorId[] = LED_SPONSORS) {
+  const key = LED_SPONSORS.filter((id) => active.includes(id)).join();
+  let image = cache.get(key);
+  if (!image) {
+    const g = ledStrip(active);
+    image = { href: `data:image/svg+xml,${encodeURIComponent(ledSvg(g))}`, cols: g.w };
+    cache.set(key, image);
   }
-  return cached;
+  return image;
 }

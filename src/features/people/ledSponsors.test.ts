@@ -12,10 +12,13 @@ describe("LED band", () => {
     expect(() => textWidth("ç")).toThrow();
   });
 
-  it("builds the strip: 4 × 3 panels, sponsors as wide as their names", () => {
-    const sponsors = sponsorPanels();
-    expect(sponsors.every((p) => p.h === LED_ROWS)).toBe(true);
-    expect(ledStrip().w).toBe(6 * 152 + 2 * sponsors.reduce((sum, p) => sum + p.w, 0));
+  it("builds the strip: one slot per sponsor, the Order only in empty slots", () => {
+    const panels = Object.values(sponsorPanels());
+    expect(panels.every((p) => p.h === LED_ROWS)).toBe(true);
+    const full = ledStrip();
+    expect(full.w).toBe(152 + 28 + panels.reduce((sum, p) => sum + p.w + 28, 0));
+    // Only Lama di Luce under contract: the three other slots are the Order's 152-LED panel.
+    expect(ledStrip(["lama-di-luce"]).w).toBe(4 * (152 + 28));
     expect(ledStripImage().href.startsWith("data:image/svg+xml,")).toBe(true);
   });
 });

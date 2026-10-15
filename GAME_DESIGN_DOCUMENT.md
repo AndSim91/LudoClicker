@@ -3226,7 +3226,10 @@ Un'unica pagina, in quest'ordine:
     dell'Ordine delle Onde ai lati del traliccio, una seconda rastrelliera
     speculare a sinistra e una fascia LED a tutta larghezza dietro il tappeto
     che scorre verso sinistra (concept C del 15/10, 24 LED al secondo, ferma con
-    «Riduci animazioni»). È pixel-art di 24 LED d'altezza, con un font a 5 righe
+    «Riduci animazioni»), alta 24 unità (dal 15/10 pomeriggio, prima 15) e con
+    28 LED spenti tra un pannello e l'altro. Ha uno slot per sponsor: dove lo
+    sponsor non c'è ancora compare «ORDINE DELLE ONDE», con tutti gli sponsor
+    l'Ordine non si vede. È pixel-art di 24 LED d'altezza, con un font a 5 righe
     (`ledPixels.ts`, `ledSponsors.ts`): «ORDINE DELLE ONDE», Lama di Luce (L1:
     stella a otto lame, «LAMA·DI·LUCE» con il «DI» arancio e la barretta
     tricolore) e tre sponsor inventati, ognuno con il suo disegno: Sartoria Cruna
