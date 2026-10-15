@@ -5,7 +5,7 @@ import { createInitialState } from "../../game/engine";
 import { GameStateProvider } from "../../game/GameStateContext";
 import { TitleBar } from "./TitleBar";
 import {
-  formatCompactCurrency,
+  formatCompactBalance,
   formatCompactNumber,
   formatExactCurrency,
   formatExactNumber,
@@ -68,7 +68,7 @@ describe("TitleBar", () => {
     );
 
     expect(screen.getByLabelText("Situazione del gioco")).toHaveTextContent(
-      formatCompactCurrency(120).replace(/\u00a0/g, " "),
+      formatCompactBalance(120).replace(/\u00a0/g, " "),
     );
     expect(screen.getByText("Iscritti")).toBeVisible();
     const availability = screen.getByLabelText(/^Fondi:/);
@@ -156,7 +156,7 @@ describe("TitleBar", () => {
     );
 
     expect(container.querySelector(".title-resources")).toHaveTextContent(
-      formatCompactCurrency(euros).replace(/\u00a0/g, " "),
+      formatCompactBalance(euros).replace(/\u00a0/g, " "),
     );
     expect(container.querySelectorAll(".title-resource")[2]).toHaveAttribute(
       "aria-label",
@@ -164,7 +164,14 @@ describe("TitleBar", () => {
     );
     expect(
       container.querySelector(`strong[title="${formatExactCurrency(euros)}"]`),
-    ).toHaveTextContent(formatCompactCurrency(euros).replace(/\u00a0/g, " "));
+    ).toHaveTextContent(formatCompactBalance(euros).replace(/\u00a0/g, " "));
+  });
+
+  it("keeps one decimal on the Fondi so the figure keeps its width", () => {
+    expect(formatCompactBalance(139_000)).toBe("139,0K €");
+    expect(formatCompactBalance(139_500)).toBe("139,5K €");
+    expect(formatCompactBalance(999_960)).toBe("1,0 Mln €");
+    expect(formatCompactBalance(950)).toBe("950 €");
   });
 
   it("exposes the contacts counter as a dedicated tutorial region", () => {

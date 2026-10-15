@@ -10,7 +10,7 @@ import { MonthlyIncomeSummary } from "./MonthlyIncomeSummary";
 import { TitleEquipment } from "./TitleEquipment";
 import { useRollingNumber } from "../../shared/useRollingNumber";
 import {
-  formatCompactCurrency,
+  formatCompactBalance,
   formatCompactNumber,
   formatExactCurrency,
   formatExactNumber,
@@ -25,7 +25,7 @@ function RollingBalance({ euros }: { euros: number }) {
   return (
     // Keyed on the rises so «Scatto» replays; the exact figure stays in title and aria-label.
     <strong key={balance.pops} className={balance.pops ? "is-rising" : undefined} title={formatExactCurrency(euros)}>
-      {formatCompactCurrency(Math.round(balance.shown))}
+      {formatCompactBalance(Math.round(balance.shown))}
     </strong>
   );
 }

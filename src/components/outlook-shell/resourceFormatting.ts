@@ -42,6 +42,18 @@ export function formatCompactNumber(value: number): string {
   return compactNumber.format(value);
 }
 
+// Fondi in the title bar always keep one decimal («139,0K €»), so the figure stays the
+// same width while it rolls and fits its 7ch slot up to «9,9 Mln €» (Andrea 15/10).
+const balanceMantissa = new Intl.NumberFormat("it-IT", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+
+export function formatCompactBalance(value: number): string {
+  const magnitude = Math.abs(value);
+  for (const [size, suffix] of COMPACT_UNITS) {
+    if (magnitude >= size * 0.99995) return `${balanceMantissa.format(value / size)}${suffix} €`;
+  }
+  return `${exactNumber.format(Math.round(value))} €`;
+}
+
 export function formatCompactCurrency(value: number): string {
   return compactCurrency.format(value);
 }
