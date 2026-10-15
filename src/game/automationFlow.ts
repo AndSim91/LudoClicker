@@ -339,7 +339,7 @@ export function processAutomation(
     getUpgradeEffectTotal(state.upgrades, "editorialAutomationMultiplier");
 
   // Redazione and Social type like the player: each "input" is writingPower characters,
-  // they share the player's Flusso and roll Frase perfetta with the same upgrades.
+  // they have their own Flusso and roll Frase perfetta with the same upgrades.
   const editorialInputs = hasEditorialWork
     ? (elapsedMs / 1_000) *
       writingProductivity *
@@ -347,15 +347,16 @@ export function processAutomation(
       editorialAutomationMultiplier
     : 0;
   const flowCap = getFlowCap(state.upgrades);
+  // The Redazione has its own Flusso (Andrea, 15/10/2026): it no longer fills the player's bar.
   const teamFlow = flowCap > 1 && editorialInputs > 0
     ? applyFlowInput(
-        state.player.flow,
+        state.player.editorialFlow,
         now,
         flowCap,
         1,
         editorialInputs,
       )
-    : state.player.flow;
+    : state.player.editorialFlow;
   const generatedWriting = editorialInputs * state.player.writingPower *
     (teamFlow && editorialInputs > 0 ? getFlowMultiplier(teamFlow.meter, flowCap) : 1);
   const emailWorkShare = wasWriting && producingSocialContent
@@ -441,11 +442,10 @@ export function processAutomation(
     },
     equipment: state.equipment,
     school: state.school,
-    // One Flusso for the whole school: the player and Redazione fill the same meter.
-    player: teamFlow !== state.player.flow || perfectPhraseCharacters > 0
+    player: teamFlow !== state.player.editorialFlow || perfectPhraseCharacters > 0
       ? {
           ...state.player,
-          ...(teamFlow ? { flow: teamFlow } : {}),
+          ...(teamFlow ? { editorialFlow: teamFlow } : {}),
           ...(perfectPhraseCharacters > 0
             ? { teamPerfectPhrases: (state.player.teamPerfectPhrases ?? 0) + perfectPhrasesWritten }
             : {}),

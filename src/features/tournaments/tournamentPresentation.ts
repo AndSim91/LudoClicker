@@ -2,7 +2,9 @@ import { TOURNAMENT_DEFINITIONS, TOURNAMENT_LEVEL_ORDER } from "../../content/to
 import { GAME_CONFIG } from "../../game/config";
 import { getTournamentSeason } from "../../game/tournamentFlow";
 import {
+  getOwnedAthleteRating,
   selectSchoolTournamentEntrantsFromRoster,
+  type OwnedAthleteRating,
 } from "../../game/tournamentSimulation";
 import type {
   GameState,
@@ -103,6 +105,7 @@ export function getUpcomingDelegationContactIds(
     state.collaborators,
     state.tournaments.qualification,
     upcoming,
+    getOwnedAthleteRating(state),
   );
 }
 
@@ -111,10 +114,11 @@ export function getUpcomingDelegationContactIdsFromRoster(
   collaborators: GameState["collaborators"],
   qualification: GameState["tournaments"]["qualification"],
   upcoming: UpcomingTournament | undefined,
+  rating?: OwnedAthleteRating,
 ): string[] {
   if (!upcoming) return [];
   if (upcoming.level === "school") {
-    return selectSchoolTournamentEntrantsFromRoster(contacts, collaborators)
+    return selectSchoolTournamentEntrantsFromRoster(contacts, collaborators, rating)
       .selectedContacts
       .map((contact) => contact.id);
   }

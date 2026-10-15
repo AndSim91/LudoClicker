@@ -214,6 +214,9 @@ export function foundSchool(
     secretUpgradeDiscoveries: state.secretUpgradeDiscoveries,
     legendaryCollaborators: fresh.legendaryCollaborators,
     statistics: careerStatistics,
+    // The September check measures what this school earned: start from the career total
+    // carried in the statistics, not from 0 (15/10/2026: it read the whole career as wealth).
+    lightInflation: { ...fresh.lightInflation, eurosEarnedAtCheck: careerStatistics.eurosEarned },
     messages: state.messages,
     // Missions start again from series 1; the baseline is the career statistics carried over.
     shortGoal: createShortGoalFromStatistics(careerStatistics, 0, now),

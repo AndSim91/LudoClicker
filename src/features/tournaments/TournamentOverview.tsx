@@ -15,6 +15,7 @@ import { GAME_CONFIG } from "../../game/config";
 import { useGameSelector } from "../../game/GameStateContext";
 import {
   getEligibleSchoolContactsFromRoster,
+  getOwnedAthleteRating,
   selectSchoolTournamentEntrantsFromRoster,
 } from "../../game/tournamentSimulation";
 import { useGameTime } from "../../game/GameTimeContext";
@@ -69,6 +70,8 @@ export function TournamentOverview({ state: stateOverride, onOpenResult }: Tourn
   const upcomingDefinition = upcoming ? TOURNAMENT_DEFINITIONS[upcoming.level] : undefined;
   const qualification = state.tournaments.qualification;
   const delegationContactIds = getUpcomingDelegationContactIds(state, upcoming);
+  const rating = getOwnedAthleteRating(state);
+  const { courseXUnlocked: ratingCourseX, formBonusMultiplier: ratingFormBonus } = rating;
   const schoolTournamentEntry = useMemo(() => {
     const eligibleCount = getEligibleSchoolContactsFromRoster(
       state.contacts,
@@ -77,9 +80,10 @@ export function TournamentOverview({ state: stateOverride, onOpenResult }: Tourn
     const selection = selectSchoolTournamentEntrantsFromRoster(
       state.contacts,
       state.collaborators,
+      { courseXUnlocked: ratingCourseX, formBonusMultiplier: ratingFormBonus },
     );
     return { eligibleCount, selection };
-  }, [state.collaborators, state.contacts]);
+  }, [ratingCourseX, ratingFormBonus, state.collaborators, state.contacts]);
   const collaboratorsByContactId = useMemo(
     () => new Map(state.collaborators.map((entry) => [entry.contactId, entry])),
     [state.collaborators],

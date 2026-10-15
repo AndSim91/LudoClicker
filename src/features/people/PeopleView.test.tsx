@@ -1,5 +1,6 @@
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, onTestFinished, vi } from "vitest";
+import { getFormTrainingYear } from "../../game/calendar";
 import { GAME_CONFIG } from "../../game/config";
 import { createInitialState } from "../../game/engine";
 import { GameTimeProvider } from "../../game/GameTimeProvider";
@@ -519,6 +520,8 @@ describe("PeopleView", () => {
       lastName: `${index + 1}`,
       email: `overflow-student-${index}@example.invalid`,
       status: "enrolled" as const,
+      // Someone the free Istruttore can prepare (15/10/2026: Preparazione needs a target).
+      lastAgonistCourseYear: getFormTrainingYear(1),
       training: {
         formId,
         startedAt: 1_000,
@@ -912,7 +915,9 @@ describe("PeopleView", () => {
       ...initial,
       school: { ...initial.school, euros: 1_000 },
       contacts: initial.contacts.map((contact, index) =>
-        index === 0 ? { ...contact, status: "enrolled" as const } : contact,
+        index === 0
+          ? { ...contact, status: "enrolled" as const, lastAgonistCourseYear: getFormTrainingYear(initial.school.currentMonth) }
+          : contact,
       ),
       collaborators,
       upgrades: {
@@ -981,7 +986,9 @@ describe("PeopleView", () => {
       ...initial,
       school: { ...initial.school, activeMembers: 1, currentMonth: 1 },
       contacts: initial.contacts.map((contact, index) =>
-        index === 0 ? { ...contact, status: "enrolled" as const } : contact
+        index === 0
+          ? { ...contact, status: "enrolled" as const, lastAgonistCourseYear: getFormTrainingYear(1) }
+          : contact
       ),
       collaborators: [instructor],
       upgrades: { ...initial.upgrades, "agonist-course-intensity": 5 },
@@ -1268,7 +1275,9 @@ describe("PeopleView", () => {
             school: { ...initial.school, currentMonth, activeMembers: 1 },
             // Someone to prepare: in summer the free instructors keep working.
             contacts: initial.contacts.map((contact, index) =>
-              index === 1 ? { ...contact, status: "enrolled" as const } : contact),
+              index === 1
+                ? { ...contact, status: "enrolled" as const, lastAgonistCourseYear: getFormTrainingYear(currentMonth) }
+                : contact),
             collaborators: [instructor],
             upgrades: { ...initial.upgrades, "agonist-course-intensity": 5 },
             unlocks: { ...initial.unlocks, collaborators: true },

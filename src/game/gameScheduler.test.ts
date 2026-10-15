@@ -1,4 +1,5 @@
 import { GAME_CONFIG } from "./config";
+import { getFormTrainingYear } from "./calendar";
 import { describe, expect, it } from "vitest";
 import {
   MAX_CATCH_UP_STEPS_PER_TICK,
@@ -164,7 +165,14 @@ describe("game scheduler", () => {
       ...state,
       school: { ...state.school, activeMembers: 1 },
       contacts: state.contacts.map((contact, index) =>
-        index === 0 ? { ...contact, status: "enrolled" as const } : contact
+        index === 0
+          ? {
+              ...contact,
+              status: "enrolled" as const,
+              // A Preparazione target: an Agonisti this school year (15/10/2026).
+              lastAgonistCourseYear: getFormTrainingYear(state.school.currentMonth),
+            }
+          : contact
       ),
       collaborators: [collaborator("instructor")],
       upgrades: { ...state.upgrades, "agonist-course-intensity": 5 },
@@ -428,7 +436,14 @@ describe("game scheduler", () => {
       ...state,
       school: { ...state.school, activeMembers: 1 },
       contacts: state.contacts.map((contact, index) =>
-        index === 0 ? { ...contact, status: "enrolled" as const } : contact
+        index === 0
+          ? {
+              ...contact,
+              status: "enrolled" as const,
+              // A Preparazione target: an Agonisti this school year (15/10/2026).
+              lastAgonistCourseYear: getFormTrainingYear(state.school.currentMonth),
+            }
+          : contact
       ),
       collaborators: [collaborator("instructor")],
       upgrades: { ...state.upgrades, "agonist-course-intensity": 5 },

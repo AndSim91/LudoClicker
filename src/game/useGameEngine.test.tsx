@@ -1,4 +1,5 @@
 import { act, renderHook } from "@testing-library/react";
+import { getFormTrainingYear } from "./calendar";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getEmailBuildLength } from "../content/emailBuild";
 import { GAME_CONFIG } from "./config";
@@ -500,6 +501,7 @@ describe("useGameEngine pause", () => {
           ...contact,
           status: "enrolled" as const,
           enrolledMonth: initial.school.currentMonth,
+          lastAgonistCourseYear: getFormTrainingYear(initial.school.currentMonth),
         })),
         collaborators: [
           {

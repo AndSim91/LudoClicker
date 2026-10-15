@@ -1,14 +1,10 @@
 import { hasAnyTraining } from "./trainingSlots";
 import { getCollaboratorProductivity } from "../content/forms";
-import {
-  getUpgradeEffectTotal,
-  isAthleticPreparationUnlocked,
-} from "../content/upgrades";
-import { isSummerBreak } from "./calendar";
+import { getUpgradeEffectTotal } from "../content/upgrades";
 import { getEquipmentAutomaticRepairTarget } from "./equipment";
 import { getInstructorTeachingCounts } from "./runtimeIndexes";
 import { getReptileSectorForRole, isReptileBarOpen } from "./reptileSectors";
-import { selectActiveEmail } from "./selectors";
+import { selectActiveEmail, selectAthleticPreparationInstructorIds } from "./selectors";
 import type {
   Collaborator,
   CollaboratorMasteryRole,
@@ -59,11 +55,9 @@ export function isPrimarySectorIdle(
     state.collaborators,
   ).get(collaborator.id) ?? 0;
   if (teaching > 0) return false;
-  const preparationActive =
-    isAthleticPreparationUnlocked(state.upgrades) &&
-    !isSummerBreak(state.school.currentMonth) &&
-    state.contacts.some((contact) => contact.status === "enrolled");
-  return !preparationActive;
+  // Same rule as the Preparazione itself (15/10/2026): in summer it goes on, slower,
+  // so an Istruttore preparing athletes is not «fermo» and does not also help elsewhere.
+  return !selectAthleticPreparationInstructorIds(state).has(collaborator.id);
 }
 
 export function getShiftShare(state: GameState): number {

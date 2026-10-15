@@ -255,6 +255,12 @@ describe("Istruttori in e-Learning", () => {
     expect(startELearningInstructorCourses(none, 5_000)).toBe(none);
   });
 
+  it("stops with the «Insegnamento automatico» switch off (15/10/2026)", () => {
+    const state = withInstructor();
+    const off = { ...state, automation: { ...state.automation, autoTeachingEnabled: false } };
+    expect(startELearningInstructorCourses(off, 5_000)).toBe(off);
+  });
+
   it("goes on to Forma 2 at level 2, without the automatic assignment", () => {
     const state = withInstructor({ forms: ["form-1"], instructorForms: ["form-1"] }, 5_000, 2);
     expect(state.collaboratorManagement.automaticShares).toBeFalsy();

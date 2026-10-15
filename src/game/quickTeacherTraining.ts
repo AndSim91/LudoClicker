@@ -2,6 +2,7 @@ import { getCollaboratorMasteryLevel } from "../content/mastery";
 import { getFormDefinition } from "../content/forms";
 import { isCourseXUnlocked, isQuickTeacherTrainingUnlocked, isSISTechnicianCourseUnlocked } from "../content/upgrades";
 import { getAthleteTournamentStats } from "./athleteStats";
+import { getFormBonusMultiplier } from "./reputation";
 import { getInstructorPendingReleaseIds } from "./collaboratorManagement";
 import { bookTechnicianCourse } from "./teacherTrainingFlow";
 import { startFormTraining } from "./trainingFlow";
@@ -117,7 +118,15 @@ function rankTrainingInstructors(state: GameState): Collaborator[] {
   );
   const style = (collaborator: Collaborator) => {
     const contact = contacts.get(collaborator.contactId);
-    return contact ? getAthleteTournamentStats(contact, collaborator.forms, false, collaborator).style : 0;
+    return contact
+      ? getAthleteTournamentStats(
+          contact,
+          collaborator.forms,
+          isCourseXUnlocked(state.upgrades),
+          collaborator,
+          getFormBonusMultiplier(state),
+        ).style
+      : 0;
   };
   return instructors
     .map((collaborator) => ({

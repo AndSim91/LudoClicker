@@ -1088,6 +1088,8 @@ export interface GameState {
     writingPower: number;
     /** Manual writing rhythm; absent in saves made before the Flusso existed. */
     flow?: WritingFlow;
+    /** Flusso of Redazione and Social, separate from the player's (15/10/2026). */
+    editorialFlow?: WritingFlow;
     /** Count of Frase perfetta bonuses, used by the UI to spot new ones. */
     perfectPhrases?: number;
     /** Frasi perfette written by Redazione: shown like the player's, never counted for achievements. */

@@ -116,11 +116,19 @@ describe("Gadget di carriera (15/10/2026)", () => {
 
     const ready = addAdminMembers(onSale, 125 - onSale.school.activeMembers);
     const next = foundSchool(
-      { ...ready, school: { ...ready.school, fame: 5_000 }, tournaments: { ...ready.tournaments, nationalTitlesCurrentSchool: 1 } },
+      {
+        ...ready,
+        school: { ...ready.school, fame: 5_000 },
+        statistics: { ...ready.statistics, eurosEarned: 50_000 },
+        tournaments: { ...ready.tournaments, nationalTitlesCurrentSchool: 1 },
+      },
       { name: "Ordine del Faro", city: "Trieste" },
       2_000,
     );
     expect(next.network.gadgetBest).toEqual({ keychain: { common: 64 } });
+    // 15/10/2026: the Inflazione di Luce measures this school's earnings, not the career.
+    expect(next.lightInflation.eurosEarnedAtCheck).toBeGreaterThanOrEqual(50_000);
+    expect(next.lightInflation.eurosEarnedAtCheck).toBe(next.statistics.eurosEarned);
     expect(next.gadgets.products.keychain).toMatchObject({ accepted: true });
     expect(next.gadgets.products.keychain.rarities.common.quality).toBe(64);
     const cards = selectDayNotifications(next, 2_000).filter(({ id }) => id.startsWith("gadget-return"));

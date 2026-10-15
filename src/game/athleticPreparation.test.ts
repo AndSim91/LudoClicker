@@ -7,6 +7,8 @@ import {
 import { createInitialState } from "./initialState";
 import { gameReducer } from "./engine";
 import { improveRandomAthletes } from "./collaboratorAutomationOutcomes";
+import { isPrimarySectorIdle } from "./collaboratorFallback";
+import { selectAthleticPreparationInstructorIds } from "./selectors";
 import type { Collaborator, GameState } from "./types";
 
 function instructor(
@@ -184,5 +186,33 @@ describe("instructor athletic preparation", () => {
     const summer = { ...initial, school: { ...initial.school, currentMonth: 19 } };
     const lastYear = { ...trained, lastAgonistCourseYear: getFormTrainingYear(19) - 1 };
     expect(improveRandomAthletes({ ...summer, contacts: [lastYear] }, 1).improvements).toBe(1);
+  });
+});
+
+describe("Preparazione atletica senza bersagli (15/10/2026)", () => {
+  it("is not an activity: no capacity weight, and the Istruttore counts as «fermo» for the Turni", () => {
+    const state = preparationState(5);
+    const noTarget: GameState = {
+      ...state,
+      contacts: state.contacts.map((contact) => ({ ...contact, lastAgonistCourseYear: undefined })),
+    };
+    expect(selectAthleticPreparationInstructorIds(state).has("idle")).toBe(true);
+    expect(isPrimarySectorIdle(state, state.collaborators[0])).toBe(false);
+    expect(selectAthleticPreparationInstructorIds(noTarget).size).toBe(0);
+    expect(isPrimarySectorIdle(noTarget, noTarget.collaborators[0])).toBe(true);
+  });
+
+  it("in summer it goes on, so the Istruttore is not «fermo» and does not help elsewhere", () => {
+    const state = preparationState(5);
+    const july = state.school.currentMonth + ((7 - (state.school.currentMonth % 12) + 12) % 12);
+    const summer: GameState = {
+      ...state,
+      school: { ...state.school, currentMonth: july },
+      contacts: state.contacts.map((contact) => ({
+        ...contact,
+        lastAgonistCourseYear: getFormTrainingYear(july) - 1,
+      })),
+    };
+    expect(isPrimarySectorIdle(summer, summer.collaborators[0])).toBe(false);
   });
 });

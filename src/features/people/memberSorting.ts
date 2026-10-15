@@ -64,7 +64,7 @@ export function getMemberVisibleScore(
 ): number | null {
   const forms = getMemberStudent(contact, context).forms;
   if (!hasUnlockedOfficialStats(forms, context.statsTier)) return null;
-  return getContactPreparation(contact, forms, false, context.collaboratorsByContactId.get(contact.id), context.formBonusMultiplier)[key];
+  return getContactPreparation(contact, forms, context.courseXUnlocked, context.collaboratorsByContactId.get(contact.id), context.formBonusMultiplier)[key];
 }
 
 export function getMemberNextFormLabel(

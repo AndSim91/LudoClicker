@@ -1,7 +1,12 @@
 import { getBusinessMultiplier, getFormBonusMultiplier } from "./reputation";
 import { isSuperbaTournament } from "./reptileUnlock";
-import { getAthleteTournamentStats, hasCompletedFormOne } from "./athleteStats";
-import { ARENA_DECISIVENESS, createChampionsOpenAthletePairs } from "./tournamentSimulation";
+import { getAthleteTournamentStats } from "./athleteStats";
+import { isCourseXUnlocked } from "../content/upgrades";
+import {
+  ARENA_DECISIVENESS,
+  createChampionsOpenAthletePairs,
+  getEligibleSchoolContacts,
+} from "./tournamentSimulation";
 import { getAvailableSwords } from "./equipment";
 import { GAME_CONFIG } from "./config";
 import { TOURNAMENT_DEFINITIONS } from "../content/tournaments";
@@ -192,12 +197,21 @@ function createHomeTeams(
   eventsQuality: number,
   cursor: RandomCursor,
 ): ReptileTeam[] {
-  const eligible = state.contacts.filter(
-    (contact) => contact.status === "enrolled" && hasCompletedFormOne(contact.forms),
-  );
+  // Same roster rules as the other tournaments (15/10/2026): a collaborator's Forms are
+  // on the collaborator record, and Corso X counts once it is unlocked.
+  const eligible = getEligibleSchoolContacts(state);
   const titlesByContactId = new Map(state.collaborators.map((entry) => [entry.contactId, entry]));
-  const statsOf: StatsOf = (contact) =>
-    getAthleteTournamentStats(contact, contact.forms, false, titlesByContactId.get(contact.id), getFormBonusMultiplier(state));
+  const courseXUnlocked = isCourseXUnlocked(state.upgrades);
+  const statsOf: StatsOf = (contact) => {
+    const collaborator = titlesByContactId.get(contact.id);
+    return getAthleteTournamentStats(
+      contact,
+      collaborator?.forms ?? contact.forms,
+      courseXUnlocked,
+      collaborator,
+      getFormBonusMultiplier(state),
+    );
+  };
   const selected = selectHomeContacts(eligible, homeTeamCount * 2, eventsQuality, cursor, statsOf)
     .sort((a, b) => {
       const statsA = statsOf(a);
@@ -470,9 +484,7 @@ export function simulateReptileTournament(
   if (!edition || !resaBreakdown) return undefined;
   const cursor: RandomCursor = { seed: state.randomSeed };
   const resa = resaBreakdown.resa;
-  const eligibleCount = state.contacts.filter(
-    (contact) => contact.status === "enrolled" && hasCompletedFormOne(contact.forms),
-  ).length;
+  const eligibleCount = getEligibleSchoolContacts(state).length;
   const maximumHomeTeams = Math.min(Math.floor(eligibleCount / 2), edition.teamCount / 2);
   const requestedHomeTeams = Math.floor(2 + (edition.teamCount / 2 - 2) * resa / 100);
   const homeTeamCount = Math.max(0, Math.min(maximumHomeTeams, requestedHomeTeams));

@@ -28,7 +28,8 @@ export function getELearningForms(tier: number): FormId[] {
  */
 export function startELearningInstructorCourses(state: GameState, now: number): GameState {
   const tier = getInstructorSelfTrainingTier(state.upgrades);
-  if (tier === 0 || !state.unlocks.forms) return state;
+  // The «Insegnamento automatico» switch stops e-Learning too (15/10/2026: it kept spending).
+  if (tier === 0 || !state.unlocks.forms || !state.automation.autoTeachingEnabled) return state;
   const courseXUnlocked = isCourseXUnlocked(state.upgrades);
   const forms = getELearningForms(tier);
   const leaving = state.collaboratorManagement.automaticPendingMoves ?? {};

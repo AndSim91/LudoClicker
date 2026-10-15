@@ -35,12 +35,13 @@ function writtenAfter(state: GameState, seconds: number): { state: GameState; wr
 }
 
 describe("Redazione collaborators and the writing rhythm", () => {
-  it("fill the player's Flusso once Ritmo di battitura is bought", () => {
+  it("fill their own Flusso once Ritmo di battitura is bought, never the player's", () => {
     const plain = writtenAfter(withWriter({}), 30);
     const rhythm = writtenAfter(withWriter({ "writing-rhythm": 4 }), 30);
 
-    expect(plain.state.player.flow).toBeUndefined();
-    expect(rhythm.state.player.flow?.meter).toBeGreaterThan(0);
+    expect(plain.state.player.editorialFlow).toBeUndefined();
+    expect(rhythm.state.player.editorialFlow?.meter).toBeGreaterThan(0);
+    expect(rhythm.state.player.flow).toBeUndefined();
     expect(rhythm.written).toBeGreaterThan(plain.written);
   });
 

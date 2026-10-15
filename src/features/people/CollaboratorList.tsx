@@ -14,7 +14,7 @@ import {
   getCollaboratorMasteryRoleLabel,
   getCollaboratorMasteryProgress,
 } from "../../content/mastery";
-import { getOfficialStatsVisibilityTier } from "../../content/upgrades";
+import { getOfficialStatsVisibilityTier, isCourseXUnlocked } from "../../content/upgrades";
 import { getContactPreparation, hasUnlockedOfficialStats, getHiddenStatsHint } from "../../game/athleteStats";
 import { GAME_CONFIG } from "../../game/config";
 import { useGameStateSlices } from "../../game/GameStateContext";
@@ -168,7 +168,7 @@ export function CollaboratorList({
               : undefined;
             const hasVisibleStats = hasUnlockedOfficialStats(collaborator.forms, statsTier);
             const officialStats = contact && hasVisibleStats
-              ? getContactPreparation(contact, collaborator.forms, false, collaborator, getFormBonusMultiplier(state))
+              ? getContactPreparation(contact, collaborator.forms, isCourseXUnlocked(state.upgrades), collaborator, getFormBonusMultiplier(state))
               : undefined;
             const selected = collaborator.id === selectedCollaboratorId;
             const nextMasteryLevel = masteryProgress

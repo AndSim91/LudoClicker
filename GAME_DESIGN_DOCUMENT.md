@@ -782,8 +782,12 @@ migliorano contemporaneamente:
 
 I collaboratori usano la potenza di scrittura (5 caratteri al secondo per punto
 di produttività, moltiplicati per `potenzaScrittura` e per i bonus di
-automazione), ma non beneficiano di Flusso e Frase perfetta, che restano legati
-all'input manuale.
+automazione). Con **Ritmo di battitura** la Redazione ha un **Flusso suo**
+(`player.editorialFlow`, decisione del 15/10/2026), che si riempie con il suo
+lavoro e moltiplica solo i suoi caratteri: la barra del Flusso del giocatore
+resta legata all'input manuale. Con **Frasi fatte** la Redazione scrive anche
+Frasi perfette, in proporzione alla probabilità comprata; non contano per il
+traguardo.
 
 Questo collegamento impedisce che la potenza manuale diventi un ramo morto dopo
 lo sblocco dell'automazione.
@@ -1573,9 +1577,10 @@ preferiti ancora disponibili.
 
 ```text
 caratteriAutomaticiAlSecondo = 5
-  × Σ produttivitàCollaboratori   // (1 + bonus Forma 6/7 + bonus Doppia spada corta) × rarità × Maestria
+  × Σ produttivitàCollaboratori   // rarità × Maestria (le Forme non danno bonus dal 06/10)
   × potenzaScrittura              // include già il bonus di rete (+5% per scuola fondata)
   × (1 + bonusAutomazioniGeneriche + bonusRedazione)
+  × Flusso della Redazione        // da ×1 al tetto di Ritmo di battitura (×5)
 ```
 
 La velocità base è `GAME_CONFIG.collaboratorWritingPerSecond` = 5 caratteri al

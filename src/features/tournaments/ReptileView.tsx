@@ -88,7 +88,7 @@ function ReptileHero({ state }: { state: GameState }) {
         <h2 id="reptile-title">{tournamentName}</h2>
         <p>
           {superba
-            ? "Avversari più forti del 25%. Chi la vince scopre un segreto."
+            ? "Il Reptile di sempre, con un nome nuovo. Chi la vince scopre un segreto."
             : "Un torneo a coppie con gironi svizzeri, migliori 16 alla fase finale e sfide alla meglio dei cinque."}
         </p>
       </div>

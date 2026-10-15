@@ -1,4 +1,4 @@
-import { getNetworkSponsorIncome } from "../../content/upgrades";
+import { getFundsGainMultiplier, getNetworkSponsorIncome } from "../../content/upgrades";
 import { useId } from "react";
 import { getEstimatedMonthlyGadgetIncome } from "../../game/gadgetIncomeEstimate";
 import { getMonthlyDepositInterest, getMonthlyMembershipIncome, getMonthlySponsorIncome } from "../../game/membershipEconomy";
@@ -21,15 +21,19 @@ interface MonthlyIncomePresentation {
 }
 
 function selectMonthlyIncomePresentation(state: GameState): MonthlyIncomePresentation {
+  // «Il tempo è denaro» 5 (+10% on the Fondi earned), as in the real monthly income (15/10/2026).
+  // The Gadget estimate plays the real sales, so it already has it.
+  const funds = getFundsGainMultiplier(state.upgrades);
   return {
-    memberFees: getMonthlyMembershipIncome(state),
-    socialIncome: getMonthlySocialIncome(state),
+    memberFees: getMonthlyMembershipIncome(state) * funds,
+    socialIncome: getMonthlySocialIncome(state) * funds,
     gadgetIncome: getEstimatedMonthlyGadgetIncome(state),
     gadgetUnlocked: state.unlocks.gadget,
-    networkRent: getMonthlyNetworkRent(state) * getBusinessMultiplier(state),
-    depositInterest: getMonthlyDepositInterest(state),
-    networkSponsor: getNetworkSponsorIncome(state.upgrades, state.network.schoolCount) * getBusinessMultiplier(state),
-    sponsors: getMonthlySponsorIncome(state),
+    networkRent: getMonthlyNetworkRent(state) * getBusinessMultiplier(state) * funds,
+    depositInterest: getMonthlyDepositInterest(state) * funds,
+    networkSponsor: getNetworkSponsorIncome(state.upgrades, state.network.schoolCount) *
+      getBusinessMultiplier(state) * funds,
+    sponsors: getMonthlySponsorIncome(state) * funds,
   };
 }
 

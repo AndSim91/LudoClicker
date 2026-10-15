@@ -187,9 +187,24 @@ export interface SchoolTournamentSelection {
   preliminary?: SchoolTournamentPreliminary;
 }
 
+/** How the school rates its own athletes: Corso X once unlocked, Formazione (Reputation). */
+export interface OwnedAthleteRating {
+  courseXUnlocked: boolean;
+  formBonusMultiplier: number;
+}
+
+export function getOwnedAthleteRating(state: Pick<GameState, "upgrades" | "network">): OwnedAthleteRating {
+  return {
+    courseXUnlocked: isCourseXUnlocked(state.upgrades),
+    formBonusMultiplier: getFormBonusMultiplier(state),
+  };
+}
+
 export function selectSchoolTournamentEntrantsFromRoster(
   contacts: readonly Contact[],
   collaborators: GameState["collaborators"],
+  // 15/10/2026: the preliminaries ranked without Corso X and Formazione, the tournament with them.
+  rating: OwnedAthleteRating = { courseXUnlocked: false, formBonusMultiplier: 1 },
 ): SchoolTournamentSelection {
   const eligibleContacts = getEligibleSchoolContactsFromRoster(contacts, collaborators);
   if (eligibleContacts.length <= SCHOOL_TOURNAMENT_FIELD_SIZE) {
@@ -203,7 +218,13 @@ export function selectSchoolTournamentEntrantsFromRoster(
     return {
       contact,
       rosterIndex,
-      stats: getAthleteTournamentStats(contact, forms, false, collaborator),
+      stats: getAthleteTournamentStats(
+        contact,
+        forms,
+        rating.courseXUnlocked,
+        collaborator,
+        rating.formBonusMultiplier,
+      ),
     };
   });
   const compareBy =
@@ -239,7 +260,11 @@ export function selectSchoolTournamentEntrantsFromRoster(
 }
 
 export function selectSchoolTournamentEntrants(state: GameState): SchoolTournamentSelection {
-  return selectSchoolTournamentEntrantsFromRoster(state.contacts, state.collaborators);
+  return selectSchoolTournamentEntrantsFromRoster(
+    state.contacts,
+    state.collaborators,
+    getOwnedAthleteRating(state),
+  );
 }
 
 function createNpcCandidate(
@@ -1072,7 +1097,11 @@ export function simulateTournament(
   // preliminaries select the field before the quadratic group simulation.
   const schoolSelection =
     level === "school"
-      ? selectSchoolTournamentEntrantsFromRoster(ownedContacts, state.collaborators)
+      ? selectSchoolTournamentEntrantsFromRoster(
+          ownedContacts,
+          state.collaborators,
+          getOwnedAthleteRating(state),
+        )
       : undefined;
   const chroniclesLegendaryIds =
     level === "chronicles"
