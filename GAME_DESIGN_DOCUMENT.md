@@ -2695,9 +2695,13 @@ livello (`levelNetworkSchools`): qui 1, 2, 3, 4 e 5 per i livelli da 1 a 5
 Sponsor, interessi), Gadget (anche al Reptile), premi dei tornei e dei Leggendari
 Segreti sconfitti, bonus d'iscrizione, obiettivi brevi ed Eventi e Imprevisti
 positivi. Non tocca i rimborsi (eventi annullati, Reptile) né il pannello Admin.
-La velocità si sceglie con il pulsante «avanti veloce» accanto alla pausa
-(concept B: ogni clic passa alla velocità successiva, poi torna a 1×), visibile
-solo con il nodo comprato. Accelera l'orologio del gioco (`gameClock.ts`): mesi
+La velocità si sceglie con il pulsante «avanti veloce» accanto alla pausa,
+visibile solo con il nodo comprato. Con il solo 2× il pulsante alterna 1× e 2×;
+dal 3× in su (concept S2 «Tendina», scelto il 15/10) il pulsante mostra la
+velocità attiva e apre un piccolo menu con le sole velocità sbloccate (1×
+Normale, 2× Doppia, 3× Tripla, 4× Quadrupla, 5× Quintupla), con la spunta su
+quella attiva; si chiude con un clic fuori o con Esc. In Onde il menu è blu
+notte con bordo e selezione oro, in Outlook è un menu bianco da Windows. Accelera l'orologio del gioco (`gameClock.ts`): mesi
 e quote, eventi, prove, corsi, tornei e collaboratori; non la scrittura delle
 email né i minigiochi in tempo reale. La scelta è salvata in
 `automation.gameSpeed` e limitata dal livello (`getPlayerGameSpeed`). Dal

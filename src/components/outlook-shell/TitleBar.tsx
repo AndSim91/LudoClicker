@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { Icon } from "../common/Icon";
 import { ProgressBar } from "../common/ProgressBar";
@@ -27,6 +27,98 @@ function RollingBalance({ euros }: { euros: number }) {
     <strong key={balance.pops} className={balance.pops ? "is-rising" : undefined} title={formatExactCurrency(euros)}>
       {formatCompactBalance(Math.round(balance.shown))}
     </strong>
+  );
+}
+
+const SPEED_NAMES = ["", "Normale", "Doppia", "Tripla", "Quadrupla", "Quintupla"];
+
+/**
+ * «Il tempo è denaro» (concept S2 «Tendina», 15/10): with only 2× unlocked the
+ * button toggles 1×/2×; from 3× on it opens a menu of the unlocked speeds.
+ */
+function TitleSpeed({
+  gameSpeed,
+  maxGameSpeed,
+  onChangeGameSpeed,
+}: {
+  gameSpeed: number;
+  maxGameSpeed: number;
+  onChangeGameSpeed: (speed: number) => void;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const rootRef = useRef<HTMLSpanElement>(null);
+  const hasMenu = maxGameSpeed > 2;
+
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const closeOutside = (event: PointerEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) setIsOpen(false);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsOpen(false);
+    };
+    document.addEventListener("pointerdown", closeOutside);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeOutside);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [isOpen]);
+
+  const className = gameSpeed > 1 ? "title-speed fast" : "title-speed";
+  if (!hasMenu) {
+    const next = gameSpeed >= maxGameSpeed ? 1 : gameSpeed + 1;
+    return (
+      <button
+        className={className}
+        type="button"
+        aria-label={`Velocità del gioco ${gameSpeed}×: passa a ${next}×`}
+        title={`Il tempo è denaro: passa a ${next}×`}
+        onClick={() => onChangeGameSpeed(next)}
+      >
+        <Icon name="fast-forward" />
+        <span>{gameSpeed}×</span>
+      </button>
+    );
+  }
+  return (
+    <span className="title-speed-wrap" ref={rootRef}>
+      <button
+        className={isOpen ? `${className} open` : className}
+        type="button"
+        aria-label={`Velocità del gioco ${gameSpeed}×: scegli la velocità`}
+        aria-haspopup="menu"
+        aria-expanded={isOpen}
+        title="Il tempo è denaro: scegli la velocità"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <Icon name="fast-forward" />
+        <span>{gameSpeed}×</span>
+        <Icon name="chevron" />
+      </button>
+      {isOpen ? (
+        <span className="title-speed-menu" role="menu" aria-label="Velocità del gioco">
+          <small>Velocità del gioco</small>
+          {Array.from({ length: maxGameSpeed }, (_, index) => index + 1).map((speed) => (
+            <button
+              key={speed}
+              type="button"
+              role="menuitemradio"
+              aria-checked={speed === gameSpeed}
+              className={speed === gameSpeed ? "selected" : undefined}
+              onClick={() => {
+                onChangeGameSpeed(speed);
+                setIsOpen(false);
+              }}
+            >
+              <span className="title-speed-check" aria-hidden="true">{speed === gameSpeed ? "✓" : ""}</span>
+              <b>{speed}×</b>
+              <span>{SPEED_NAMES[speed]}</span>
+            </button>
+          ))}
+        </span>
+      ) : null}
+    </span>
   );
 }
 
@@ -79,7 +171,6 @@ export function TitleBar({
   const [localEquipmentOpen, setLocalEquipmentOpen] = useState(false);
   const liveNow = useGameTime(providedNow === undefined, GAME_CONFIG.progressUpdateIntervalMs);
   const now = providedNow ?? liveNow;
-  const nextGameSpeed = gameSpeed >= maxGameSpeed ? 1 : gameSpeed + 1;
   const monthName = getGameMonthName(currentMonth);
   const currentSchoolYear = getSchoolYear(currentMonth);
   const monthProgress = Math.min(
@@ -159,16 +250,11 @@ export function TitleBar({
           <Icon name={isPaused ? "play" : "pause"} />
         </button>
         {maxGameSpeed > 1 ? (
-          <button
-            className={gameSpeed > 1 ? "title-speed fast" : "title-speed"}
-            type="button"
-            aria-label={`Velocità del gioco ${gameSpeed}×: passa a ${nextGameSpeed}×`}
-            title={`Il tempo è denaro: passa a ${nextGameSpeed}×`}
-            onClick={() => onChangeGameSpeed(nextGameSpeed)}
-          >
-            <Icon name="fast-forward" />
-            <span>{gameSpeed}×</span>
-          </button>
+          <TitleSpeed
+            gameSpeed={gameSpeed}
+            maxGameSpeed={maxGameSpeed}
+            onChangeGameSpeed={onChangeGameSpeed}
+          />
         ) : null}
       </span>
       <span

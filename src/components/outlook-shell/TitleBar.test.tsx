@@ -279,7 +279,7 @@ describe("TitleBar", () => {
     );
   });
 
-  it("shows the «Il tempo è denaro» button next to the pause and cycles through the allowed speeds", () => {
+  it("shows the «Il tempo è denaro» button next to the pause: a toggle with 2×, a menu from 3×", () => {
     const onChangeGameSpeed = vi.fn();
     const props = {
       currentMonth: 9,
@@ -295,19 +295,25 @@ describe("TitleBar", () => {
       onTogglePause: () => undefined,
       onChangeGameSpeed,
     };
-    const { rerender } = render(<TitleBar {...props} gameSpeed={1} maxGameSpeed={3} />);
+    const { rerender } = render(<TitleBar {...props} gameSpeed={1} maxGameSpeed={2} />);
     const pause = screen.getByRole("button", { name: "Pausa" });
-    const speed = screen.getByRole("button", { name: "Velocità del gioco 1×: passa a 2×" });
-    expect(pause.nextElementSibling).toBe(speed);
-    expect(speed).toHaveTextContent("1×");
-    fireEvent.click(speed);
+    const toggle = screen.getByRole("button", { name: "Velocità del gioco 1×: passa a 2×" });
+    expect(pause.nextElementSibling).toBe(toggle);
+    fireEvent.click(toggle);
     expect(onChangeGameSpeed).toHaveBeenLastCalledWith(2);
-
-    rerender(<TitleBar {...props} gameSpeed={3} maxGameSpeed={3} />);
-    fireEvent.click(screen.getByRole("button", { name: "Velocità del gioco 3×: passa a 1×" }));
-    expect(onChangeGameSpeed).toHaveBeenLastCalledWith(1);
-
     rerender(<TitleBar {...props} gameSpeed={2} maxGameSpeed={2} />);
     expect(screen.getByRole("button", { name: "Velocità del gioco 2×: passa a 1×" })).toHaveClass("fast");
+
+    // Concept S2 «Tendina»: from 3× the button opens the unlocked speeds.
+    rerender(<TitleBar {...props} gameSpeed={2} maxGameSpeed={4} />);
+    const menuButton = screen.getByRole("button", { name: "Velocità del gioco 2×: scegli la velocità" });
+    expect(menuButton).toHaveTextContent("2×");
+    fireEvent.click(menuButton);
+    const items = screen.getAllByRole("menuitemradio");
+    expect(items.map((item) => item.textContent)).toEqual(["1×Normale", "✓2×Doppia", "3×Tripla", "4×Quadrupla"]);
+    expect(items[1]).toHaveAttribute("aria-checked", "true");
+    fireEvent.click(items[3]);
+    expect(onChangeGameSpeed).toHaveBeenLastCalledWith(4);
+    expect(screen.queryByRole("menu")).toBeNull();
   });
 });
