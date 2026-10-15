@@ -6,9 +6,9 @@ import type { FoundedSchool, GameState } from "./types";
 /*
  * Reputazione di rete (6.19): the only value that travels from a school to the
  * next one. The prestige earns 2 points for the Accademico title that unlocked it,
- * 2 for a national title,
- * √(Fama / 115) points, +2 each for the Champion's Arena, the Reptile
- * (or the Superba it became) and the Chronicles won by the school left behind. Points are spent at the foundation, for good:
+ * 3 for a national title, the Fama points (first at 120, each next at twice the
+ * Fama), 4 for the Champion's Arena, 3 for the Reptile (or the Superba it became)
+ * and 5 for the Chronicles won by the school left behind (15/10). Points are spent at the foundation, for good:
  * - six permanent upgrades, +20% of their base value per point (Scrittura: +1
  *   character per input instead, 14/10), up to 50 points;
  * - the network rent, which is consumed: each point locks 10% of the rent value
@@ -111,19 +111,32 @@ export interface PrestigeReputationPreview {
   rentPerPoint: number;
 }
 
+/** Fama needed for the `points`-th point: 120, then doubled at every point. */
+export function getFameForReputationPoint(points: number): number {
+  return GAME_CONFIG.reputationFameFirstPoint * GAME_CONFIG.reputationFameGrowth ** (points - 1);
+}
+
+export function getFameReputationPoints(fame: number): number {
+  let points = 0;
+  while (fame >= getFameForReputationPoint(points + 1)) points += 1;
+  return points;
+}
+
 export function getPrestigeReputationPreview(state: GameState): PrestigeReputationPreview {
   const nationalWin = (state.tournaments.nationalTitlesCurrentSchool ?? 0) > 0;
   const championsWin = state.tournaments.championsVictoryCurrentSchool;
   const reptileWin = getReptileWin(state);
   const chroniclesWin = state.tournaments.chroniclesVictoryCurrentSchool === true;
-  const famePoints = Math.floor(Math.sqrt(Math.max(0, state.school.fame) / GAME_CONFIG.reputationFameDivisor));
+  const famePoints = getFameReputationPoints(state.school.fame);
   // Network delle Onde: Lettere di raccomandazione and Gran Consiglio.
   const letterPoints = getUpgradeEffectTotal(state.upgrades, "foundationReputationBonus");
   const councilDoubled = getUpgradeEffectTotal(state.upgrades, "foundationReputationDouble") > 0;
   // The Accademico title opens the prestige; the National is worth more.
   const basePoints = GAME_CONFIG.reputationAcademyTitlePoints +
     (nationalWin ? GAME_CONFIG.reputationNationalTitlePoints : 0) + famePoints +
-    [championsWin, reptileWin, chroniclesWin].filter(Boolean).length * GAME_CONFIG.reputationTournamentPoints +
+    (championsWin ? GAME_CONFIG.reputationTournamentPoints.champions : 0) +
+    (reptileWin ? GAME_CONFIG.reputationTournamentPoints.reptile : 0) +
+    (chroniclesWin ? GAME_CONFIG.reputationTournamentPoints.chronicles : 0) +
     letterPoints;
   const rentValue = Math.max(0, state.school.activeMembers) *
     GAME_CONFIG.monthlyMemberFee * GAME_CONFIG.networkRentValueShare;

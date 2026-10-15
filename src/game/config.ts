@@ -156,13 +156,15 @@ export const GAME_CONFIG = {
   reputationStepByUpgrade: { training: 0.1, genetics: 0.1 } as Partial<Record<string, number>>,
   // The Accademico title that unlocks the prestige (13/10: 2 points like the tournaments, was 1).
   reputationAcademyTitlePoints: 2,
-  // A national title (Arena or Style) of the school left behind.
-  reputationNationalTitlePoints: 2,
-  // Champion's Arena, Reptile/Superba and Chronicles won by the school left behind.
-  reputationTournamentPoints: 2,
-  // Fama points = ⌊√(Fama / divisor)⌋: the n-th point arrives at divisor × n².
-  // 13/10: 115 ≈ 128 × 0,9, every threshold 10% sooner (was 128).
-  reputationFameDivisor: 115,
+  // A national title (Arena or Style) of the school left behind (15/10: 3, was 2).
+  reputationNationalTitlePoints: 3,
+  // Tournaments won by the school left behind (15/10: Champion's 4, Reptile/Superba 3, Chronicles 5; were 2).
+  reputationTournamentPoints: { champions: 4, reptile: 3, chronicles: 5 },
+  // Fama points (15/10): the first at 120 Fama, every next one at twice the Fama of
+  // the one before (120, 240, 480 …): ~5 points at 3.000 Fama, 10 at 120.000.
+  // Was ⌊√(Fama / 115)⌋, 32 points at 120.000.
+  reputationFameFirstPoint: 120,
+  reputationFameGrowth: 2,
   reputationUpgradeMaxLevel: 50,
   // Rent value of a school left behind: members × base fee × this share.
   networkRentValueShare: 0.1,

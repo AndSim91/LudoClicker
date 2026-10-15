@@ -72,3 +72,15 @@ it("draws the schools left on the map and collapses the older ones", () => {
   expect(screen.getByText(/N° 1 · Ordine delle Onde · Genova · Fama alla partenza 900 · Sede madre/)).toBeInTheDocument();
   expect(screen.getByText(/^1\.?450,00 €\/mese$/)).toBeInTheDocument();
 });
+
+it("shows the Chronicles row only once they are unlocked, with the tournament points of 15/10", () => {
+  const base = ready();
+  const { unmount } = render(<NetworkView state={base} onFoundSchool={vi.fn()} />);
+  expect(screen.queryByText("Chronicles of Ludosport")).not.toBeInTheDocument();
+  expect(screen.getByText("Champion's Arena").closest("li")).toHaveTextContent("+4 possibili");
+  unmount();
+
+  const chronicles = { ...base.tournaments.chronicles, unlocked: true };
+  render(<NetworkView state={{ ...base, tournaments: { ...base.tournaments, chronicles } }} onFoundSchool={vi.fn()} />);
+  expect(screen.getByText("Chronicles of Ludosport").closest("li")).toHaveTextContent("+5 possibili");
+});

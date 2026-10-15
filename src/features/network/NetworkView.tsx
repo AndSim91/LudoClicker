@@ -13,6 +13,7 @@ import {
   getPrestigeReputationPreview,
   getReputationLevel,
   type ReputationSpending,
+  getFameForReputationPoint,
 } from "../../game/reputation";
 import { getReptileTournamentName } from "../../game/reptileUnlock";
 import type { GameState, SchoolFoundationDetails } from "../../game/types";
@@ -47,12 +48,16 @@ export function NetworkView({
   const ready = canFoundSchool(state);
   const preview = getPrestigeReputationPreview(state);
   const network = state.network;
-  const nextFamePoint = (preview.famePoints + 1) ** 2 * GAME_CONFIG.reputationFameDivisor;
+  const nextFamePoint = getFameForReputationPoint(preview.famePoints + 1);
   const reptileName = getReptileTournamentName(state);
-  const tournaments: [string, boolean][] = [
-    ["Champion's Arena", preview.championsWin],
-    [reptileName, Boolean(preview.reptileWin)],
-    ["Chronicles of Ludosport", preview.chroniclesWin],
+  const tournamentPoints = GAME_CONFIG.reputationTournamentPoints;
+  const tournaments: [string, boolean, number][] = [
+    ["Champion's Arena", preview.championsWin, tournamentPoints.champions],
+    [reptileName, Boolean(preview.reptileWin), tournamentPoints.reptile],
+    // Andrea (15/10): no Chronicles row while they are locked.
+    ...(state.tournaments.chronicles.unlocked
+      ? [["Chronicles of Ludosport", preview.chroniclesWin, tournamentPoints.chronicles] as [string, boolean, number]]
+      : []),
   ];
   const secretsEnrolled = Object.values(network.secretLegendaries)
     .filter((progress) => progress.status === "enrolled").length;
@@ -108,10 +113,10 @@ export function NetworkView({
               <span>Fama {formatStat(state.school.fame)}<small>il prossimo punto a {formatStat(nextFamePoint)}</small></span>
               <b>+{preview.famePoints}</b>
             </li>
-            {tournaments.map(([name, won]) => (
+            {tournaments.map(([name, won, value]) => (
               <li key={name} className={won ? "is-done" : "is-open"}>
                 <span>{name}</span>
-                <b>{won ? `+${GAME_CONFIG.reputationTournamentPoints}` : `+${GAME_CONFIG.reputationTournamentPoints} possibili`}</b>
+                <b>{won ? `+${value}` : `+${value} possibili`}</b>
               </li>
             ))}
             {preview.letterPoints > 0 ? (

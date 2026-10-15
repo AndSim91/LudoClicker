@@ -618,19 +618,24 @@ i contenuti della scuola corrente e riparte da zero a ogni prestigio.
 
 ```
 punti = 2 per il titolo all'Accademico che sblocca il prestigio
-      + 2 se la scuola lasciata ha vinto un titolo nazionale
-      + arrotonda per difetto(√(Fama / 115))
-      + 2 se la scuola lasciata ha vinto la Champion's Arena
-      + 2 se ha vinto il Torneo Reptile o della Superba (stesso torneo)
-      + 2 se ha vinto le Chronicles of Ludosport
+      + 3 se la scuola lasciata ha vinto un titolo nazionale
+      + i punti della Fama (sotto)
+      + 4 se la scuola lasciata ha vinto la Champion's Arena
+      + 3 se ha vinto il Torneo Reptile o della Superba (stesso torneo)
+      + 5 se ha vinto le Chronicles of Ludosport
 ```
 
-L'n-esimo punto della Fama arriva a 115 × n² (115, 460, 1.035 …): il 13/10 ogni
-soglia è stata anticipata del 10% (prima 128 × n²) e l'Accademico è passato da 1
-a 2 punti, come i tornei. Per esempio, con il solo Accademico, Fama 114 dà 2
-punti, Fama 10.000 ne dà 11 e Fama 30.000 ne dà 18
-(`reputationAcademyTitlePoints = 2`, `reputationNationalTitlePoints = 2`,
-`reputationTournamentPoints = 2`, `reputationFameDivisor = 115`).
+**Punti della Fama (15/10/2026, Andrea):** più punti ai livelli bassi, sempre
+meno man mano che sale. Il primo punto arriva a 120 di Fama e ognuno dei
+successivi al doppio della Fama del precedente: 120, 240, 480, 960, 1.920,
+3.840, 7.680, 15.360, 30.720, 61.440, 122.880 … (`reputationFameFirstPoint =
+120`, `reputationFameGrowth = 2`, `getFameReputationPoints`). Fama 3.000 dà 5
+punti, 30.000 ne dà 8, 120.000 ne dà 10 (prima erano 5, 16 e 32 con
+⌊√(Fama / 115)⌋). Lo stesso giorno i tornei sono saliti: Nazionale 3 (era 2),
+Champion's 4, Reptile o Superba 3 e Chronicles 5 (erano 2); l'Accademico resta a 2
+(`reputationAcademyTitlePoints`, `reputationNationalTitlePoints`,
+`reputationTournamentPoints`). Nella pagina Network la riga delle Chronicles
+compare solo quando sono sbloccate.
 
 **Spesa.** I punti si spendono alla fondazione, nella finestra «Fonda una nuova
 scuola» della pagina Network (§ 17.3); la spesa è definitiva e i punti non spesi
