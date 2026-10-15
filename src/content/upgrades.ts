@@ -112,6 +112,8 @@ export interface UpgradeDefinition {
   /** Narrative links only: a node that transforms or follows another one. */
   requiredUpgradeLevels?: Partial<Record<UpgradeId, number>>;
   requiredGadgetProduct?: GadgetProductId;
+  /** Its own catalogue prices, untouched by the branch points (like the Network). */
+  fixedPrice?: boolean;
   /** Record of active members of the current school needed to open the node. */
   requiredPeakMembers?: number;
   requiredNetworkSchools?: number;
@@ -165,7 +167,7 @@ const UPGRADE_CATALOG: UpgradeDefinition[] = [
   { id: "winning-advertising", category: "writing", title: "Pubblicità vincente", description: "L'email diventa un volantino completo, e funziona anche sui Social. I **follower** arrivano, a volte persino in coppia.", effectLabel: "Ogni livello: +1 punto Creatività · Probabilità che un contenuto Social porti un **follower**: 50% senza il nodo, poi 60% · 70% · 80% · 90% · 95% · Livello 5: il 5% dei follower arriva in coppia", effect: "creativityPoint", effectPerLevel: 1, additionalEffectsPerLevel: { socialFollowerChanceTier: 1 }, baseCost: 5_000, costGrowth: LEVEL_GROWTH, levelCosts: [5_000, 10_000, 20_000, 40_000, 80_000], maxLevel: 5, requiredFame: noFame, requiredBranchPoints: 25 },
   { id: "marketing-course", category: "writing", title: "Corso di Marketing", description: "Qualcuno ha seguito un corso, e si vede: l'email spiega lo sport per bene. E ogni **follower** ora vale qualche centesimo in più.", effectLabel: "Ogni livello: +1 punto Creatività · Ogni **follower** rende al mese 0,20 € senza il nodo, poi 0,30 € · 0,40 € · 0,60 € · 0,80 € · 1 €", effect: "creativityPoint", effectPerLevel: 1, additionalEffectsPerLevel: { socialFollowerValueTier: 1 }, baseCost: 10_000, costGrowth: LEVEL_GROWTH, levelCosts: [10_000, 15_000, 22_500, 34_000, 51_000], maxLevel: 5, requiredFame: noFame, requiredBranchPoints: 30 },
   { id: "influencer-project", category: "writing", title: "Progetto Influencer", description: "Ring light, sorriso e un balletto che nessuno aveva chiesto. I **follower**, però, arrivano.", effectLabel: "Ogni livello: +1 **follower** sicuro per ogni contenuto Social · Livello 5: +5", effect: "socialExtraFollowers", effectPerLevel: 1, baseCost: 25_000, costGrowth: LEVEL_GROWTH, levelCosts: [25_000, 50_000, 100_000, 200_000, 400_000], maxLevel: 5, requiredFame: noFame, requiredUnlocks: ["social"], requiredBranchPoints: 35 },
-  { id: "sponsor-contracts", category: "writing", title: "Contratti di sponsorizzazione", description: "La fascia LED dell'Arena ha spazio da vendere. Ogni contratto mette un marchio in più sul muro, e qualche euro in più in cassa ogni mese.", effectLabel: "Ogni livello: un nuovo sponsor sulla fascia LED, che paga ogni mese in base alla **Fama** · 1 € · 2 € · 3 € · 5 € per punto di **Fama**", effect: "sponsorContracts", effectPerLevel: 1, baseCost: 2_000, costGrowth: LEVEL_GROWTH, levelCosts: [2_000, 4_000, 8_000, 16_000], maxLevel: 4, requiredFame: noFame, requiredPeakMembers: 1_000, requiredBranchPoints: 35, levelNotes: ["Sartoria Cruna dell'Ago", "F4 Basito · Solo Basilico Genovese", "Focacceria Inquartata di Strutto", "Lama di Luce, partner tecnico di LudoSport"] },
+  { id: "sponsor-contracts", category: "writing", title: "Contratti di sponsorizzazione", description: "La fascia LED dell'Arena ha spazio da vendere. Ogni contratto mette un marchio in più sul muro, e qualche euro in più in cassa ogni mese.", effectLabel: "Ogni livello: un nuovo sponsor sulla fascia LED, che paga ogni mese in base alla **Fama** · 1 € · 2 € · 3 € · 5 € per punto di **Fama**", effect: "sponsorContracts", effectPerLevel: 1, baseCost: 10_000, costGrowth: LEVEL_GROWTH, levelCosts: [10_000, 30_000, 80_000, 200_000], fixedPrice: true, maxLevel: 4, requiredFame: noFame, requiredPeakMembers: 1_000, requiredBranchPoints: 35, levelNotes: ["Sartoria Cruna dell'Ago", "F4 Basito · Solo Basilico Genovese", "Focacceria Inquartata di Strutto", "Lama di Luce, partner tecnico di LudoSport"] },
 
   // Carisma
   { id: "prepared-presentation", category: "charisma", title: "Presentazione preparata", description: "Tre frasi provate davanti allo specchio, per spiegare LudoSport in trenta secondi. Lo specchio non si è iscritto, i passanti sì.", effectLabel: "Ogni livello: +4% **Contatti** a ogni evento · Livello 5: +20%", effect: "eventContactsMultiplier", effectPerLevel: 0.04, baseCost: 50, costGrowth: LEVEL_GROWTH, levelCosts: [50, 100, 200, 400, 800], maxLevel: 5, requiredFame: noFame, requiredBranchPoints: 0 },
@@ -467,7 +469,7 @@ export function getUpgradeCost(
 ) {
   const localCost = definition.levelCosts?.[currentLevel] ??
     definition.baseCost * definition.costGrowth ** currentLevel;
-  if (definition.category === "network" || definition.category === "secrets") {
+  if (definition.category === "network" || definition.category === "secrets" || definition.fixedPrice) {
     return Math.round(localCost);
   }
   const branchPoints = levels ? getUpgradeCategoryPoints(levels, definition.category) : 0;

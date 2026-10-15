@@ -160,3 +160,12 @@ describe("Contratti di sponsorizzazione", () => {
     expect(buyUpgrade(big, "sponsor-contracts").upgrades["sponsor-contracts"]).toBe(1);
   });
 });
+
+describe("Contratti di sponsorizzazione: price", () => {
+  it("keeps its own prices whatever the branch points", async () => {
+    const { getUpgradeCost, getUpgradeDefinition, createInitialUpgradeLevels } = await import("../content/upgrades");
+    const definition = getUpgradeDefinition("sponsor-contracts")!;
+    const levels = { ...createInitialUpgradeLevels(), "spell-check": 5, "professional-email": 5, "marketing-course": 5 };
+    expect([0, 1, 2, 3].map((level) => getUpgradeCost(definition, level, levels))).toEqual([10_000, 30_000, 80_000, 200_000]);
+  });
+});

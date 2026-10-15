@@ -2313,8 +2313,9 @@ alla catena perché non acceleri troppo il prestigio.
 
 **Contratti di sponsorizzazione** (15/10, nono nodo: 35 punti di Creatività e
 1.000 iscritti di record nella scuola, cioè quando in Palestra c'è la fascia LED
-dell'Arena delle Onde; 2.000 / 4.000 / 8.000 / 16.000 € di catalogo, valori
-provvisori da verificare con il motore). Ogni livello firma uno sponsor, che
+dell'Arena delle Onde; prezzo fisso, deciso da Andrea il 15/10: 10.000 /
+30.000 / 80.000 / 200.000 €, che non sale con i punti del ramo, come nel
+Network). Ogni livello firma uno sponsor, che
 compare sulla fascia LED al posto di un «ORDINE DELLE ONDE» e paga ogni mese in
 base alla **Fama** della scuola: Sartoria Cruna dell'Ago 1 €, F4 Basito 2 €,
 Focacceria Inquartata di Strutto 3 € e, per ultimo e più prestigioso, Lama di

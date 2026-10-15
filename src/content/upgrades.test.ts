@@ -110,7 +110,7 @@ describe("upgrade catalog", () => {
       "winning-advertising": [5_000, 10_000, 20_000, 40_000, 80_000],
       "marketing-course": [10_000, 15_000, 22_500, 34_000, 51_000],
       "influencer-project": [25_000, 50_000, 100_000, 200_000, 400_000],
-      "sponsor-contracts": [2_000, 4_000, 8_000, 16_000],
+      "sponsor-contracts": [10_000, 30_000, 80_000, 200_000],
     });
     expect(costsFor("charisma")).toEqual({
       "prepared-presentation": [50, 100, 200, 400, 800],
