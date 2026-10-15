@@ -4399,7 +4399,12 @@ comprare e collaudo, rarità dalle revisioni), che resta sempre disponibile.
 Un prodotto il cui progetto è già stato comprato segue il giro normale. Ogni
 ritorno lascia una card «<Prodotto> <Rarità> torna in vetrina» in La mia
 giornata (solo lì, nessun avviso a giornata chiusa, nessun messaggio in
-Posta).
+Posta). Nel catalogo, i prodotti già stati in vendita che non sono ancora tornati
+compaiono come card **«In arrivo»** (concept B «Pacco sigillato»): bordo
+tratteggiato, nastro «In arrivo» sulla foto (oro in Onde, grigio in Outlook),
+occhiello «Già collaudato» e la pastiglia «Sbloccato tra X vendite di
+<prodotto precedente>»; i prodotti mai raggiunti restano nascosti
+(`getIncomingGadget`).
 
 Ogni progetto successivo si sblocca automaticamente dopo 100 vendite della
 famiglia precedente, sommando le unità di tutte le sue rarità. Lo sblocco non

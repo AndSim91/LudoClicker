@@ -39,6 +39,7 @@ import {
   GadgetWorkshopArtwork,
 } from "./GadgetArtwork";
 import { GadgetRhythmGame } from "./GadgetRhythmGame";
+import { getIncomingGadget } from "../../game/gadgetReturns";
 
 const numberFormatter = new Intl.NumberFormat("it-IT", {
   maximumFractionDigits: 2,
@@ -311,6 +312,35 @@ const GadgetProductCard = memo(function GadgetProductCard({
   );
 });
 
+/** Concept B «Pacco sigillato» (15/10/2026): a Gadget di carriera not back on sale yet. */
+function GadgetIncomingCard({
+  productId,
+  previousId,
+  remaining,
+}: {
+  productId: GadgetProductId;
+  previousId: GadgetProductId;
+  remaining: number;
+}) {
+  const definition = GADGET_DEFINITIONS[productId];
+  return (
+    <article className="gadget-product-card is-locked is-incoming">
+      <span className="gadget-product-rail" aria-hidden="true" />
+      <GadgetProductArtwork productId={productId} locked ribbon="In arrivo" />
+      <div className="gadget-product-heading">
+        <span>Già collaudato</span>
+        <h2>{definition.name}</h2>
+        <p>{definition.description}</p>
+      </div>
+      <div className="gadget-product-status">
+        <span className="gadget-status-label is-incoming">
+          Sbloccato tra {remaining} {remaining === 1 ? "vendita" : "vendite"} di {GADGET_DEFINITIONS[previousId].name}
+        </span>
+      </div>
+    </article>
+  );
+}
+
 export function GadgetsView({
   state: stateOverride,
   onStartProject,
@@ -457,9 +487,13 @@ export function GadgetsView({
         data-tutorial-region="gadget-catalog"
         data-tutorial-target="true"
       >
-        {/* Products appear only once their requirement is met (decisione del 06/10). */}
-        {GADGET_PRODUCT_ORDER.filter((productId) => state.gadgets.products[productId].unlocked).map((productId) => {
+        {/* Products appear only once their requirement is met (decisione del 06/10),
+            or as «In arrivo» if they were on sale in an earlier school (15/10/2026). */}
+        {GADGET_PRODUCT_ORDER.map((productId) => {
           const product = state.gadgets.products[productId];
+          const incoming = getIncomingGadget(state, productId);
+          if (incoming) return <GadgetIncomingCard key={productId} productId={productId} {...incoming} />;
+          if (!product.unlocked) return null;
           const highestRarity = getHighestUnlockedGadgetRarity(product);
           const revisionCost = getGadgetRevisionCost(productId, highestRarity);
           return (

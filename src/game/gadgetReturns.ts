@@ -56,6 +56,25 @@ export function syncGadgetBest(state: GameState): GameState {
     : { ...state, network: { ...state.network, gadgetBest: best } };
 }
 
+/**
+ * A product already on sale in an earlier school, not back yet: the sales of the
+ * previous product still missing («Sbloccato tra X vendite di Y», concept B, 15/10/2026).
+ */
+export function getIncomingGadget(
+  state: GameState,
+  productId: GadgetProductId,
+): { previousId: GadgetProductId; remaining: number } | undefined {
+  const index = GADGET_PRODUCT_ORDER.indexOf(productId);
+  if (
+    index <= 0 ||
+    state.gadgets.products[productId].projectPurchased ||
+    getSavedGadgetQuality(state.network, productId, "common") === undefined
+  ) return undefined;
+  const previousId = GADGET_PRODUCT_ORDER[index - 1];
+  const sold = getGadgetFamilyUnitsSold(state.gadgets.products[previousId]);
+  return { previousId, remaining: Math.max(0, GADGET_PROJECT_UNLOCK_SALES - sold) };
+}
+
 /** Puts back on sale what the sales have earned again. Called on every sale and at a new school. */
 export function restoreCareerGadgets(state: GameState, now: number): GameState {
   const { network } = state;

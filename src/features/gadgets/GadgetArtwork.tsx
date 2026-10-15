@@ -36,10 +36,13 @@ export function GadgetProductArtwork({
   productId,
   rarity = "common",
   locked = false,
+  ribbon,
 }: {
   productId: GadgetProductId;
   rarity?: GadgetRarity;
   locked?: boolean;
+  /** A tape across the photo: «In arrivo» on Gadget di carriera not back yet. */
+  ribbon?: string;
 }) {
   return (
     <div
@@ -57,6 +60,7 @@ export function GadgetProductArtwork({
         decoding="async"
         draggable={false}
       />
+      {ribbon ? <span className="gadget-product-ribbon">{ribbon}</span> : null}
     </div>
   );
 }

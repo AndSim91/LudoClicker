@@ -466,4 +466,26 @@ describe("GadgetsView", () => {
     expect(actions.onSkipMinigame).toHaveBeenCalledWith("wristband");
     expect(actions.onStartMinigame).not.toHaveBeenCalled();
   });
+
+  it("shows a Gadget di carriera not back yet as «In arrivo» with the sales still missing", () => {
+    const state = unlockedState();
+    const keychain = state.gadgets.products.keychain;
+    render(<GadgetsView {...handlers()} state={{
+      ...state,
+      network: { ...state.network, gadgetBest: { "sticker-set": { common: 80 } } },
+      gadgets: {
+        ...state.gadgets,
+        products: {
+          ...state.gadgets.products,
+          keychain: withCommonRarity(keychain, { unlocked: true, quality: 100, unitsSold: 18 }, {
+            unlocked: true, projectPurchased: true, prototypeCompleted: true, accepted: true,
+          }),
+        },
+      },
+    }} />);
+    expect(screen.getByText("Sbloccato tra 82 vendite di Portachiavi")).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Set di Adesivi" })).toBeTruthy();
+    // Never on sale before: still hidden, no spoilers.
+    expect(screen.queryByRole("heading", { name: "Tazza" })).toBeNull();
+  });
 });
