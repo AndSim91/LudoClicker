@@ -268,7 +268,7 @@
   padding: 10px;
   border: 1px solid var(--line-strong);
   border-radius: var(--radius-md);
-  font: 11px/1.4 Consolas, monospace;
+  font: 11px/1.4 var(--font-body, "Segoe UI Variable", "Segoe UI", system-ui, sans-serif);
 }
 
 .settings-status {

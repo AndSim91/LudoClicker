@@ -130,8 +130,7 @@
   color: white;
   background: var(--blue-600);
   font:
-    600 12px/1 "Segoe UI",
-    sans-serif;
+    600 12px/1 var(--font-body, "Segoe UI Variable", "Segoe UI", system-ui, sans-serif);
 }
 
 .settings-layout button:hover:not(:disabled) {
@@ -214,8 +213,7 @@
   color: var(--ink);
   background: var(--surface);
   font:
-    13px/1 "Segoe UI",
-    sans-serif;
+    13px/1 var(--font-body, "Segoe UI Variable", "Segoe UI", system-ui, sans-serif);
 }
 
 .settings-profile-row input:focus,
@@ -320,7 +318,7 @@
   border-radius: var(--radius-md);
   color: var(--ink);
   background: var(--surface);
-  font: 12px/1 "Segoe UI", sans-serif;
+  font: 12px/1 var(--font-body, "Segoe UI Variable", "Segoe UI", system-ui, sans-serif);
 }
 
 .settings-import-content input[type="file"]::file-selector-button {
@@ -331,7 +329,7 @@
   border-radius: calc(var(--radius-md) - 2px);
   color: var(--blue-700);
   background: var(--surface);
-  font: 600 12px/1 "Segoe UI", sans-serif;
+  font: 600 12px/1 var(--font-body, "Segoe UI Variable", "Segoe UI", system-ui, sans-serif);
   cursor: pointer;
 }
 

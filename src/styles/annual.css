@@ -270,7 +270,7 @@
 .annual-items-foot button { padding: 3px 9px; border: 1px solid var(--ap-line); border-radius: 6px; background: none; color: var(--ap-muted); font: 600 12px var(--font-body, inherit); cursor: pointer; }
 
 /* Guadagni previsti, stile borsa */
-.annual-market { border: 1px solid rgb(108 211 214 / 30%); border-radius: 8px; background: #010b13; font-family: Consolas, "Courier New", monospace; }
+.annual-market { border: 1px solid rgb(108 211 214 / 30%); border-radius: 8px; background: #010b13; font-variant-numeric: tabular-nums; }
 :root[data-theme="light"] .annual-market { background: #fafafa; }
 .annual-market-symbol { font-size: 11px; letter-spacing: .12em; color: var(--ap-muted); }
 .annual-market-total { font-size: 20px; font-weight: 700; color: var(--ap-cream); font-variant-numeric: tabular-nums; }
@@ -281,7 +281,7 @@
 /* Larghezza limitata: con la scala, un grafico al 100% crescerebbe senza fine. */
 .annual-plot svg { display: block; width: 100%; max-width: 440px; height: auto; }
 .annual-plot .grid { stroke: rgb(108 211 214 / 12%); stroke-width: 1; }
-.annual-plot .axis { fill: var(--ap-muted); font: 10px Consolas, monospace; }
+.annual-plot .axis { fill: var(--ap-muted); font: 10px var(--font-body, "Segoe UI Variable", "Segoe UI", system-ui, sans-serif); font-variant-numeric: tabular-nums; }
 .annual-plot .bar-in { fill: var(--ap-good); opacity: .85; }
 .annual-plot .bar-debt { fill: var(--ap-bad); }
 .annual-plot .average { stroke: var(--ap-gold); stroke-dasharray: 3 3; stroke-width: 1; }
