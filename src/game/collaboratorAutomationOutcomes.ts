@@ -25,6 +25,20 @@ export function isAthleticPreparationTarget(
     (course === year || (isSummerBreak(currentMonth) && course === year - 1));
 }
 
+const preparationTargetCache = new WeakMap<readonly Contact[], { month: number; has: boolean }>();
+
+/** Whether anyone can be prepared now; one pass per contacts list and month (20/10/2026). */
+export function hasAthleticPreparationTarget(
+  contacts: readonly Pick<Contact, "status" | "lastAgonistCourseYear">[],
+  currentMonth: number,
+): boolean {
+  const cached = preparationTargetCache.get(contacts as readonly Contact[]);
+  if (cached?.month === currentMonth) return cached.has;
+  const has = contacts.some((contact) => isAthleticPreparationTarget(contact, currentMonth));
+  preparationTargetCache.set(contacts as readonly Contact[], { month: currentMonth, has });
+  return has;
+}
+
 export function improveRandomAthletes(
   state: GameState,
   improvementCount: number,

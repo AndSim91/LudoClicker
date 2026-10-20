@@ -7,6 +7,7 @@ import { getUpgradeEffectTotal } from "../content/upgrades";
 import { GAME_CONFIG } from "./config";
 import { getCollaboratorFallbackProductivity } from "./collaboratorFallback";
 import { nextRandom } from "./random";
+import { getAvailableContactCount } from "./runtimeIndexes";
 import { getSocialEventPromotionBonus } from "./social";
 import type { GameState } from "./types";
 
@@ -49,9 +50,7 @@ export function getEventCollaboratorBonus(state: GameState): number {
  */
 export function getWaitingContacts(state: Pick<GameState, "contacts" | "availableContactPool">): number {
   const pooled = (state.availableContactPool ?? []).reduce((total, entry) => total + entry.count, 0);
-  let available = 0;
-  for (const contact of state.contacts) if (contact.status === "available") available += 1;
-  return pooled + available;
+  return pooled + getAvailableContactCount(state.contacts);
 }
 
 export function getEventMarketAvailability(state: GameState): number {

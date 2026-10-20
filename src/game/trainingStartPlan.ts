@@ -29,7 +29,7 @@ import { getInstructorPendingReleaseIds } from "./collaboratorManagement";
 import { GAME_CONFIG, getTechnicalArenaDurationMs } from "./config";
 import { roundCurrency } from "./economy";
 import { getAvailableSwords, reserveSwords } from "./equipment";
-import { getInstructorTeachingCounts } from "./runtimeIndexes";
+import { getContactsById, getInstructorTeachingCounts } from "./runtimeIndexes";
 import {
   compareInstructorTeachingPriority,
   selectInstructorCapacity,
@@ -107,7 +107,7 @@ class BatchedTrainingStartPlan implements TrainingStartPlan {
     private readonly now: number,
     private readonly teachingCounts: Map<string, number>,
   ) {
-    this.contactsById = new Map(state.contacts.map((contact) => [contact.id, contact]));
+    this.contactsById = new Map(getContactsById(state.contacts));
     this.collaboratorsById = new Map(
       state.collaborators.map((collaborator) => [collaborator.id, collaborator]),
     );

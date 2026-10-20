@@ -7,6 +7,7 @@ import type {
   ScheduledTrial,
 } from "./types";
 import { getPersonTrainings, hasAnyTraining } from "./trainingSlots";
+import { getLineage } from "./replaceById";
 
 type TrainingPerson = Contact | Collaborator;
 
@@ -338,15 +339,62 @@ export function getContactsById(contacts: Contact[]): ReadonlyMap<string, Contac
   return index;
 }
 
-export function getAvailableContactCount(contacts: Contact[]): number {
-  const cached = availableContactCountCache.get(contacts);
+const isAvailable = (contact: Contact | undefined) => contact?.status === "available";
+// ponytail: past this many steps up the lineage, a plain scan (chains are short in practice).
+const MAX_LINEAGE_DEPTH = 64;
+
+export function getAvailableContactCount(contacts: readonly Contact[], depth = 0): number {
+  const cached = availableContactCountCache.get(contacts as Contact[]);
   if (cached !== undefined) return cached;
-  let count = 0;
-  for (const contact of contacts) {
-    if (contact.status === "available") count += 1;
+  // From the array it was made from (replaceById, appendItems): only the change is looked at.
+  const lineage = depth < MAX_LINEAGE_DEPTH ? getLineage(contacts) : undefined;
+  let count: number;
+  if (lineage) {
+    const parent = lineage.parent as readonly Contact[];
+    count = getAvailableContactCount(parent, depth + 1);
+    if (lineage.changed !== undefined) {
+      count += Number(isAvailable(contacts[lineage.changed])) - Number(isAvailable(parent[lineage.changed]));
+    } else if (lineage.appendedFrom !== undefined) {
+      for (let index = lineage.appendedFrom; index < contacts.length; index += 1) count += Number(isAvailable(contacts[index]));
+    }
+  } else {
+    count = 0;
+    for (const contact of contacts) if (isAvailable(contact)) count += 1;
   }
-  availableContactCountCache.set(contacts, count);
+  availableContactCountCache.set(contacts as Contact[], count);
   return count;
+}
+
+const firstAvailableCache = new WeakMap<readonly Contact[], number>();
+
+/** Index of the first available contact (the next one to write to), or the length if none. */
+export function getFirstAvailableContactIndex(contacts: readonly Contact[], depth = 0): number {
+  const cached = firstAvailableCache.get(contacts);
+  if (cached !== undefined) return cached;
+  const scanFrom = (start: number) => {
+    let index = start;
+    while (index < contacts.length && !isAvailable(contacts[index])) index += 1;
+    return index;
+  };
+  const lineage = depth < MAX_LINEAGE_DEPTH ? getLineage(contacts) : undefined;
+  let first: number;
+  if (!lineage) {
+    first = scanFrom(0);
+  } else {
+    const parentFirst = getFirstAvailableContactIndex(lineage.parent as readonly Contact[], depth + 1);
+    const changed = lineage.changed;
+    if (lineage.appendedFrom !== undefined) {
+      first = parentFirst < lineage.appendedFrom ? parentFirst : scanFrom(lineage.appendedFrom);
+    } else if (changed === undefined || changed > parentFirst) {
+      first = parentFirst;
+    } else if (isAvailable(contacts[changed])) {
+      first = changed;
+    } else {
+      first = changed < parentFirst ? parentFirst : scanFrom(changed + 1);
+    }
+  }
+  firstAvailableCache.set(contacts, first);
+  return first;
 }
 
 export function getContactsAwaitingEmailCount(contacts: Contact[]): number {

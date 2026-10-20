@@ -14,6 +14,7 @@ import { makeGameId } from "./ids";
 import { getCurrentSchoolContactCount } from "./historyArchive";
 import { getCareer } from "./career";
 import { getReservedLegendaryProfileIds } from "./legendaryAvailability";
+import { appendItems } from "./replaceById";
 import { nextRandom } from "./random";
 import { advanceRandomSeed, rollAthleteBaseStats } from "./athleteStats";
 import type {
@@ -340,10 +341,16 @@ export function createAcquiredContacts(
   now: number,
   options?: { forcedRarity?: ForcedContactRarity },
 ): { contacts: Contact[]; nextSeed: number } {
+  // Nobody to create (an event that met no one): nothing below would change (20/10/2026).
+  if (!(count >= 1)) return { contacts: [], nextSeed: state.randomSeed };
   let nextSeed = state.randomSeed;
   let progress = state.legendaryCollaborators;
   const reservedProfileIds = getReservedLegendaryProfileIds(state, now);
-  const contactIds = new Set(state.contacts.map((contact) => contact.id));
+  // The ids already taken. A new id carries `now` (makeGameId), so only contacts made
+  // at this same instant can clash: one pass with startsWith, no index of everyone.
+  const samePrefix = `${makeGameId("contact", now, "")}`;
+  const takenIds = new Set<string>();
+  for (const contact of state.contacts) if (contact.id.startsWith(samePrefix)) takenIds.add(contact.id);
   let nextSequence = state.statistics.contactsAcquired;
   const currentSchoolContactCount = getCurrentSchoolContactCount(state);
   const legendsVisitMultiplier = 1 + getUpgradeEffectTotal(state.upgrades, "legendaryAppearanceBonus");
@@ -419,11 +426,11 @@ export function createAcquiredContacts(
       ? getRetainedLegendaryProgress(progress, specialProfile.id)
       : undefined;
     let id = returningContact?.id ?? makeGameId("contact", now, `acquired-${nextSequence}`);
-    while (!returningContact && contactIds.has(id)) {
+    while (!returningContact && takenIds.has(id)) {
       nextSequence += 1;
       id = makeGameId("contact", now, `acquired-${nextSequence}`);
     }
-    contactIds.add(id);
+    takenIds.add(id);
     nextSequence += 1;
     return {
       ...returningContact,
@@ -466,6 +473,10 @@ export function mergeAcquiredContacts(
 ): Contact[] {
   if (acquiredContacts.length === 0) return existingContacts;
   const acquiredById = new Map(acquiredContacts.map((contact) => [contact.id, contact]));
+  // Usually all new: append, without copying everyone through the map (20/10/2026).
+  if (!existingContacts.some((contact) => acquiredById.has(contact.id))) {
+    return appendItems(existingContacts, acquiredContacts);
+  }
   const existingIds = new Set(existingContacts.map((contact) => contact.id));
   return [
     ...existingContacts.map((contact) => acquiredById.get(contact.id) ?? contact),

@@ -10,7 +10,8 @@ import { GAME_CONFIG } from "./config";
 import { createCampaign } from "./campaignContent";
 import { ANDREA_SIMONAZZI_ID, materializePooledContact } from "./contacts";
 import { makeGameId } from "./ids";
-import { replaceById } from "./replaceById";
+import { indexById, replaceById } from "./replaceById";
+import { getFirstAvailableContactIndex } from "./runtimeIndexes";
 import { nextRandom, randomBetween } from "./random";
 import { addMessage } from "./stateUpdates";
 import { selectActiveEmail } from "./selectors";
@@ -46,7 +47,7 @@ export function startNextCampaign(currentState: GameState, now: number): GameSta
   if (selectActiveEmail(currentState)) return currentState;
   let state = currentState;
   let nextContact = findPriorityContact(state) ??
-    state.contacts.find((contact) => contact.status === "available");
+    state.contacts[getFirstAvailableContactIndex(state.contacts)];
   if (!nextContact) {
     const pooled = materializePooledContact(state, now);
     if (!pooled) return state;
@@ -116,9 +117,7 @@ export function finalizeEmail(state: GameState, emailId: string, now: number): G
     if (status === "lost") emailLossStreak += 1;
   }
   const protectedBooking = emailLossStreak >= GAME_CONFIG.conversionGuaranteeFailures;
-  const contactRarity = state.contacts.find(
-    (contact) => contact.id === email.contactId,
-  )?.rarity ?? "common";
+  const contactRarity = state.contacts[indexById(state.contacts, email.contactId)]?.rarity ?? "common";
   const result =
     guaranteedTutorialBooking || protectedBooking ||
       bookingRoll < getEmailBookingChance(state, contactRarity)

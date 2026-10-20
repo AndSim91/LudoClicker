@@ -15,7 +15,7 @@ import {
   isCourseXUnlocked,
 } from "../content/upgrades";
 import { getInstructorPendingReleaseIds } from "./collaboratorManagement";
-import { isAthleticPreparationTarget } from "./collaboratorAutomationOutcomes";
+import { hasAthleticPreparationTarget } from "./collaboratorAutomationOutcomes";
 import { getMessageThreadKey } from "./messages";
 import { getMonthlyOperationalIncome } from "./membershipEconomy";
 import { isGameAreaUnlocked } from "./progression";
@@ -104,7 +104,7 @@ export function selectAthleticPreparationInstructorIds(state: GameState): Set<st
     !isAthleticPreparationUnlocked(state.upgrades) ||
     // 15/10/2026: only while someone can be prepared, otherwise the Istruttore kept
     // weight 2 in his capacity for an idle activity and his own courses ran at a third.
-    !state.contacts.some((contact) => isAthleticPreparationTarget(contact, state.school.currentMonth))
+    !hasAthleticPreparationTarget(state.contacts, state.school.currentMonth)
   ) return activeInstructorIds;
 
   const teachingCounts = getInstructorTeachingCounts(state.contacts, state.collaborators);
