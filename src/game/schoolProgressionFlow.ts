@@ -194,6 +194,8 @@ export function foundSchool(
       prestigeOfferSent: false,
       secretLegendaries: state.network.secretLegendaries,
       ...(state.network.superbaTournament ? { superbaTournament: true } : {}),
+      // «Un procione in palestra» keeps doubling for the whole save.
+      ...(state.network.raccoonVisits ? { raccoonVisits: state.network.raccoonVisits } : {}),
       ...(state.network.gadgetMastery ? { gadgetMastery: state.network.gadgetMastery } : {}),
       ...(gadgetBest ? { gadgetBest } : {}),
     },

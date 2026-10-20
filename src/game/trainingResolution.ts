@@ -258,6 +258,7 @@ function resolveHiddenExam(
   training: FormTraining,
   slot: TrainingSlot,
 ): boolean {
+  if (training.examWaived) return true;
   const exam = getExamProfile(
     context.state,
     training,

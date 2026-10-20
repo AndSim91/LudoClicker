@@ -211,6 +211,7 @@ function hasValidTraining(training: GameState["contacts"][number]["training"]): 
     (training.technicianId === undefined || typeof training.technicianId === "string") &&
     (training.eLearning === undefined || typeof training.eLearning === "boolean") &&
     (training.refresher === undefined || typeof training.refresher === "boolean") &&
+    (training.examWaived === undefined || typeof training.examWaived === "boolean") &&
     (training.trainingTrack === undefined ||
       training.trainingTrack === "athlete" ||
       training.trainingTrack === "combined-instructor" ||

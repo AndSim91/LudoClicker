@@ -9,6 +9,8 @@ import {
   getPrestigeRequirements,
 } from "./engine";
 import { selectIncomePerMonth } from "./selectors";
+import { boostRunningCourses } from "./narrativeFlow";
+import type { GameState } from "./types";
 import { formatCurrency } from "../shared/formatters";
 
 describe("game engine: narrative", () => {
@@ -517,6 +519,93 @@ describe("game engine: narrative", () => {
     const resolved = gameReducer(ready, { type: "TICK", now: 2_000 });
 
     expect(resolved.contacts.find((contact) => contact.id === currentContact.id)?.status).toBe("enrolled");
+  });
+
+  it("rolls Leggendario events only while their Leggendario is enrolled, with wear in percent", () => {
+    const initial = createInitialState(1_000);
+    const due = (enrolled: string[], seed: number) => ({
+      ...initial,
+      randomSeed: seed,
+      school: { ...initial.school, activeMembers: 50 },
+      equipment: { ...initial.equipment, totalSwords: 40, availableSwords: 40, wear: 1_000 },
+      legendaryCollaborators: {
+        ...initial.legendaryCollaborators,
+        enrolledProfileIds: enrolled as typeof initial.legendaryCollaborators.enrolledProfileIds,
+      },
+      narrative: { ...initial.narrative, nextEventAt: 2_000 },
+    });
+    const linked = new Set(["perfect-rack", "pini-at-work", "too-many-volunteers"]);
+    const roll = (enrolled: string[]) => Array.from({ length: 300 }, (_, seed) =>
+      gameReducer(due(enrolled, seed + 1), { type: "TICK", now: 2_000 }));
+
+    expect(roll([]).some((state) => linked.has(state.narrative.history[0]?.definitionId))).toBe(false);
+    const pini = roll(["ruggero-pini"]).find((state) => state.narrative.history[0]?.definitionId === "pini-at-work");
+    // −5% di 40 spade × 100 = −200 punti.
+    expect(pini?.narrative.history[0].effects).toMatchObject({ wear: -200, wearPercent: -5 });
+    expect(pini?.equipment.wear).toBe(800);
+  });
+
+  it("gives the Leggendari events their effects", () => {
+    const initial = createInitialState(1_000);
+    const base = {
+      ...initial,
+      school: { ...initial.school, activeMembers: 50, currentMonth: 10 },
+      equipment: { ...initial.equipment, totalSwords: 10, availableSwords: 10, wear: 500 },
+      network: { ...initial.network, schoolCount: 2, raccoonVisits: 3 },
+      narrative: { ...initial.narrative, nextEventAt: 2_000 },
+    };
+    const rollFor = (profileId: string, definitionId: string, state: GameState = base) => Array.from({ length: 400 }, (_, seed) =>
+      gameReducer({
+        ...state,
+        randomSeed: seed + 1,
+        legendaryCollaborators: {
+          ...state.legendaryCollaborators,
+          enrolledProfileIds: [profileId] as typeof state.legendaryCollaborators.enrolledProfileIds,
+        },
+      }, { type: "TICK", now: 2_000 }))
+      .find((result) => result.narrative.history.at(-1)?.definitionId === definitionId)!;
+
+    // Todaro: 100.000 € per school of the career, the current one included.
+    const alpha = rollFor("lorenzo-todaro", "alpha-help");
+    expect(alpha.school.euros - base.school.euros).toBe(300_000);
+
+    // Simonazzi's raccoon, fourth visit: ×8 on every effect, and the counter goes on.
+    const raccoon = rollFor("andrea-simonazzi", "gym-raccoon");
+    expect(raccoon.network.raccoonVisits).toBe(4);
+    expect(raccoon.narrative.history.at(-1)?.effects).toMatchObject({ wearPercent: -8, wear: -80, courseBoostPercent: 8 });
+
+    // Scarzello: the next June is shielded, and the year after cannot be.
+    const mediator = rollFor("matteo-scarzello", "the-mediator");
+    expect(mediator.narrative.mediatorSchoolYear).toBe(1);
+    const nextYear = {
+      ...mediator,
+      school: { ...mediator.school, currentMonth: 22 },
+      narrative: { ...mediator.narrative, nextEventAt: 2_000 },
+    };
+    expect(rollFor("matteo-scarzello", "the-mediator", nextYear)).toBeUndefined();
+  });
+
+  it("pushes every running course forward and skips the exam when it finishes", () => {
+    const initial = createInitialState(1_000);
+    const contact = (id: string, startedAt: number, completesAt: number) => ({
+      ...initial.contacts[0],
+      id,
+      status: "enrolled" as const,
+      forms: [],
+      training: { formId: "form-1" as const, startedAt, completesAt, status: "running" as const },
+    });
+    const state = {
+      ...initial,
+      contacts: [contact("far", 0, 10_000), contact("near", 0, 10_000)],
+    };
+    const boosted = boostRunningCourses({
+      ...state,
+      contacts: [state.contacts[0], { ...state.contacts[1], training: { ...state.contacts[1].training, startedAt: -8_500, completesAt: 1_500 } }],
+    }, 20, 0);
+
+    expect(boosted.contacts[0].training).toMatchObject({ startedAt: -2_000, completesAt: 8_000 });
+    expect(boosted.contacts[0].training?.examWaived).toBeUndefined();
+    expect(boosted.contacts[1].training).toMatchObject({ completesAt: 0, examWaived: true });
   });
 
   it("prevents a third consecutive negative narrative event", () => {

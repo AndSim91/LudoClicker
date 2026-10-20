@@ -570,7 +570,7 @@ describe("DayPanel", () => {
     // An Imprevisto: red card, the definition's text and its effects as pastiglie.
     expect(screen.getByText("Imprevisto")).toBeVisible();
     expect(screen.getByText("Non so cosa sia successo, non sono stato io!")).toBeVisible();
-    expect(screen.getByText("+30 usura")).toHaveClass("day-effect", "is-bad");
+    expect(screen.getByText("+5% usura")).toHaveClass("day-effect", "is-bad");
     expect(screen.getByText("1 spada rotta")).toHaveClass("day-effect", "is-bad");
 
     act(() => {

@@ -55,6 +55,8 @@ export interface FormTraining {
   eLearning?: boolean;
   /** Corso di aggiornamento: a Tecnico turns an e-Learning Istruttore into a normal one. */
   refresher?: boolean;
+  /** Finished by an Evento (Usai, Oliveri, il procione): no hidden exam (20/10/2026). */
+  examWaived?: boolean;
 }
 
 export interface Contact {
@@ -367,13 +369,25 @@ export type NarrativeEventId =
   | "too-many-volunteers"
   | "perfect-rack"
   | "rancor-den"
-  | "thirty-milanese-coins";
+  | "thirty-milanese-coins"
+  | "alpha-help"
+  | "the-mediator"
+  | "perfect-photos"
+  | "hokage-technician"
+  | "derivative-pink"
+  | "gym-raccoon";
 
 /** What an Evento or Imprevisto actually did to the game (pastiglie in La mia giornata). */
 export interface NarrativeEffects {
   contacts?: number;
   euros?: number;
   wear?: number;
+  /** Dal 20/10 l'usura degli Eventi è in percentuale: la pastiglia mostra questa. */
+  wearPercent?: number;
+  /** Avanzamento dato a tutti i corsi in corso, in percentuale. */
+  courseBoostPercent?: number;
+  /** «Il Mediatore»: anno scolastico senza abbandoni. */
+  departureShieldYear?: number;
   damagedSwords?: number;
   repairedSwords?: number;
 }
@@ -1110,6 +1124,8 @@ export interface GameState {
     secretLegendaries: Record<SecretLegendaryId, SecretLegendaryProgress>;
     /** The Reptile has become the Torneo della Superba: permanent, kept by every new school. */
     superbaTournament?: boolean;
+    /** «Un procione in palestra»: times it came, over the whole save; its effects double each time. */
+    raccoonVisits?: number;
     /** Maestria dei gadget: product×rarity reached at 100%, collaudo skipped for good (gadgetRarity.ts). */
     gadgetMastery?: Partial<Record<GadgetProductId, GadgetRarity[]>>;
     /**
@@ -1176,6 +1192,8 @@ export interface GameState {
   narrative: {
     nextEventAt: number;
     history: NarrativeEventRecord[];
+    /** «Il Mediatore»: school year whose June departures are skipped (never two years in a row). */
+    mediatorSchoolYear?: number;
   };
   tutorial: TutorialProgress;
   shortGoal: ShortGoalProgress;

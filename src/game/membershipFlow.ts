@@ -7,7 +7,7 @@ import {
   isAthleteImmuneFromDeparture,
   type AthleteDepartureContext,
 } from "./athleteImmunity";
-import { isSchoolYearDepartureMonth } from "./calendar";
+import { getSchoolYear, isSchoolYearDepartureMonth } from "./calendar";
 import { GAME_CONFIG } from "./config";
 import { roundCurrency, scaleCurrencyGain } from "./economy";
 import { getMemberAnnualDepartureChance } from "./formulas";
@@ -209,6 +209,8 @@ function processMemberDepartures(
   now: number,
 ): GameState {
   if (state.school.activeMembers <= DEPARTURE_FREE_MEMBERS) return state;
+  // «Il Mediatore» (20/10/2026): this school year nobody leaves.
+  if (state.narrative.mediatorSchoolYear === getSchoolYear(state.school.currentMonth - 1)) return state;
   const collaboratorsByContactId = new Map(
     state.collaborators.map((collaborator) => [collaborator.contactId, collaborator]),
   );

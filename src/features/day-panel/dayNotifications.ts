@@ -453,7 +453,7 @@ export function selectDayNotifications(
         effects: getNarrativeEffects(event.effects ?? {
           contacts: definition!.contactDelta,
           euros: definition!.euroDelta,
-          wear: definition!.wearDelta,
+          wearPercent: definition!.wearPercent,
           damagedSwords: definition!.damagedSwordsDelta,
           repairedSwords: definition!.repairedSwordsDelta,
         }),
@@ -534,7 +534,18 @@ export function getNarrativeEffects(effects: NarrativeEffects): DayEffect[] {
   if (effects.euros) {
     list.push({ icon: "coin", amount: `${effects.euros > 0 ? "+" : "−"}${formatStat(Math.abs(effects.euros))} €`, good: effects.euros > 0 });
   }
-  if (effects.wear) list.push({ icon: "wrench", amount: sign(effects.wear), text: "usura", good: effects.wear < 0 });
+  if (effects.wearPercent) {
+    list.push({ icon: "wrench", amount: `${sign(effects.wearPercent)}%`, text: "usura", good: effects.wearPercent < 0 });
+  } else if (effects.wear) {
+    // Eventi registrati prima del 20/10: usura in punti.
+    list.push({ icon: "wrench", amount: sign(effects.wear), text: "usura", good: effects.wear < 0 });
+  }
+  if (effects.courseBoostPercent) {
+    list.push({ icon: "check", amount: `+${effects.courseBoostPercent}%`, text: "a tutti i corsi", good: true });
+  }
+  if (effects.departureShieldYear !== undefined) {
+    list.push({ icon: "calendar", amount: "0", text: "abbandoni quest'anno", good: true });
+  }
   if (effects.damagedSwords) {
     list.push({ icon: "warning", amount: String(effects.damagedSwords), text: effects.damagedSwords === 1 ? "spada rotta" : "spade rotte", good: false });
   }

@@ -319,14 +319,17 @@ describe("game engine: operations", () => {
 
   it("blocks damaged swords until paid maintenance repairs them", () => {
     const initial = createInitialState(1_000);
-    const due = {
+    const due = (randomSeed: number) => ({
       ...initial,
-      randomSeed: 18,
+      randomSeed,
       school: { ...initial.school, activeMembers: 10, euros: 20 },
       narrative: { ...initial.narrative, nextEventAt: 2_000 },
-    };
+    });
 
-    const damaged = gameReducer(due, { type: "TICK", now: 2_000 });
+    // The first seed that rolls «Un piccolo disastro» (+5% of 6 swords = 30 points).
+    const damaged = Array.from({ length: 200 }, (_, seed) =>
+      gameReducer(due(seed + 1), { type: "TICK", now: 2_000 }))
+      .find((state) => state.narrative.history[0]?.definitionId === "unexpected-repair")!;
     const repairMessage = { preview: damaged.narrative.history.find(
       (event) => event.title === "Un piccolo disastro",
     )?.summary };
