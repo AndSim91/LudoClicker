@@ -375,7 +375,8 @@ export type NarrativeEventId =
   | "perfect-photos"
   | "hokage-technician"
   | "derivative-pink"
-  | "gym-raccoon";
+  | "gym-raccoon"
+  | "millennium-sabersmith";
 
 /** What an Evento or Imprevisto actually did to the game (pastiglie in La mia giornata). */
 export interface NarrativeEffects {
