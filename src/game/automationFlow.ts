@@ -1078,35 +1078,50 @@ export function processAutomaticTeaching(
     return false;
   };
   // Pass 1, students in priority order (14/10/2026, same order and same courses as a
-  // full sort). In a big school hundreds qualify and a couple of places are free, so
-  // the next student is picked from the pool instead of sorting everyone; after each
-  // start the pool keeps only who can still start (loads only grow, funds only shrink,
-  // so who cannot start now cannot start later in this pass). If someone in the pool
-  // starts nothing, the rest is sorted and walked as before.
-  let pool = students.filter(canActNow()).map((student) => ({ student, priority: priorityOf(student) }));
-  let ordered: typeof students | undefined;
-  for (let next = 0; ordered ? next < ordered.length : pool.length > 0;) {
-    let student: (typeof students)[number];
-    if (ordered) {
-      student = ordered[next];
-      next += 1;
-    } else {
-      let best = 0;
-      for (let index = 1; index < pool.length; index += 1) {
-        if (compareAutomaticTeachingStudentPriority(pool[index].priority, pool[best].priority) < 0) best = index;
-      }
-      student = pool[best].student;
-      pool[best] = pool[pool.length - 1];
-      pool.pop();
+  // full sort). They come out of a heap, so nobody sorts everyone. Loads only grow and
+  // funds only shrink, so who cannot start now cannot start later in this pass: each
+  // student is checked when their turn comes, against the state after the last start
+  // (20/10/2026: filtering the whole pool after every start was a sixth of the motore
+  // with a thousand Istruttori). If someone who can start starts nothing, the rest of
+  // those who can still start are walked in order, as before.
+  const heap = students.filter(canActNow()).map((student) => ({ student, priority: priorityOf(student) }));
+  const first = (left: number, right: number) =>
+    compareAutomaticTeachingStudentPriority(heap[left].priority, heap[right].priority) < 0;
+  const siftDown = (from: number) => {
+    for (let index = from; ;) {
+      const left = index * 2 + 1;
+      let best = index;
+      if (left < heap.length && first(left, best)) best = left;
+      if (left + 1 < heap.length && first(left + 1, best)) best = left + 1;
+      if (best === index) return;
+      [heap[index], heap[best]] = [heap[best], heap[index]];
+      index = best;
     }
-    const started = startFormFor(student);
-    if (ordered) continue;
-    if (started) {
-      const canAct = canActNow();
-      pool = pool.filter((entry) => canAct(entry.student));
-    } else {
-      ordered = sortByPriority(pool.map((entry) => entry.student));
+  };
+  const pop = () => {
+    const top = heap[0];
+    const last = heap.pop()!;
+    if (heap.length > 0) {
+      heap[0] = last;
+      siftDown(0);
     }
+    return top.student;
+  };
+  for (let index = Math.floor(heap.length / 2) - 1; index >= 0; index -= 1) siftDown(index);
+  let canAct = canActNow();
+  while (heap.length > 0) {
+    const student = pop();
+    if (!canAct(student)) continue;
+    if (startFormFor(student)) {
+      canAct = canActNow();
+      continue;
+    }
+    const ordered: typeof students = [];
+    while (heap.length > 0) {
+      const next = pop();
+      if (canAct(next)) ordered.push(next);
+    }
+    for (const next of ordered) startFormFor(next);
   }
   // Pass 2 (Arena Tecnica / Corso Agonisti): the students the old loop skipped are
   // left out before sorting, so the order of the others does not change.

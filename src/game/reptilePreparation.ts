@@ -1,6 +1,6 @@
 import { getCollaboratorProductivity } from "../content/forms";
 import { getCalendarMonth } from "./calendar";
-import { isPrimarySectorIdle } from "./collaboratorFallback";
+import { athleticPreparationOnce, isPrimarySectorIdle } from "./collaboratorFallback";
 import { GAME_CONFIG } from "./config";
 import {
   REPTILE_ROLE_BY_SECTOR,
@@ -148,6 +148,7 @@ export function getReptileBarRates(state: GameState): Partial<Record<ReptileSect
   }
   let unassignedPower = 0;
   let unassignedCount = 0;
+  const preparing = athleticPreparationOnce(state);
   for (const collaborator of state.collaborators) {
     if (!collaborator.assignment) {
       unassignedPower += getCollaboratorProductivity(collaborator, null) * GAME_CONFIG.reptileUnassignedShare;
@@ -157,7 +158,7 @@ export function getReptileBarRates(state: GameState): Partial<Record<ReptileSect
     const sector = getReptileSectorForRole(collaborator.assignment);
     const entry = sector ? rates[sector] : undefined;
     if (!sector || !entry) continue;
-    const idle = isPrimarySectorIdle(state, collaborator);
+    const idle = isPrimarySectorIdle(state, collaborator, preparing);
     entry.assigned += 1;
     if (idle) entry.idle += 1;
     entry.rate += getCollaboratorProductivity(collaborator, REPTILE_ROLE_BY_SECTOR[sector]) *

@@ -8,7 +8,11 @@
  * Opzioni:
  *   --partite N   partite da giocare (50)
  *   --scuole N    fino a quale scuola (20)
- *   --ore N       tetto di sicurezza per partita, in ore effettive (400)
+ *   --ore N       tetto di sicurezza per partita, in ore effettive (60)
+ *   --ore-scuola N  tetto di ore effettive in una sola scuola (5): oltre, la
+ *                 partita è bloccata, si ferma e finisce nel report così com'è
+ *   --minuti N    tempo massimo di calcolo, in minuti reali: allo scadere il
+ *                 motore ferma le partite e scrive comunque il report
  *   --thread N    partite in contemporanea al massimo (tutti i core)
  *   --cpu N       % massima della CPU del PC (99)
  *   --ram N       % massima della RAM libera (99)
@@ -33,6 +37,9 @@
  *   soglia di sicurezza (3%, almeno 512 MB) l'ultima partita avviata viene fermata e
  *   rimessa in coda (riparte uguale: il seme è lo stesso).
  * Una partita usa un solo core: JavaScript non divide una partita su più core.
+ *
+ * Ctrl+C ferma il motore e scrive comunque il report con le partite fin dove sono
+ * arrivate (un secondo Ctrl+C esce subito, senza report).
  *
  * Nel terminale un pannello fisso si ridisegna ogni 2 secondi: avanzamento totale,
  * stima della fine e una riga per partita (scuola, ore di gioco, iscritti, cosa sta
@@ -98,7 +105,9 @@ function opzioni(argv) {
   return {
     partite: Number(get("partite", 50)),
     scuole: Number(get("scuole", 20)),
-    ore: Number(get("ore", 400)),
+    ore: Number(get("ore", 60)),
+    oreScuola: Number(get("ore-scuola", 5)),
+    minuti: Number(get("minuti", 0)),
     thread: Math.max(1, Math.min(core, Number(get("thread", core)))),
     cpu: Math.max(10, Math.min(99, Number(get("cpu", 99)))),
     ram: Math.max(10, Math.min(99, Number(get("ram", 99)))),
@@ -130,13 +139,14 @@ async function impacchetta() {
 /** Una partita per thread: il thread finisce con la partita. */
 async function lavoratore() {
   const motore = await import(pathToFileURL(BUNDLE).href);
-  const { seed, scuole, ore, pausa, reputazione } = workerData;
+  const { seed, scuole, ore, oreScuola, pausa, reputazione } = workerData;
   const segnale = new Int32Array(pausa);
   let prossimaMemoria = 0;
   const registro = motore.giocaPartita({
     seed,
     maxScuole: scuole,
     maxOre: ore,
+    maxOreScuola: oreScuola,
     reputazione,
     onAvanzamento: (parziale, state) => parentPort.postMessage({
       tipo: "avanzamento",
@@ -147,12 +157,15 @@ async function lavoratore() {
     }),
     alPasso: () => {
       // In pausa il thread dorme qui finché il lanciatore non lo risveglia: 0% di CPU.
+      // Segnale: 0 gioca, 1 in pausa, 2 fermati (Ctrl+C o tempo massimo).
       if (Atomics.load(segnale, 0) === 1) Atomics.wait(segnale, 0, 1);
+      if (Atomics.load(segnale, 0) === 2) return true;
       const ora = performance.now();
       if (ora >= prossimaMemoria) {
         prossimaMemoria = ora + 2_000;
         parentPort.postMessage({ tipo: "memoria", mb: getHeapStatistics().total_heap_size / MB });
       }
+      return false;
     },
   });
   parentPort.postMessage({ tipo: "fatta", registro });
@@ -251,7 +264,8 @@ async function principale() {
   let altri = 0;
   let obiettivo = o.thread;
   let motivo = "";
-  let ultimaStampa = 0;
+  /** Perché il motore si sta fermando prima della fine (Ctrl+C, tempo massimo); vuoto = gira. */
+  let fermo = "";
 
   // M1 «Pannello fisso» (Andrea, 14/10): in un terminale il pannello si ridisegna al suo
   // posto; con l'uscita in un file, una riga semplice al minuto.
@@ -301,7 +315,8 @@ async function principale() {
     return Math.max(...resti, 0, lavoro / posti);
   };
   const avanzamento = () => {
-    let fatte = finite.size * o.scuole;
+    let fatte = 0;
+    for (const f of finite.values()) fatte += f.interrotta ? f.scuola - 1 : o.scuole;
     for (const p of inCorso.values()) fatte += p.scuola - 1;
     return fatte;
   };
@@ -393,6 +408,7 @@ async function principale() {
 
   const attive = () => [...inCorso.values()].filter((p) => !p.pausa);
   const metti = (p, pausa) => {
+    if (fermo) return;
     p.pausa = pausa;
     Atomics.store(p.segnale, 0, pausa ? 1 : 0);
     if (!pausa) Atomics.notify(p.segnale, 0);
@@ -411,7 +427,7 @@ async function principale() {
     const limiteMb = Math.min(16_384, Math.floor(quota));
     const pausa = new SharedArrayBuffer(4);
     const worker = new Worker(fileURLToPath(import.meta.url), {
-      workerData: { seed: voce.seed, scuole: o.scuole, ore: o.ore, pausa, reputazione: voce.reputazione },
+      workerData: { seed: voce.seed, scuole: o.scuole, ore: o.ore, oreScuola: o.oreScuola, pausa, reputazione: voce.reputazione },
       resourceLimits: {
         maxOldGenerationSizeMb: Math.floor(limiteMb * 0.85),
         // Una generazione giovane più grande = meno pulizie della memoria.
@@ -432,8 +448,11 @@ async function principale() {
       } else {
         p.finita = true;
         durate.set(p.scuola, [...(durate.get(p.scuola) ?? []), (Date.now() - p.inizioScuola) / 60_000]);
-        finite.set(voce.id, { minuti: message.registro.minutiTotali, iscritti: p.iscritti, seed: voce.seed, reputazione: voce.reputazione });
-        registri.push(message.registro);
+        const registro = message.registro;
+        if (fermo) registro.errori = registro.errori.map((errore) => errore.replace("fermata dal lanciatore", fermo));
+        if (registro.interrotta === "fermata dal lanciatore") registro.interrotta = fermo;
+        finite.set(voce.id, { minuti: registro.minutiTotali, iscritti: p.iscritti, seed: voce.seed, reputazione: voce.reputazione, scuola: registro.scuoleRaggiunte, interrotta: registro.interrotta });
+        registri.push(registro);
       }
     });
     worker.on("error", (error) => {
@@ -443,7 +462,8 @@ async function principale() {
     worker.on("exit", (code) => {
       inCorso.delete(voce.id);
       if (!p.finita) {
-        if (p.richiamata) coda.unshift({ ...voce });
+        if (fermo) problemi.push(`partita ${voce.seed} (${NOMI_STRATEGIE[voce.reputazione]}): fermata prima di salvare il registro`);
+        else if (p.richiamata) coda.unshift({ ...voce });
         else if (p.memoriaFinita && voce.tentativi + 1 < TENTATIVI) coda.unshift({ ...voce, tentativi: voce.tentativi + 1 });
         else problemi.push(`partita ${voce.seed} (${NOMI_STRATEGIE[voce.reputazione]}): ${p.memoriaFinita ? `memoria esaurita (${limiteMb} MB)` : `thread uscito con codice ${code}`}`);
       }
@@ -455,6 +475,7 @@ async function principale() {
 
   /** Il cuore dell'adattamento: quante partite tenere attive adesso. */
   const regola = (misura = true) => {
+    if (fermo) return;
     if (misura) {
       const letto = cpu();
       // Media mobile: un picco di un attimo non mette in pausa nulla.
@@ -491,8 +512,26 @@ async function principale() {
     }
   };
 
+  /** Ferma tutto: niente partite nuove, quelle in corso chiudono il registro dove sono. */
+  const ferma = (perche) => {
+    if (fermo) return;
+    fermo = perche;
+    motivo = `${perche}: fermo le partite e scrivo il report`;
+    coda.length = 0;
+    for (const p of inCorso.values()) {
+      Atomics.store(p.segnale, 0, 2);
+      Atomics.notify(p.segnale, 0);
+    }
+    stampa();
+  };
+  process.on("SIGINT", () => {
+    if (fermo) process.exit(130);
+    ferma("fermato con Ctrl+C");
+  });
+
   await new Promise((fine) => {
     const controllo = setInterval(() => {
+      if (o.minuti > 0 && Date.now() - t0 >= o.minuti * 60_000) ferma(`tempo massimo di ${o.minuti} minuti`);
       regola();
       stampa();
       if (inCorso.size === 0 && coda.length === 0) {
@@ -514,6 +553,7 @@ async function principale() {
   writeFileSync(join(o.uscita, "dati.json"), JSON.stringify({ opzioni: o, versione, secondi, problemi, analisi, confronto, registri }));
   writeFileSync(join(o.uscita, "report.html"), motore.creaReport(analisi, {
     creato: new Date().toLocaleString("it-IT"),
+    ...(fermo ? { nota: `${fermo}: partite fin dove erano arrivate` } : {}),
     partite: registri.length,
     scuole: o.scuole,
     secondi,
@@ -521,6 +561,7 @@ async function principale() {
     ...(confronto ? { confronto: { righe: confronto, nomi: NOMI_STRATEGIE } } : {}),
   }));
   if (confronto) stampaConfronto(confronto, o.scuole);
+  if (fermo) console.log(`Motore ${fermo}: il report contiene le partite fin dove erano arrivate.`);
   if (problemi.length) console.log(`Problemi:\n - ${problemi.join("\n - ")}`);
   console.log(`Fatto in ${Math.round(secondi / 60)} min. Report: ${join(o.uscita, "report.html")}`);
 }

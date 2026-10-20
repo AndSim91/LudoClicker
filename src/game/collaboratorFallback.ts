@@ -42,9 +42,16 @@ function isSectorWorking(state: GameState, role: CollaboratorMasteryRole): boole
   }
 }
 
+/**
+ * `preparing`: the Istruttori in Preparazione atletica, when the caller loops over
+ * all collaborators. Computing it once per loop instead of once per person turns
+ * a quadratic scan into a linear one (motore, 20/10/2026: a third of the time with
+ * a thousand collaborators).
+ */
 export function isPrimarySectorIdle(
   state: GameState,
   collaborator: Collaborator,
+  preparing?: () => ReadonlySet<string>,
 ): boolean {
   const role = collaborator.assignment;
   if (!role) return false;
@@ -57,7 +64,7 @@ export function isPrimarySectorIdle(
   if (teaching > 0) return false;
   // Same rule as the Preparazione itself (15/10/2026): in summer it goes on, slower,
   // so an Istruttore preparing athletes is not «fermo» and does not also help elsewhere.
-  return !selectAthleticPreparationInstructorIds(state).has(collaborator.id);
+  return !(preparing?.() ?? selectAthleticPreparationInstructorIds(state)).has(collaborator.id);
 }
 
 export function getShiftShare(state: GameState): number {
@@ -78,8 +85,15 @@ export interface ShiftSummary {
   idleRoles: Set<CollaboratorMasteryRole>;
 }
 
+/** The Istruttori in Preparazione atletica, computed at most once per loop over the collaborators. */
+export function athleticPreparationOnce(state: GameState): () => ReadonlySet<string> {
+  let ids: ReadonlySet<string> | undefined;
+  return () => (ids ??= selectAthleticPreparationInstructorIds(state));
+}
+
 export function getShiftSummary(state: GameState): ShiftSummary {
   const receiver = getShiftReceiver(state);
+  const preparing = athleticPreparationOnce(state);
   const helpers: Collaborator[] = [];
   const busyRoles = new Set<CollaboratorMasteryRole>();
   const staffedRoles = new Set<CollaboratorMasteryRole>();
@@ -87,7 +101,7 @@ export function getShiftSummary(state: GameState): ShiftSummary {
     const role = collaborator.assignment;
     if (!role) continue;
     staffedRoles.add(role);
-    if (!isPrimarySectorIdle(state, collaborator)) {
+    if (!isPrimarySectorIdle(state, collaborator, preparing)) {
       busyRoles.add(role);
       continue;
     }

@@ -46,6 +46,8 @@ export interface RegistroPartita {
   tick: number;
   /** Finestre chiuse per tipo: ognuna costa REGOLE.reazioneMs a gioco fermo. */
   finestre?: Record<string, number>;
+  /** Perché la partita si è fermata prima della scuola obiettivo (tetto di ore, Ctrl+C, tempo massimo). */
+  interrotta?: string;
 }
 
 export interface OpzioniPartita {
@@ -53,14 +55,16 @@ export interface OpzioniPartita {
   maxScuole: number;
   /** Tetto di sicurezza in ore effettive. */
   maxOre: number;
+  /** Tetto di ore effettive in una sola scuola: oltre, la partita è bloccata e si ferma. */
+  maxOreScuola?: number;
   /** Spesa della Reputazione: tutti i rami alla pari (regola di Andrea) o prima 5 punti in Genetica. */
   reputazione?: ModoReputazione;
   /** Passo minimo del motore (ms di gioco): 1.000 come il gioco senza animazioni; 250 per i controlli. */
   passoMinimoMs?: number;
   /** Ogni quanti minuti effettivi avvisare il chiamante (avanzamento). */
   onAvanzamento?: (registro: RegistroPartita, state: GameState) => void;
-  /** Chiamata a ogni passo: il lanciatore la usa per mettere in pausa la partita. */
-  alPasso?: () => void;
+  /** Chiamata a ogni passo: il lanciatore la usa per mettere in pausa la partita; `true` = fermati. */
+  alPasso?: () => boolean | void;
 }
 
 const SOGLIE_ISCRITTI = [10, 100, 1_000, 10_000, 100_000];
@@ -117,6 +121,7 @@ export function giocaPartita({
   seed,
   maxScuole,
   maxOre,
+  maxOreScuola = Infinity,
   reputazione = "pari",
   passoMinimoMs = STEP_GIOCO_MS,
   onAvanzamento,
@@ -150,6 +155,11 @@ export function giocaPartita({
   /** Iscritti e livelli di Upgrade a ogni cambio di mese, per confrontare con 12 mesi prima. */
   let mesi: { mese: number; iscritti: number; livelli: number }[] = [];
   let ultimoMese = state.school.currentMonth;
+  let inizioScuolaMs = 0;
+  const ferma = (motivo: string) => {
+    registro.interrotta = motivo;
+    registro.errori.push(`interrotta alla scuola ${scuola}: ${motivo}`);
+  };
 
   const annota = (tipo: string, chiave?: string, valore?: number, dati?: Record<string, unknown>) => {
     registro.eventi.push({
@@ -240,7 +250,13 @@ export function giocaPartita({
   };
 
   const limiteMs = maxOre * 3_600_000;
-  while (effettivoMs < limiteMs) {
+  const limiteScuolaMs = maxOreScuola * 3_600_000;
+  while (true) {
+    if (effettivoMs >= limiteMs) { ferma(`oltre il tetto di ${maxOre} ore di gioco`); break; }
+    if (effettivoMs - inizioScuolaMs >= limiteScuolaMs) {
+      ferma(`bloccata: più di ${maxOreScuola} ore di gioco nella stessa scuola`);
+      break;
+    }
     // 1. Finestre che fermano il gioco: mezzo minuto a gioco fermo ciascuna.
     const finestra = finestraAperta(state);
     if (finestra) {
@@ -265,7 +281,7 @@ export function giocaPartita({
     state = act(state, { type: "TICK", now, minStepMs: passoMinimoMs });
     registro.msMotore += performance.now() - t0;
     registro.tick += 1;
-    alPasso?.();
+    if (alPasso?.()) { ferma("fermata dal lanciatore"); break; }
     effettivoMs += STEP_GIOCO_MS / speed;
 
     // 3. Scrittura a mano: 8 input per secondo reale.
@@ -347,6 +363,7 @@ export function giocaPartita({
           if (state !== prima) {
             scuola += 1;
             registro.scuoleRaggiunte = scuola;
+            inizioScuolaMs = effettivoMs;
             visti = new Set([...visti].filter((key) => key.startsWith("leggendario:")));
             risultatiVisti = new Set();
             livelli = { ...state.upgrades } as Record<string, number>;

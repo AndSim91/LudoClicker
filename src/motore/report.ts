@@ -134,6 +134,8 @@ export function creaReport(analisi: Analisi, meta: {
   scuole: number;
   secondi: number;
   versione: string;
+  /** Il motore si è fermato prima della fine (Ctrl+C, tempo massimo). */
+  nota?: string;
   /** --reputation: le stesse misure per ogni strategia, con il nome da mostrare. */
   confronto?: { righe: ConfrontoStrategie; nomi: Record<string, string> };
 }): string {
@@ -242,7 +244,7 @@ td strong{display:block}td small{display:block;color:var(--muted);font-size:12px
 .chip{display:inline-block;color:#fff;font-weight:700;border-radius:4px;padding:0 8px}
 </style></head><body>
 <header><h1>Motore di test LudoClicker</h1>
-<p class="meta">${meta.partite} partite del giocatore medio fino alla scuola ${meta.scuole} · versione del gioco ${esc(meta.versione)} · ${esc(meta.creato)} · calcolo ${tempo(meta.secondi / 60)}</p>
+<p class="meta">${meta.partite} partite del giocatore medio fino alla scuola ${meta.scuole} · versione del gioco ${esc(meta.versione)} · ${esc(meta.creato)} · calcolo ${tempo(meta.secondi / 60)}</p>${meta.nota ? `\n<p class="meta"><strong>⚠ ${esc(meta.nota)}</strong></p>` : ""}
 <p class="meta">Tempi in tempo di gioco effettivo (il gioco avanza solo mentre è aperto). Regole del giocatore medio: Project, <code>claude/motore-giocatore-medio.md</code>.</p></header>
 <nav>${indice}</nav>
 <main>${confronto}${tappe}${scuole}${segreti}${leggendari}${upgrade}${pagelle}${reputazione}${tornei}${entrate}${salute}</main>

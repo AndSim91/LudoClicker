@@ -24,7 +24,8 @@ describe("motore di test", () => {
 
   it("gioca 15 minuti senza errori, registra le tappe e produce il report", () => {
     const registro = giocaPartita({ seed: 3, maxScuole: 1, maxOre: 0.25 });
-    expect(registro.errori).toEqual([]);
+    expect(registro.interrotta).toBe("oltre il tetto di 0.25 ore di gioco");
+    expect(registro.errori.filter((errore) => !errore.startsWith("interrotta"))).toEqual([]);
     expect(registro.eventi.some((evento) => evento.tipo === "iscritti" && evento.chiave === "10")).toBe(true);
     const html = creaReport(analizza([registro]), { creato: "oggi", partite: 1, scuole: 1, secondi: 1, versione: "test" });
     expect(html).toContain("Tappe della storia");
