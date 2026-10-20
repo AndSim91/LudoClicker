@@ -540,9 +540,9 @@ describe("game engine: narrative", () => {
 
     expect(roll([]).some((state) => linked.has(state.narrative.history[0]?.definitionId))).toBe(false);
     const pini = roll(["ruggero-pini"]).find((state) => state.narrative.history[0]?.definitionId === "pini-at-work");
-    // −5% di 40 spade × 100 = −200 punti.
-    expect(pini?.narrative.history[0].effects).toMatchObject({ wear: -200, wearPercent: -5 });
-    expect(pini?.equipment.wear).toBe(800);
+    // −10% di 40 spade × 100 = −400 punti.
+    expect(pini?.narrative.history[0].effects).toMatchObject({ wear: -400, wearPercent: -10 });
+    expect(pini?.equipment.wear).toBe(600);
   });
 
   it("gives the Leggendari events their effects", () => {
