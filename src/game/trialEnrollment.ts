@@ -1,3 +1,4 @@
+import { getSchoolYear } from "./calendar";
 import { ANDREA_SIMONAZZI_ID } from "./contacts";
 import { GAME_CONFIG } from "./config";
 import { getEnrollmentChance } from "./formulas";
@@ -30,6 +31,18 @@ export function getLegendaryEnrollmentChance(
   return getLegendaryEnrollmentChanceAtPity(state, profileId, state.legendaryPity);
 }
 
+/**
+ * Rete di sicurezza (20/10/2026): from the second school, a school that reaches its
+ * second school year with fewer than 3 collaborators enrolls the next Leggendari for
+ * sure. Without it a run of failed trials left a school with its one collaborator for
+ * years (motore of 19/10: 2 games in 24, 12 schools in 264 at the end of year 2).
+ */
+export function isCollaboratorSafetyNetActive(state: GameState): boolean {
+  return state.network.schoolCount > 0 &&
+    getSchoolYear(state.school.currentMonth) >= GAME_CONFIG.collaboratorSafetyNetSchoolYear &&
+    state.collaborators.length < GAME_CONFIG.collaboratorSafetyNetCollaborators;
+}
+
 export function isTrialEnrollmentGuaranteed(
   state: GameState,
   trial: ScheduledTrial,
@@ -48,6 +61,7 @@ export function isTrialEnrollmentGuaranteed(
     return (
       // Andrea Simonazzi always enrolls, in every school.
       specialProfileId === ANDREA_SIMONAZZI_ID ||
+      isCollaboratorSafetyNetActive(state) ||
       getLegendaryEnrollmentChanceAtPity(state, specialProfileId, context.legendaryPity) >= 1
     );
   }

@@ -468,6 +468,14 @@ riporta Pity a zero; le prove delle altre rarità non lo toccano. Il bonus perso
 precedente tentativo fallito aggiunge 3 punti percentuali entro il massimo
 ordinario del 35%, poi si applica Pity oltre quel limite.
 
+**Rete di sicurezza dei collaboratori** (20/10/2026, dal motore di test del
+19/10): dalla seconda scuola, se la scuola arriva al secondo anno scolastico
+con meno di 3 collaboratori, la prova di un Leggendario va sempre a buon fine
+(anche senza spade libere), finché i collaboratori non sono 3. Non si vede
+nell'interfaccia. Serve a chiudere gli stalli in cui una scuola restava per
+anni con il solo Leggendario di partenza (2 partite su 24; a fine del secondo
+anno 12 scuole su 264 avevano ancora un solo collaboratore).
+
 Ogni contatto contiene:
 
 - nome e cognome generati;

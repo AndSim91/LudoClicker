@@ -36,3 +36,24 @@ describe("Andrea Simonazzi nella scuola iniziale", () => {
     expect(iterMs(3)).toBeGreaterThan(30_000);
   });
 });
+
+describe("Rete di sicurezza dei collaboratori (20/10/2026)", () => {
+  it("dalla seconda scuola, dal secondo anno scolastico e sotto i 3 collaboratori il Leggendario si iscrive sempre", () => {
+    const initial = createInitialState(1_000);
+    const contact = { ...initial.contacts[0], rarity: "legendary" as const, specialProfileId: "eva-parodi" as const };
+    const trial: ScheduledTrial = {
+      id: "trial-1", contactId: contact.id, startsAt: 1_000, resolvesAt: 2_000, resultSeed: 1, status: "scheduled",
+    };
+    const guaranteed = (schoolCount: number, currentMonth: number, collaborators: number) => isTrialEnrollmentGuaranteed({
+      ...initial,
+      contacts: [contact],
+      collaborators: Array.from({ length: collaborators }, (_, index) => ({ ...initial.collaborators[0], id: `c${index}` })),
+      school: { ...initial.school, fame: 5_000, currentMonth },
+      network: { ...initial.network, schoolCount },
+    }, trial);
+    expect(guaranteed(1, 24, 2)).toBe(true);
+    expect(guaranteed(0, 24, 2)).toBe(false); // la prima scuola ha la sua Spinta
+    expect(guaranteed(1, 10, 2)).toBe(false); // ancora il primo anno scolastico
+    expect(guaranteed(1, 24, 3)).toBe(false);
+  });
+});

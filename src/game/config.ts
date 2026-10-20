@@ -111,6 +111,10 @@ export const GAME_CONFIG = {
   // Scolastico until 8 collaborators, +5% Ultra Rari every month.
   councilBoostMonthsPerStep: 1,
   councilBoostPerStep: 0.05,
+  // Rete di sicurezza (20/10/2026): from the second school, from this school year on, a
+  // school under this many collaborators enrolls every Leggendario at the trial.
+  collaboratorSafetyNetSchoolYear: 2,
+  collaboratorSafetyNetCollaborators: 3,
   legendaryMalusReputationNeutral: 25,
   legendaryBonusReputationMax: 50,
   ultraRareDeclineStartCollaborators: 8,
